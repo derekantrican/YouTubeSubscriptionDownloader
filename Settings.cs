@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PocketSharp;
+using PocketSharp.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,11 +16,14 @@ namespace YouTubeSubscriptionDownloader
         private static string ApplicationName = "YouTube Subscription Downloader";
         private static string userSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
         private static string settingsPath = Path.Combine(userSettingsPath, "Settings.xml");
+        public static PocketClient pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf");
 
         public static string DownloadDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         public static string PreferredQuality = "Highest";
         public static bool ShowNotifications = true;
         public static bool DownloadVideos = true;
+        public static bool AddToPocket = false;
+        public static string PocketAuthCode = "";
 
         public static void SaveSettings()
         {
@@ -26,6 +31,8 @@ namespace YouTubeSubscriptionDownloader
             SaveSpecificSetting(PreferredQuality, "PreferredQuality");
             SaveSpecificSetting(ShowNotifications, "ShowNotifications");
             SaveSpecificSetting(DownloadVideos, "DownloadVideos");
+            SaveSpecificSetting(AddToPocket, "AddToPocket");
+            SaveSpecificSetting(PocketAuthCode, "PocketAuthCode");
         }
 
         public static void ReadSettings()
@@ -34,6 +41,8 @@ namespace YouTubeSubscriptionDownloader
             PreferredQuality = (string)ReadSpecificSetting(typeof(string), "PreferredQuality", "Highest");
             ShowNotifications = (bool)ReadSpecificSetting(typeof(bool), "ShowNotifications", true);
             DownloadVideos = (bool)ReadSpecificSetting(typeof(bool), "DownloadVideos", true);
+            AddToPocket = (bool)ReadSpecificSetting(typeof(bool), "AddToPocket", false);
+            PocketAuthCode = (string)ReadSpecificSetting(typeof(string), "PocketAuthCode", "");
         }
 
         private static void SaveSpecificSetting(object setting, string settingTag)

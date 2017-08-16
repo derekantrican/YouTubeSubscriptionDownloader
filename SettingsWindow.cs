@@ -1,7 +1,9 @@
-﻿using System;
+﻿using PocketSharp.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -20,6 +22,7 @@ namespace YouTubeSubscriptionDownloader
             comboBoxPreferredQuality.SelectedIndex = comboBoxPreferredQuality.FindStringExact(Settings.PreferredQuality);
             checkBoxShowNotifications.Checked = Settings.ShowNotifications;
             checkBoxDownloadVideos.Checked = Settings.DownloadVideos;
+            checkBoxAddPocket.Checked = Settings.AddToPocket;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
         }
@@ -31,6 +34,9 @@ namespace YouTubeSubscriptionDownloader
             Settings.PreferredQuality = comboBoxPreferredQuality.Text;
             Settings.ShowNotifications = checkBoxShowNotifications.Checked;
             Settings.DownloadVideos = checkBoxDownloadVideos.Checked;
+            if (!checkBoxAddPocket.Checked)
+                Settings.AddToPocket = false; //Only set this to true if successfully Authed (down below)
+
             Settings.SaveSettings();
 
             this.Close();
@@ -55,6 +61,35 @@ namespace YouTubeSubscriptionDownloader
             textBoxDownloadDirectory.Enabled = checkBoxDownloadVideos.Checked;
             buttonFolderPicker.Enabled = checkBoxDownloadVideos.Checked;
             comboBoxPreferredQuality.Enabled = checkBoxDownloadVideos.Checked;
+        }
+
+        private void checkBoxAddPocket_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxAddPocket.Checked)
+                AuthorizePocket();
+        }
+
+        private async void AuthorizePocket()
+        {
+            Settings.pocketClient.CallbackUri = "https://getpocket.com/a/queue/"; //Todo: Need to change this to an automatically closing page
+            string requestCode = await Settings.pocketClient.GetRequestCode();
+            Uri authenticationUri = Settings.pocketClient.GenerateAuthenticationUri();
+            Process.Start(authenticationUri.ToString());
+
+            PocketUser user = null;
+            while (true)
+            {
+                try
+                {
+                    user = await Settings.pocketClient.GetUser(requestCode);
+                    break;
+                }
+                catch { }
+                System.Threading.Thread.Sleep(500);
+            }
+
+            Settings.PocketAuthCode = user.Code;
+            Settings.AddToPocket = true;
         }
     }
 }

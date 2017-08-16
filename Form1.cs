@@ -21,6 +21,7 @@ using YoutubeExplode.Models;
 using System.Text.RegularExpressions;
 using YoutubeExplode.Models.MediaStreams;
 using System.Xml.Serialization;
+using PocketSharp;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -46,9 +47,16 @@ namespace YouTubeSubscriptionDownloader
 
             Settings.ReadSettings();
 
+            initializePocket();
             initializeTimer();
 
             buttonStop.Enabled = false;
+        }
+
+        private async void initializePocket()
+        {
+            if (Settings.AddToPocket && Settings.PocketAuthCode != "")
+                Settings.pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf", Settings.PocketAuthCode, "https://getpocket.com/a/queue/");
         }
 
         private void initializeTimer()
@@ -235,33 +243,21 @@ namespace YouTubeSubscriptionDownloader
                         Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                         DownloadYouTubeVideo(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId, Settings.DownloadDirectory);
 
+
                         sub.LastVideoPublishDate = newUploadPublishedDate;
                     }
                 }
             }
         }
 
-        private void SendMeAnEmail(string subject)
+        private async void AddYouTubeVideoToPocket(string youTubeVideoId)
         {
-            MailAddress from = new MailAddress("derekantrican@gmail.com");
-
-            SmtpClient client = new SmtpClient
+            if (Settings.AddToPocket)
             {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(from.Address, "cgbvtwhwxsyahjjz")
-            };
-
-            using (MailMessage message = new MailMessage(from, from)
-            {
-                Subject = subject,
-                Body = ""
-            })
-            {
-                client.Send(message);
+                Log("Adding video to Pocket...");
+                string youTubeURL = "https://www.youtube.com/watch?v=" + youTubeVideoId;
+                await Settings.pocketClient.Add(new Uri(youTubeURL));
+                Log("Video added to Pocket");
             }
         }
 

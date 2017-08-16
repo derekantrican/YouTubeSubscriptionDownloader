@@ -37,6 +37,7 @@
             this.buttonFolderPicker = new System.Windows.Forms.Button();
             this.checkBoxShowNotifications = new System.Windows.Forms.CheckBox();
             this.checkBoxDownloadVideos = new System.Windows.Forms.CheckBox();
+            this.checkBoxAddPocket = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // buttonCancel
@@ -131,11 +132,23 @@
             this.checkBoxDownloadVideos.UseVisualStyleBackColor = true;
             this.checkBoxDownloadVideos.CheckedChanged += new System.EventHandler(this.checkBoxDownloadVideos_CheckedChanged);
             // 
+            // checkBoxAddPocket
+            // 
+            this.checkBoxAddPocket.AutoSize = true;
+            this.checkBoxAddPocket.Location = new System.Drawing.Point(12, 124);
+            this.checkBoxAddPocket.Name = "checkBoxAddPocket";
+            this.checkBoxAddPocket.Size = new System.Drawing.Size(134, 17);
+            this.checkBoxAddPocket.TabIndex = 9;
+            this.checkBoxAddPocket.Text = "Add videos to Pocket?";
+            this.checkBoxAddPocket.UseVisualStyleBackColor = true;
+            this.checkBoxAddPocket.CheckedChanged += new System.EventHandler(this.checkBoxAddPocket_CheckedChanged);
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(343, 185);
+            this.Controls.Add(this.checkBoxAddPocket);
             this.Controls.Add(this.checkBoxDownloadVideos);
             this.Controls.Add(this.checkBoxShowNotifications);
             this.Controls.Add(this.buttonFolderPicker);
@@ -164,5 +177,6 @@
         private System.Windows.Forms.Button buttonFolderPicker;
         private System.Windows.Forms.CheckBox checkBoxShowNotifications;
         private System.Windows.Forms.CheckBox checkBoxDownloadVideos;
+        private System.Windows.Forms.CheckBox checkBoxAddPocket;
     }
 }
