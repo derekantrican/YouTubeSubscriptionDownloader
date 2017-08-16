@@ -53,7 +53,7 @@ namespace YouTubeSubscriptionDownloader
             buttonStop.Enabled = false;
         }
 
-        private async void initializePocket()
+        private void initializePocket()
         {
             if (Settings.AddToPocket && Settings.PocketAuthCode != "")
                 Settings.pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf", Settings.PocketAuthCode, "https://getpocket.com/a/queue/");
@@ -242,7 +242,7 @@ namespace YouTubeSubscriptionDownloader
                         showNotification(newUploadDetails.Title, "New video from " + sub.Title);
                         Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                         DownloadYouTubeVideo(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId, Settings.DownloadDirectory);
-
+                        AddYouTubeVideoToPocket(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId);
 
                         sub.LastVideoPublishDate = newUploadPublishedDate;
                     }
