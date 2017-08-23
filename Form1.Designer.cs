@@ -98,6 +98,7 @@
             this.Controls.Add(this.buttonStart);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "YouTube Subscription Downloader";
             this.Resize += new System.EventHandler(this.Form1_Resize);
