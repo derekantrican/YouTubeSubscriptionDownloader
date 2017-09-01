@@ -31,7 +31,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (Directory.Exists(textBoxDownloadDirectory.Text))
+            if (checkBoxDownloadVideos.Checked && Directory.Exists(textBoxDownloadDirectory.Text))
             {
                 MessageBox.Show("The directory \"" + textBoxDownloadDirectory.Text + "\" does not exist. Please either create it or choose a different one");
                 return;
