@@ -33,7 +33,7 @@ namespace YouTubeSubscriptionDownloader
 
         System.Windows.Forms.Timer timer = null;
 
-        YouTubeService service;
+        YouTubeService service = null;
         static string[] Scopes = { YouTubeService.Scope.Youtube };
 
         List<Subscription> userSubscriptions = new List<Subscription>();
@@ -46,9 +46,6 @@ namespace YouTubeSubscriptionDownloader
                 Directory.CreateDirectory(UserSettings);
 
             Settings.ReadSettings();
-
-            if (Settings.SerializeSubscriptions)
-                DeserializeSubscriptions();
 
             initializePocket();
             initializeTimer();
@@ -99,37 +96,45 @@ namespace YouTubeSubscriptionDownloader
 
             List<Subscription> tempUserSubscriptions = new List<Subscription>();
 
-            UserCredential credential;
-            string clientSecretString = "{\"installed\":" +
-                                            "{" +
-                                                "\"client_id\":\"761670588704-lgl5qbcv5odmq1vlq3lcgqv67fr8vkdn.apps.googleusercontent.com\"," +
-                                                "\"project_id\":\"youtube-downloader-174123\"," +
-                                                "\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\"," +
-                                                "\"token_uri\":\"https://accounts.google.com/o/oauth2/token\"," +
-                                                "\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\"," +
-                                                "\"client_secret\":\"_uzJUnD4gNiIpIL991kmCuvB\"," +
-                                                "\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]" +
-                                            "}" +
-                                        "}";
-            byte[] byteArray = Encoding.ASCII.GetBytes(clientSecretString);
-
-            using (var stream = new MemoryStream(byteArray))
+            if (service == null)
             {
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(CredentialsPath, true)).Result;
+                Log("Authorizing...");
+
+                UserCredential credential;
+                string clientSecretString = "{\"installed\":" +
+                                                "{" +
+                                                    "\"client_id\":\"761670588704-lgl5qbcv5odmq1vlq3lcgqv67fr8vkdn.apps.googleusercontent.com\"," +
+                                                    "\"project_id\":\"youtube-downloader-174123\"," +
+                                                    "\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\"," +
+                                                    "\"token_uri\":\"https://accounts.google.com/o/oauth2/token\"," +
+                                                    "\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\"," +
+                                                    "\"client_secret\":\"_uzJUnD4gNiIpIL991kmCuvB\"," +
+                                                    "\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]" +
+                                                "}" +
+                                            "}";
+                byte[] byteArray = Encoding.ASCII.GetBytes(clientSecretString);
+
+                using (var stream = new MemoryStream(byteArray))
+                {
+                    credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                        GoogleClientSecrets.Load(stream).Secrets,
+                        Scopes,
+                        "user",
+                        CancellationToken.None,
+                        new FileDataStore(CredentialsPath, true)).Result;
+                }
+
+                service = new YouTubeService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = ApplicationName
+                });
             }
 
-            service = new YouTubeService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName
-            });
-
             Log("Retrieving subscriptions...");
+            if (Settings.SerializeSubscriptions)
+                DeserializeSubscriptions();
+
             SubscriptionsResource.ListRequest listSubscriptions = service.Subscriptions.List("snippet");
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
             listSubscriptions.Mine = true;
