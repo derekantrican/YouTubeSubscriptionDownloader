@@ -53,6 +53,21 @@ namespace YouTubeSubscriptionDownloader
             buttonStop.Enabled = false;
         }
 
+        private bool CheckForInternetConnection()
+        {
+            try
+            {
+                using (WebClient client = new WebClient())
+                using (client.OpenRead("http://www.youtube.com"))
+                    return true;
+            }
+            catch
+            {
+                Log("!!NO INTERNET CONNECTION!!");
+                return false;
+            }
+        }
+
         private void initializePocket()
         {
             if (Settings.AddToPocket && Settings.PocketAuthCode != "")
@@ -90,6 +105,9 @@ namespace YouTubeSubscriptionDownloader
 
         private void buttonStart_Click(object sender, EventArgs e)
         {
+            if (!CheckForInternetConnection())
+                return;
+
             richTextBoxLog.Clear();
             buttonStart.Enabled = false;
             buttonStop.Enabled = true;
@@ -277,6 +295,9 @@ namespace YouTubeSubscriptionDownloader
 
         private void CheckForNewVideoFromSubscriptions()
         {
+            if (!CheckForInternetConnection())
+                return;
+
             foreach (Subscription sub in userSubscriptions)
             {
                 if (!string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
