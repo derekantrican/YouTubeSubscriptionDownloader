@@ -158,8 +158,12 @@ namespace YouTubeSubscriptionDownloader
                 userSubscriptions.Add(sub);
             }
 
-            Log("Looking for recent uploads");
-            LookForMoreRecentUploads();
+            if (Settings.SerializeSubscriptions &&
+                (Settings.DownloadVideos || Settings.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
+            {
+                Log("Looking for recent uploads");
+                LookForMoreRecentUploads();
+            }
 
             Log("Iterations started");
             initializeTimer();
@@ -174,13 +178,50 @@ namespace YouTubeSubscriptionDownloader
 
         private void LookForMoreRecentUploads()
         {
-            foreach (Subscription sub in userSubscriptions)
+            for (int i = 0; i < userSubscriptions.Count(); i++)
             {
+                if (string.IsNullOrEmpty(userSubscriptions[i].UploadsPlaylist))
+                    userSubscriptions[i] = GetUploadsPlaylist(userSubscriptions[i]);
+
+                Subscription sub = userSubscriptions[i];
                 DateTime mostRecentUploadDate = GetMostRecentUploadDate(sub);
                 if (sub.LastVideoPublishDate == mostRecentUploadDate)
                     continue;
 
+                List<PlaylistItem> moreRecentUploads = new List<PlaylistItem>();
+
                 //Todo: get all videos between sub.LastVideoPublishDate and mostRecentUploadDate
+                PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
+                listRequest.PlaylistId = sub.UploadsPlaylist;
+                listRequest.MaxResults = 50;
+                PlaylistItemListResponse response = listRequest.Execute();
+                List<PlaylistItem> responseItems = response.Items.ToList();
+
+                //while (responseItems.Where(p => p.Id != )) //Todo: In the future we should store the "mostRecentUploadId" on a Subscription and get that instead
+                while (responseItems.Where(p => p.Snippet.PublishedAt <= sub.LastVideoPublishDate).FirstOrDefault() == null)
+                {
+                    moreRecentUploads.AddRange(responseItems);
+
+                    listRequest.PageToken = response.NextPageToken;
+                    responseItems = listRequest.Execute().Items.ToList();
+                }
+
+                foreach (PlaylistItem item in responseItems)
+                {
+                    if (item.Snippet.PublishedAt <= sub.LastVideoPublishDate) //Todo: In the future we should store the "mostRecentUploadId" on a Subscription and get that instead
+                        break;
+
+                    moreRecentUploads.Add(item);
+                }
+
+                foreach (PlaylistItem moreRecent in moreRecentUploads)
+                {
+                    if (Settings.DownloadVideos)
+                        DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.DownloadDirectory);
+
+                    if (Settings.AddToPocket)
+                        AddYouTubeVideoToPocket(moreRecent.Snippet.ResourceId.VideoId);
+                }
 
                 sub.LastVideoPublishDate = mostRecentUploadDate;
             }
@@ -236,12 +277,8 @@ namespace YouTubeSubscriptionDownloader
 
         private void CheckForNewVideoFromSubscriptions()
         {
-            for (int i = 0; i < userSubscriptions.Count(); i++)
+            foreach (Subscription sub in userSubscriptions)
             {
-                if (string.IsNullOrEmpty(userSubscriptions[i].UploadsPlaylist))
-                    userSubscriptions[i] = GetUploadsPlaylist(userSubscriptions[i]);
-
-                Subscription sub = userSubscriptions[i];
                 if (!string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
                 {
                     PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
