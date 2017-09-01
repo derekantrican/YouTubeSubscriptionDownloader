@@ -101,6 +101,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "YouTube Subscription Downloader";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

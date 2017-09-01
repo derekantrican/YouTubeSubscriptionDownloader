@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,19 +24,28 @@ namespace YouTubeSubscriptionDownloader
             checkBoxShowNotifications.Checked = Settings.ShowNotifications;
             checkBoxDownloadVideos.Checked = Settings.DownloadVideos;
             checkBoxAddPocket.Checked = Settings.AddToPocket;
+            checkBoxSerializeSubscriptions.Checked = Settings.SerializeSubscriptions;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
+            if (Directory.Exists(textBoxDownloadDirectory.Text))
+            {
+                MessageBox.Show("The directory \"" + textBoxDownloadDirectory.Text + "\" does not exist. Please either create it or choose a different one");
+                return;
+            }
+
             //Save settings
-            Settings.DownloadDirectory = textBoxDownloadDirectory.Text; //Todo: verify download directory is an existing directory
+            Settings.DownloadDirectory = textBoxDownloadDirectory.Text;
             Settings.PreferredQuality = comboBoxPreferredQuality.Text;
             Settings.ShowNotifications = checkBoxShowNotifications.Checked;
             Settings.DownloadVideos = checkBoxDownloadVideos.Checked;
             if (!checkBoxAddPocket.Checked)
                 Settings.AddToPocket = false; //Only set this to true if successfully Authed (down below)
+
+            Settings.SerializeSubscriptions = checkBoxSerializeSubscriptions.Checked;
 
             Settings.SaveSettings();
 
@@ -65,7 +75,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void checkBoxAddPocket_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxAddPocket.Checked)
+            if (checkBoxAddPocket.Checked && !Settings.AddToPocket) //Authorize Pocket only if this checkbox gets checked and it isn't already authorized
                 AuthorizePocket();
         }
 

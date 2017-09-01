@@ -38,11 +38,12 @@
             this.checkBoxShowNotifications = new System.Windows.Forms.CheckBox();
             this.checkBoxDownloadVideos = new System.Windows.Forms.CheckBox();
             this.checkBoxAddPocket = new System.Windows.Forms.CheckBox();
+            this.checkBoxSerializeSubscriptions = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(256, 150);
+            this.buttonCancel.Location = new System.Drawing.Point(256, 175);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 0;
@@ -52,7 +53,7 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(175, 150);
+            this.buttonSave.Location = new System.Drawing.Point(175, 175);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 1;
@@ -143,11 +144,22 @@
             this.checkBoxAddPocket.UseVisualStyleBackColor = true;
             this.checkBoxAddPocket.CheckedChanged += new System.EventHandler(this.checkBoxAddPocket_CheckedChanged);
             // 
+            // checkBoxSerializeSubscriptions
+            // 
+            this.checkBoxSerializeSubscriptions.AutoSize = true;
+            this.checkBoxSerializeSubscriptions.Location = new System.Drawing.Point(12, 148);
+            this.checkBoxSerializeSubscriptions.Name = "checkBoxSerializeSubscriptions";
+            this.checkBoxSerializeSubscriptions.Size = new System.Drawing.Size(291, 17);
+            this.checkBoxSerializeSubscriptions.TabIndex = 10;
+            this.checkBoxSerializeSubscriptions.Text = "Download all uploads since last time program was used?";
+            this.checkBoxSerializeSubscriptions.UseVisualStyleBackColor = true;
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 185);
+            this.ClientSize = new System.Drawing.Size(343, 210);
+            this.Controls.Add(this.checkBoxSerializeSubscriptions);
             this.Controls.Add(this.checkBoxAddPocket);
             this.Controls.Add(this.checkBoxDownloadVideos);
             this.Controls.Add(this.checkBoxShowNotifications);
@@ -178,5 +190,6 @@
         private System.Windows.Forms.CheckBox checkBoxShowNotifications;
         private System.Windows.Forms.CheckBox checkBoxDownloadVideos;
         private System.Windows.Forms.CheckBox checkBoxAddPocket;
+        private System.Windows.Forms.CheckBox checkBoxSerializeSubscriptions;
     }
 }

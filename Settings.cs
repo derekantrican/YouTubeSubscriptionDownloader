@@ -24,6 +24,7 @@ namespace YouTubeSubscriptionDownloader
         public static bool DownloadVideos = true;
         public static bool AddToPocket = false;
         public static string PocketAuthCode = "";
+        public static bool SerializeSubscriptions = false;
 
         public static void SaveSettings()
         {
@@ -33,6 +34,7 @@ namespace YouTubeSubscriptionDownloader
             SaveSpecificSetting(DownloadVideos, "DownloadVideos");
             SaveSpecificSetting(AddToPocket, "AddToPocket");
             SaveSpecificSetting(PocketAuthCode, "PocketAuthCode");
+            SaveSpecificSetting(SerializeSubscriptions, "SerializeSubscriptions");
         }
 
         public static void ReadSettings()
@@ -43,6 +45,7 @@ namespace YouTubeSubscriptionDownloader
             DownloadVideos = (bool)ReadSpecificSetting(typeof(bool), "DownloadVideos", true);
             AddToPocket = (bool)ReadSpecificSetting(typeof(bool), "AddToPocket", false);
             PocketAuthCode = (string)ReadSpecificSetting(typeof(string), "PocketAuthCode", "");
+            SerializeSubscriptions = (bool)ReadSpecificSetting(typeof(bool), "SerializeSubscriptions", false);
         }
 
         private static void SaveSpecificSetting(object setting, string settingTag)
