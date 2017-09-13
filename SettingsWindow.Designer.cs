@@ -88,6 +88,7 @@
             // 
             // comboBoxPreferredQuality
             // 
+            this.comboBoxPreferredQuality.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPreferredQuality.FormattingEnabled = true;
             this.comboBoxPreferredQuality.Items.AddRange(new object[] {
             "Highest",
