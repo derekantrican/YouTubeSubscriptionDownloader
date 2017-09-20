@@ -317,6 +317,9 @@ namespace YouTubeSubscriptionDownloader
                         AddYouTubeVideoToPocket(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId);
 
                         sub.LastVideoPublishDate = newUploadPublishedDate;
+
+                        if (Settings.SerializeSubscriptions)
+                            SerializeSubscriptions();
                     }
                 }
             }
