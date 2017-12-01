@@ -39,11 +39,15 @@
             this.checkBoxDownloadVideos = new System.Windows.Forms.CheckBox();
             this.checkBoxAddPocket = new System.Windows.Forms.CheckBox();
             this.checkBoxSerializeSubscriptions = new System.Windows.Forms.CheckBox();
+            this.labelIterationFrequency = new System.Windows.Forms.Label();
+            this.numericUpDownIterationFrequency = new System.Windows.Forms.NumericUpDown();
+            this.labelMinutes = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(256, 175);
+            this.buttonCancel.Location = new System.Drawing.Point(256, 226);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 0;
@@ -53,7 +57,7 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(175, 175);
+            this.buttonSave.Location = new System.Drawing.Point(175, 226);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 1;
@@ -155,11 +159,49 @@
             this.checkBoxSerializeSubscriptions.Text = "Download all uploads since last time program was used?";
             this.checkBoxSerializeSubscriptions.UseVisualStyleBackColor = true;
             // 
+            // labelIterationFrequency
+            // 
+            this.labelIterationFrequency.AutoSize = true;
+            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 181);
+            this.labelIterationFrequency.Name = "labelIterationFrequency";
+            this.labelIterationFrequency.Size = new System.Drawing.Size(91, 13);
+            this.labelIterationFrequency.TabIndex = 11;
+            this.labelIterationFrequency.Text = "Check frequency:";
+            // 
+            // numericUpDownIterationFrequency
+            // 
+            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 179);
+            this.numericUpDownIterationFrequency.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDownIterationFrequency.Name = "numericUpDownIterationFrequency";
+            this.numericUpDownIterationFrequency.Size = new System.Drawing.Size(40, 20);
+            this.numericUpDownIterationFrequency.TabIndex = 12;
+            this.numericUpDownIterationFrequency.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
+            // labelMinutes
+            // 
+            this.labelMinutes.AutoSize = true;
+            this.labelMinutes.Location = new System.Drawing.Point(152, 181);
+            this.labelMinutes.Name = "labelMinutes";
+            this.labelMinutes.Size = new System.Drawing.Size(43, 13);
+            this.labelMinutes.TabIndex = 13;
+            this.labelMinutes.Text = "minutes";
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 210);
+            this.ClientSize = new System.Drawing.Size(343, 261);
+            this.Controls.Add(this.labelMinutes);
+            this.Controls.Add(this.numericUpDownIterationFrequency);
+            this.Controls.Add(this.labelIterationFrequency);
             this.Controls.Add(this.checkBoxSerializeSubscriptions);
             this.Controls.Add(this.checkBoxAddPocket);
             this.Controls.Add(this.checkBoxDownloadVideos);
@@ -174,6 +216,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "SettingsWindow";
             this.Text = "SettingsWindow";
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -192,5 +235,8 @@
         private System.Windows.Forms.CheckBox checkBoxDownloadVideos;
         private System.Windows.Forms.CheckBox checkBoxAddPocket;
         private System.Windows.Forms.CheckBox checkBoxSerializeSubscriptions;
+        private System.Windows.Forms.Label labelIterationFrequency;
+        private System.Windows.Forms.NumericUpDown numericUpDownIterationFrequency;
+        private System.Windows.Forms.Label labelMinutes;
     }
 }

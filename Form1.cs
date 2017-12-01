@@ -80,7 +80,7 @@ namespace YouTubeSubscriptionDownloader
                 timer.Dispose();
 
             timer = new System.Windows.Forms.Timer();
-            timer.Interval = 5 * 60 * 1000; //every 5 minutes
+            timer.Interval = Settings.Instance.IterationFrequency * 60 * 1000;
             timer.Tick += Timer_Tick;
         }
 

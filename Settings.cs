@@ -29,6 +29,7 @@ namespace YouTubeSubscriptionDownloader
         public bool AddToPocket { get; set; }
         public string PocketAuthCode { get; set; }
         public bool SerializeSubscriptions { get; set; }
+        public int IterationFrequency { get; set; } //In minutes
 
         private static Settings GetDefaultValues()
         {
@@ -41,6 +42,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.AddToPocket = false;
             defaultSettings.PocketAuthCode = "";
             defaultSettings.SerializeSubscriptions = false;
+            defaultSettings.IterationFrequency = 5;
 
             return defaultSettings;
         }
