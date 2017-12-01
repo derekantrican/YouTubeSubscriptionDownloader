@@ -433,6 +433,24 @@ namespace YouTubeSubscriptionDownloader
             this.Show();
             this.WindowState = FormWindowState.Normal;
             notifyIconFormInTray.Visible = false;
+
+            //Move the window if it's not visible on any screen
+            bool visible = false;
+            foreach(Screen screen in Screen.AllScreens)
+            {
+                Point formLocation = new Point(this.Left, this.Top);
+                if (screen.WorkingArea.Contains(formLocation))
+                {
+                    visible = true;
+                    break;
+                }
+            }
+
+            if (!visible)
+            {
+                this.Left = Screen.PrimaryScreen.WorkingArea.Left;
+                this.Top = Screen.PrimaryScreen.WorkingArea.Top;
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
