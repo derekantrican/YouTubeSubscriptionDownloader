@@ -70,8 +70,8 @@ namespace YouTubeSubscriptionDownloader
 
         private void initializePocket()
         {
-            if (Settings.AddToPocket && Settings.PocketAuthCode != "")
-                Settings.pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf", Settings.PocketAuthCode, "https://getpocket.com/a/queue/");
+            if (Settings.Instance.AddToPocket && Settings.Instance.PocketAuthCode != "")
+                Settings.pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf", Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
         }
 
         private void initializeTimer()
@@ -86,7 +86,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void showNotification(string notificationSubTitle, string notificationTitle = "")
         {
-            if (Settings.ShowNotifications)
+            if (Settings.Instance.ShowNotifications)
                 notifyIconFormInTray.ShowBalloonTip(1000, notificationTitle, notificationSubTitle, ToolTipIcon.None);
         }
 
@@ -150,7 +150,7 @@ namespace YouTubeSubscriptionDownloader
             }
 
             Log("Retrieving subscriptions...");
-            if (Settings.SerializeSubscriptions)
+            if (Settings.Instance.SerializeSubscriptions)
                 DeserializeSubscriptions();
 
             SubscriptionsResource.ListRequest listSubscriptions = service.Subscriptions.List("snippet");
@@ -176,8 +176,8 @@ namespace YouTubeSubscriptionDownloader
                 userSubscriptions.Add(sub);
             }
 
-            if (Settings.SerializeSubscriptions &&
-                (Settings.DownloadVideos || Settings.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
+            if (Settings.Instance.SerializeSubscriptions &&
+                (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
                 Log("Looking for recent uploads");
                 LookForMoreRecentUploads();
@@ -234,10 +234,10 @@ namespace YouTubeSubscriptionDownloader
 
                 foreach (PlaylistItem moreRecent in moreRecentUploads)
                 {
-                    if (Settings.DownloadVideos)
-                        DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.DownloadDirectory);
+                    if (Settings.Instance.DownloadVideos)
+                        DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
 
-                    if (Settings.AddToPocket)
+                    if (Settings.Instance.AddToPocket)
                         AddYouTubeVideoToPocket(moreRecent.Snippet.ResourceId.VideoId);
                 }
 
@@ -313,12 +313,12 @@ namespace YouTubeSubscriptionDownloader
                     {
                         showNotification(newUploadDetails.Title, "New video from " + sub.Title);
                         Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
-                        DownloadYouTubeVideo(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId, Settings.DownloadDirectory);
+                        DownloadYouTubeVideo(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
                         AddYouTubeVideoToPocket(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId);
 
                         sub.LastVideoPublishDate = newUploadPublishedDate;
 
-                        if (Settings.SerializeSubscriptions)
+                        if (Settings.Instance.SerializeSubscriptions)
                             SerializeSubscriptions();
                     }
                 }
@@ -327,7 +327,7 @@ namespace YouTubeSubscriptionDownloader
 
         private async void AddYouTubeVideoToPocket(string youTubeVideoId)
         {
-            if (Settings.AddToPocket)
+            if (Settings.Instance.AddToPocket)
             {
                 Log("Adding video to Pocket...");
                 string youTubeURL = "https://www.youtube.com/watch?v=" + youTubeVideoId;
@@ -338,17 +338,17 @@ namespace YouTubeSubscriptionDownloader
 
         private async void DownloadYouTubeVideo(string youTubeVideoId, string destinationFolder)
         {
-            if (Settings.DownloadVideos)
+            if (Settings.Instance.DownloadVideos)
             {
                 Log("Downloading video...");
                 YoutubeClient client = new YoutubeClient();
                 var videoInfo = await client.GetVideoInfoAsync(youTubeVideoId);
 
                 MixedStreamInfo streamInfo = null;
-                if (Settings.PreferredQuality != "Highest")
-                    streamInfo = videoInfo.MixedStreams.Where(p => p.VideoQualityLabel == Settings.PreferredQuality).FirstOrDefault();
+                if (Settings.Instance.PreferredQuality != "Highest")
+                    streamInfo = videoInfo.MixedStreams.Where(p => p.VideoQualityLabel == Settings.Instance.PreferredQuality).FirstOrDefault();
 
-                if (Settings.PreferredQuality == "Highest" || streamInfo == null)
+                if (Settings.Instance.PreferredQuality == "Highest" || streamInfo == null)
                     streamInfo = videoInfo.MixedStreams.OrderBy(s => s.VideoQuality).Last();
 
                 string fileExtension = streamInfo.Container.GetFileExtension();
@@ -437,7 +437,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Settings.SerializeSubscriptions)
+            if (Settings.Instance.SerializeSubscriptions)
                 SerializeSubscriptions();
         }
     }

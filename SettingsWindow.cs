@@ -19,12 +19,12 @@ namespace YouTubeSubscriptionDownloader
         {
             InitializeComponent();
 
-            textBoxDownloadDirectory.Text = Settings.DownloadDirectory;
-            comboBoxPreferredQuality.SelectedIndex = comboBoxPreferredQuality.FindStringExact(Settings.PreferredQuality);
-            checkBoxShowNotifications.Checked = Settings.ShowNotifications;
-            checkBoxDownloadVideos.Checked = Settings.DownloadVideos;
-            checkBoxAddPocket.Checked = Settings.AddToPocket;
-            checkBoxSerializeSubscriptions.Checked = Settings.SerializeSubscriptions;
+            textBoxDownloadDirectory.Text = Settings.Instance.DownloadDirectory;
+            comboBoxPreferredQuality.SelectedIndex = comboBoxPreferredQuality.FindStringExact(Settings.Instance.PreferredQuality);
+            checkBoxShowNotifications.Checked = Settings.Instance.ShowNotifications;
+            checkBoxDownloadVideos.Checked = Settings.Instance.DownloadVideos;
+            checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
+            checkBoxSerializeSubscriptions.Checked = Settings.Instance.SerializeSubscriptions;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
         }
@@ -38,14 +38,14 @@ namespace YouTubeSubscriptionDownloader
             }
 
             //Save settings
-            Settings.DownloadDirectory = textBoxDownloadDirectory.Text;
-            Settings.PreferredQuality = comboBoxPreferredQuality.Text;
-            Settings.ShowNotifications = checkBoxShowNotifications.Checked;
-            Settings.DownloadVideos = checkBoxDownloadVideos.Checked;
+            Settings.Instance.DownloadDirectory = textBoxDownloadDirectory.Text;
+            Settings.Instance.PreferredQuality = comboBoxPreferredQuality.Text;
+            Settings.Instance.ShowNotifications = checkBoxShowNotifications.Checked;
+            Settings.Instance.DownloadVideos = checkBoxDownloadVideos.Checked;
             if (!checkBoxAddPocket.Checked)
-                Settings.AddToPocket = false; //Only set this to true if successfully Authed (down below)
+                Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)
 
-            Settings.SerializeSubscriptions = checkBoxSerializeSubscriptions.Checked;
+            Settings.Instance.SerializeSubscriptions = checkBoxSerializeSubscriptions.Checked;
 
             Settings.SaveSettings();
 
@@ -75,7 +75,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void checkBoxAddPocket_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxAddPocket.Checked && !Settings.AddToPocket) //Authorize Pocket only if this checkbox gets checked and it isn't already authorized
+            if (checkBoxAddPocket.Checked && !Settings.Instance.AddToPocket) //Authorize Pocket only if this checkbox gets checked and it isn't already authorized
                 AuthorizePocket();
         }
 
@@ -98,8 +98,8 @@ namespace YouTubeSubscriptionDownloader
                 System.Threading.Thread.Sleep(500);
             }
 
-            Settings.PocketAuthCode = user.Code;
-            Settings.AddToPocket = true;
+            Settings.Instance.PocketAuthCode = user.Code;
+            Settings.Instance.AddToPocket = true;
         }
     }
 }
