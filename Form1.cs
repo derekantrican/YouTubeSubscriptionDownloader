@@ -288,7 +288,12 @@ namespace YouTubeSubscriptionDownloader
 
         private DateTime GetMostRecentUploadDate(Subscription sub)
         {
-            return (DateTime)GetMostRecentUpload(sub).Snippet.PublishedAt;
+            PlaylistItem item = GetMostRecentUpload(sub);
+
+            if (item == null)
+                return DateTime.MinValue;
+
+            return (DateTime)item.Snippet.PublishedAt;
         }
 
         private PlaylistItem GetMostRecentUpload(Subscription sub)
