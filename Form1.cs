@@ -215,6 +215,14 @@ namespace YouTubeSubscriptionDownloader
                 PlaylistItemListResponse response = listRequest.Execute();
                 List<PlaylistItem> responseItems = response.Items.ToList();
 
+                ////------------------------------------
+                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
+                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
+                ////   will reorder the results by upload date
+
+                responseItems = responseItems.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                ////------------------------------------
+
                 //while (responseItems.Where(p => p.Id != )) //Todo: In the future we should store the "mostRecentUploadId" on a Subscription and get that instead
                 while (responseItems.Where(p => p.Snippet.PublishedAt <= sub.LastVideoPublishDate).FirstOrDefault() == null)
                 {
@@ -280,17 +288,31 @@ namespace YouTubeSubscriptionDownloader
 
         private DateTime GetMostRecentUploadDate(Subscription sub)
         {
-            DateTime result = DateTime.MinValue;
+            return (DateTime)GetMostRecentUpload(sub).Snippet.PublishedAt;
+        }
+
+        private PlaylistItem GetMostRecentUpload(Subscription sub)
+        {
             if (!string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
             {
                 PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
                 listRequest.PlaylistId = sub.UploadsPlaylist;
-                listRequest.MaxResults = 1;
+
+                ////------------------------------------
+                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
+                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
+                ////   will get the top 15 results and order them by upload date (hopefully 15 is enough to contain the
+                ////   most recent upload).
+
+                listRequest.MaxResults = 15;
                 PlaylistItemListResponse response = listRequest.Execute();
-                return (DateTime)response.Items.FirstOrDefault().Snippet.PublishedAt;
+                List<PlaylistItem> resultsByDate = response.Items.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                ////------------------------------------
+
+                return resultsByDate.FirstOrDefault();
             }
 
-            return result;
+            return null;
         }
 
         private void CheckForNewVideoFromSubscriptions()
@@ -300,21 +322,17 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Subscription sub in userSubscriptions)
             {
-                if (!string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
+                PlaylistItem newUpload = GetMostRecentUpload(sub);
+                if (newUpload != null)
                 {
-                    PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
-                    listRequest.PlaylistId = sub.UploadsPlaylist;
-                    listRequest.MaxResults = 1;
-                    PlaylistItemListResponse response = listRequest.Execute();
-                    PlaylistItemSnippet newUploadDetails = response.Items.FirstOrDefault().Snippet;
-
+                    PlaylistItemSnippet newUploadDetails = newUpload.Snippet;
                     DateTime newUploadPublishedDate = (DateTime)newUploadDetails.PublishedAt;
                     if (newUploadPublishedDate > sub.LastVideoPublishDate)
                     {
                         showNotification(newUploadDetails.Title, "New video from " + sub.Title);
                         Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
-                        DownloadYouTubeVideo(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
-                        AddYouTubeVideoToPocket(response.Items.FirstOrDefault().Snippet.ResourceId.VideoId);
+                        DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
+                        AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);
 
                         sub.LastVideoPublishDate = newUploadPublishedDate;
 
