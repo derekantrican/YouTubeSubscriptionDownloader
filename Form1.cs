@@ -288,7 +288,7 @@ namespace YouTubeSubscriptionDownloader
 
         private DateTime GetMostRecentUploadDate(Subscription sub)
         {
-            PlaylistItem item = GetMostRecentUpload(sub);
+            PlaylistItem item = GetMostRecentUploads(sub).FirstOrDefault();
 
             if (item == null)
                 return DateTime.MinValue;
@@ -296,7 +296,7 @@ namespace YouTubeSubscriptionDownloader
             return (DateTime)item.Snippet.PublishedAt;
         }
 
-        private PlaylistItem GetMostRecentUpload(Subscription sub)
+        private List<PlaylistItem> GetMostRecentUploads(Subscription sub, int qty = 15)
         {
             if (!string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
             {
@@ -309,15 +309,22 @@ namespace YouTubeSubscriptionDownloader
                 ////   will get the top 15 results and order them by upload date (hopefully 15 is enough to contain the
                 ////   most recent upload).
 
-                listRequest.MaxResults = 15;
+                listRequest.MaxResults = qty;
                 PlaylistItemListResponse response = listRequest.Execute();
                 List<PlaylistItem> resultsByDate = response.Items.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
                 ////------------------------------------
 
-                return resultsByDate.FirstOrDefault();
+                return resultsByDate;
             }
 
-            return null;
+            return new List<PlaylistItem>();
+        }
+
+        private List<PlaylistItem> GetUploadsSince(Subscription sub, DateTime date)
+        {
+            List<PlaylistItem> mostRecentUploads = GetMostRecentUploads(sub);
+
+            return mostRecentUploads.Where(p => p.Snippet.PublishedAt > date).ToList();
         }
 
         private void CheckForNewVideoFromSubscriptions()
@@ -327,24 +334,21 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Subscription sub in userSubscriptions)
             {
-                PlaylistItem newUpload = GetMostRecentUpload(sub);
-                if (newUpload != null)
+                List<PlaylistItem> newUploads = GetUploadsSince(sub, sub.LastVideoPublishDate);
+                foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
-                    PlaylistItemSnippet newUploadDetails = newUpload.Snippet;
-                    DateTime newUploadPublishedDate = (DateTime)newUploadDetails.PublishedAt;
-                    if (newUploadPublishedDate > sub.LastVideoPublishDate)
-                    {
-                        showNotification(newUploadDetails.Title, "New video from " + sub.Title);
-                        Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
-                        DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
-                        AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);
-
-                        sub.LastVideoPublishDate = newUploadPublishedDate;
-
-                        if (Settings.Instance.SerializeSubscriptions)
-                            SerializeSubscriptions();
-                    }
+                    PlaylistItemSnippet newUploadDetails = item.Snippet;
+                    showNotification(newUploadDetails.Title, "New video from " + sub.Title);
+                    Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
+                    DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
+                    AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);
                 }
+
+                if (newUploads.Count > 0)
+                    sub.LastVideoPublishDate = (DateTime)newUploads.First().Snippet.PublishedAt;
+
+                if (Settings.Instance.SerializeSubscriptions)
+                    SerializeSubscriptions();
             }
         }
 
