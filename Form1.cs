@@ -179,6 +179,11 @@ namespace YouTubeSubscriptionDownloader
                 userSubscriptions.Add(sub);
             }
 
+            //Remove any extraneous (unsubscribed) subscriptions
+            List<Subscription> unsubscribedSubscriptions = userSubscriptions.Where(p => tempUserSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null).ToList();
+            foreach (Subscription unsubscribedSubscription in unsubscribedSubscriptions)
+                userSubscriptions.Remove(unsubscribedSubscription);
+
             if (Settings.Instance.SerializeSubscriptions &&
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
