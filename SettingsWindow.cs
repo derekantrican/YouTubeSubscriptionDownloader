@@ -26,6 +26,7 @@ namespace YouTubeSubscriptionDownloader
             checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
             checkBoxSerializeSubscriptions.Checked = Settings.Instance.SerializeSubscriptions;
             numericUpDownIterationFrequency.Value = Settings.Instance.IterationFrequency;
+            checkBoxRunIterationsOnStartup.Checked = Settings.Instance.StartIterationsOnStartup;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
         }
@@ -48,6 +49,7 @@ namespace YouTubeSubscriptionDownloader
 
             Settings.Instance.SerializeSubscriptions = checkBoxSerializeSubscriptions.Checked;
             Settings.Instance.IterationFrequency = Convert.ToInt32(numericUpDownIterationFrequency.Value);
+            Settings.Instance.StartIterationsOnStartup = checkBoxRunIterationsOnStartup.Checked;
 
             Settings.SaveSettings();
 

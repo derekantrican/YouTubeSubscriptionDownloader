@@ -51,6 +51,9 @@ namespace YouTubeSubscriptionDownloader
             initializeTimer();
 
             buttonStop.Enabled = false;
+
+            if (Settings.Instance.StartIterationsOnStartup)
+                buttonStart_Click(null, null);
         }
 
         private bool CheckForInternetConnection()

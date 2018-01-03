@@ -42,6 +42,7 @@
             this.labelIterationFrequency = new System.Windows.Forms.Label();
             this.numericUpDownIterationFrequency = new System.Windows.Forms.NumericUpDown();
             this.labelMinutes = new System.Windows.Forms.Label();
+            this.checkBoxRunIterationsOnStartup = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -162,7 +163,7 @@
             // labelIterationFrequency
             // 
             this.labelIterationFrequency.AutoSize = true;
-            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 181);
+            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 192);
             this.labelIterationFrequency.Name = "labelIterationFrequency";
             this.labelIterationFrequency.Size = new System.Drawing.Size(91, 13);
             this.labelIterationFrequency.TabIndex = 11;
@@ -170,7 +171,7 @@
             // 
             // numericUpDownIterationFrequency
             // 
-            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 179);
+            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 190);
             this.numericUpDownIterationFrequency.Minimum = new decimal(new int[] {
             1,
             0,
@@ -188,17 +189,28 @@
             // labelMinutes
             // 
             this.labelMinutes.AutoSize = true;
-            this.labelMinutes.Location = new System.Drawing.Point(152, 181);
+            this.labelMinutes.Location = new System.Drawing.Point(152, 192);
             this.labelMinutes.Name = "labelMinutes";
             this.labelMinutes.Size = new System.Drawing.Size(43, 13);
             this.labelMinutes.TabIndex = 13;
             this.labelMinutes.Text = "minutes";
+            // 
+            // checkBoxRunIterationsOnStartup
+            // 
+            this.checkBoxRunIterationsOnStartup.AutoSize = true;
+            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 172);
+            this.checkBoxRunIterationsOnStartup.Name = "checkBoxRunIterationsOnStartup";
+            this.checkBoxRunIterationsOnStartup.Size = new System.Drawing.Size(228, 17);
+            this.checkBoxRunIterationsOnStartup.TabIndex = 14;
+            this.checkBoxRunIterationsOnStartup.Text = "Start running iterations on program startup?";
+            this.checkBoxRunIterationsOnStartup.UseVisualStyleBackColor = true;
             // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(343, 261);
+            this.Controls.Add(this.checkBoxRunIterationsOnStartup);
             this.Controls.Add(this.labelMinutes);
             this.Controls.Add(this.numericUpDownIterationFrequency);
             this.Controls.Add(this.labelIterationFrequency);
@@ -238,5 +250,6 @@
         private System.Windows.Forms.Label labelIterationFrequency;
         private System.Windows.Forms.NumericUpDown numericUpDownIterationFrequency;
         private System.Windows.Forms.Label labelMinutes;
+        private System.Windows.Forms.CheckBox checkBoxRunIterationsOnStartup;
     }
 }
