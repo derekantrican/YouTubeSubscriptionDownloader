@@ -31,6 +31,8 @@ namespace YouTubeSubscriptionDownloader
         static string UserSettings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
         static string CredentialsPath = Path.Combine(UserSettings, "Credentials");
 
+        List<string> missingLogLines = new List<string>();
+
         System.Windows.Forms.Timer timer = null;
 
         YouTubeService service = null;
@@ -38,9 +40,10 @@ namespace YouTubeSubscriptionDownloader
 
         List<Subscription> userSubscriptions = new List<Subscription>();
 
-        public Form1()
+        public Form1(bool start = false)
         {
             InitializeComponent();
+            this.HandleCreated += Form1_HandleCreated;
 
             if (!Directory.Exists(UserSettings))
                 Directory.CreateDirectory(UserSettings);
@@ -52,8 +55,22 @@ namespace YouTubeSubscriptionDownloader
 
             buttonStop.Enabled = false;
 
-            if (Settings.Instance.StartIterationsOnStartup)
+            if (Settings.Instance.StartIterationsOnStartup || start)
                 buttonStart_Click(null, null);
+        }
+
+        private void Form1_HandleCreated(object sender, EventArgs e)
+        {
+            if (missingLogLines.Count > 0)
+            {
+                foreach (string line in missingLogLines)
+                    richTextBoxLog.Text += line;
+
+                richTextBoxLog.SelectionStart = richTextBoxLog.Text.Length;
+                richTextBoxLog.ScrollToCaret();
+
+                missingLogLines.Clear();
+            }
         }
 
         private bool CheckForInternetConnection()
@@ -96,6 +113,13 @@ namespace YouTubeSubscriptionDownloader
         private void Log(string itemToLog)
         {
             DateTime date = DateTime.Now;
+
+            if (!this.IsHandleCreated ||
+                !this.richTextBoxLog.IsHandleCreated)
+            {
+                missingLogLines.Add("[" + date + "] " + itemToLog + Environment.NewLine);
+                return;
+            }
 
             this.richTextBoxLog.Invoke((MethodInvoker)delegate
             {

@@ -13,14 +13,20 @@ namespace YouTubeSubscriptionDownloader
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
             try
             {
-                Application.Run(new Form1());
+                if (args != null && args.Length > 0)
+                {
+                    if (args.ToList().Contains("start"))
+                        Application.Run(new Form1(true));
+                }
+                else
+                    Application.Run(new Form1());
             }
             catch (Exception ex)
             {
