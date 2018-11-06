@@ -401,17 +401,18 @@ namespace YouTubeSubscriptionDownloader
             {
                 Log("Downloading video...");
                 YoutubeClient client = new YoutubeClient();
-                var videoInfo = await client.GetVideoInfoAsync(youTubeVideoId);
+                var videoInfo = await client.GetVideoAsync(youTubeVideoId);
+                var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(youTubeVideoId);
 
-                MixedStreamInfo streamInfo = null;
+                MuxedStreamInfo streamInfo = null;
                 if (Settings.Instance.PreferredQuality != "Highest")
-                    streamInfo = videoInfo.MixedStreams.Where(p => p.VideoQualityLabel == Settings.Instance.PreferredQuality).FirstOrDefault();
+                    streamInfo = streamInfoSet.Muxed.Where(p => p.VideoQualityLabel == Settings.Instance.PreferredQuality).FirstOrDefault();
 
                 if (Settings.Instance.PreferredQuality == "Highest" || streamInfo == null)
-                    streamInfo = videoInfo.MixedStreams.OrderBy(s => s.VideoQuality).Last();
+                    streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
 
                 string fileExtension = streamInfo.Container.GetFileExtension();
-                string fileName = "[" + videoInfo.Author.Title + "] " + videoInfo.Title + "." + fileExtension;
+                string fileName = "[" + videoInfo.Author + "] " + videoInfo.Title + "." + fileExtension;
 
                 //Remove invalid characters from filename
                 string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
