@@ -88,13 +88,13 @@ namespace YouTubeSubscriptionDownloader
 
         private bool IsValidPlaylist(string playlistURL)
         {
-            string playlistID = Regex.Match(playlistURL, @"PL\w*-*").ToString();
+            string playlistID = Regex.Match(playlistURL, @"[PL|UU][\w-]*").ToString();
             return !string.IsNullOrEmpty(playlistID);
         }
 
         private void AddPlaylistToList(string playlistURL)
         {
-            string playlistID = Regex.Match(playlistURL, @"PL\w*-*").ToString();
+            string playlistID = Regex.Match(playlistURL, @"[PL|UU][\w-]*").ToString();
 
             PlaylistsResource.ListRequest listRequest = service.Playlists.List("snippet");
             listRequest.Id = playlistID;
