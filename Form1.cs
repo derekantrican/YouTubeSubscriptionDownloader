@@ -303,29 +303,6 @@ namespace YouTubeSubscriptionDownloader
             return subscriptions;
         }
 
-        #region Playlists
-        private void AddPlaylistToSubscriptions(string playlistURL)
-        {
-            string playlistID = Regex.Match(playlistURL, @"PL\w*-*").ToString();
-
-            PlaylistsResource.ListRequest listRequest = service.Playlists.List("snippet");
-            listRequest.Id = playlistID;
-            PlaylistListResponse response = listRequest.Execute();
-
-            string channelId = response.Items.FirstOrDefault().Snippet.ChannelId;
-            string playlistTitle = response.Items.FirstOrDefault().Snippet.Title;
-
-            Subscription playlistSubscription = new Subscription();
-            playlistSubscription.LastVideoPublishDate = DateTime.Now;
-            playlistSubscription.Id = channelId;
-            playlistSubscription.UploadsPlaylist = playlistID;
-            playlistSubscription.Title = playlistTitle;
-            playlistSubscription.IsPlaylist = true;
-
-            userSubscriptions.Add(playlistSubscription);
-        }
-        #endregion Playlists
-
         private Subscription GetUploadsPlaylist(Subscription sub)
         {
             if (string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
