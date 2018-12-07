@@ -177,8 +177,7 @@ namespace YouTubeSubscriptionDownloader
             }
 
             Log("Retrieving subscriptions...");
-            if (Settings.Instance.SerializeSubscriptions)
-                DeserializeSubscriptions();
+            DeserializeSubscriptions();
 
             SubscriptionsResource.ListRequest listSubscriptions = service.Subscriptions.List("snippet");
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
@@ -203,10 +202,13 @@ namespace YouTubeSubscriptionDownloader
                 userSubscriptions.Add(sub);
             }
 
-            //Remove any extraneous (unsubscribed) subscriptions
-            List<Subscription> unsubscribedSubscriptions = userSubscriptions.Where(p => tempUserSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null).ToList();
+            //Remove any extraneous (unsubscribed since last time the program was run) subscriptions
+            List<Subscription> unsubscribedSubscriptions = userSubscriptions.Where(p => tempUserSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null && !p.IsPlaylist).ToList();
             foreach (Subscription unsubscribedSubscription in unsubscribedSubscriptions)
                 userSubscriptions.Remove(unsubscribedSubscription);
+
+            //Remove any duplicates
+            userSubscriptions = userSubscriptions.GroupBy(p => p.UploadsPlaylist).Select(p => p.First()).ToList();
 
             if (Settings.Instance.SerializeSubscriptions &&
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
@@ -301,6 +303,29 @@ namespace YouTubeSubscriptionDownloader
             return subscriptions;
         }
 
+        #region Playlists
+        private void AddPlaylistToSubscriptions(string playlistURL)
+        {
+            string playlistID = Regex.Match(playlistURL, @"PL\w*-*").ToString();
+
+            PlaylistsResource.ListRequest listRequest = service.Playlists.List("snippet");
+            listRequest.Id = playlistID;
+            PlaylistListResponse response = listRequest.Execute();
+
+            string channelId = response.Items.FirstOrDefault().Snippet.ChannelId;
+            string playlistTitle = response.Items.FirstOrDefault().Snippet.Title;
+
+            Subscription playlistSubscription = new Subscription();
+            playlistSubscription.LastVideoPublishDate = DateTime.Now;
+            playlistSubscription.Id = channelId;
+            playlistSubscription.UploadsPlaylist = playlistID;
+            playlistSubscription.Title = playlistTitle;
+            playlistSubscription.IsPlaylist = true;
+
+            userSubscriptions.Add(playlistSubscription);
+        }
+        #endregion Playlists
+
         private Subscription GetUploadsPlaylist(Subscription sub)
         {
             if (string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
@@ -379,8 +404,7 @@ namespace YouTubeSubscriptionDownloader
                 if (newUploads.Count > 0)
                     sub.LastVideoPublishDate = (DateTime)newUploads.First().Snippet.PublishedAt;
 
-                if (Settings.Instance.SerializeSubscriptions)
-                    SerializeSubscriptions();
+                SerializeSubscriptions();
             }
         }
 
@@ -431,7 +455,7 @@ namespace YouTubeSubscriptionDownloader
             {
                 FileStream fileStream = new FileStream(serializationPath, FileMode.Open);
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-                userSubscriptions = (List<Subscription>)xmlSerializer.Deserialize(fileStream);
+                userSubscriptions.AddRange((List<Subscription>)xmlSerializer.Deserialize(fileStream));
             }
         }
 
@@ -444,18 +468,26 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
-            string serializationPath = string.IsNullOrEmpty(overrideSerializationPath) ? Path.Combine(UserSettings, "Subscriptions.xml") : overrideSerializationPath;
+            List<Subscription> subscriptionsToSerialize = new List<Subscription>();
+            if (Settings.Instance.SerializeSubscriptions)
+                subscriptionsToSerialize = userSubscriptions;
+            else
+                subscriptionsToSerialize = userSubscriptions.Where(p => p.IsPlaylist).ToList();
 
+            string serializationPath = string.IsNullOrEmpty(overrideSerializationPath) ? Path.Combine(UserSettings, "Subscriptions.xml") : overrideSerializationPath;
             if (File.Exists(serializationPath))
                 File.Delete(serializationPath);
 
-            TextWriter writer = new StreamWriter(serializationPath);
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-            xmlSerializer.Serialize(writer, userSubscriptions); //Could wrap this in a try{ }catch{ } (and writer.Close() in a finally{ }), but we're catching all exceptions already
-            writer.Close();
+            if (subscriptionsToSerialize.Any())
+            {
+                TextWriter writer = new StreamWriter(serializationPath);
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
+                xmlSerializer.Serialize(writer, subscriptionsToSerialize); //Could wrap this in a try{ }catch{ } (and writer.Close() in a finally{ }), but we're catching all exceptions already
+                writer.Close();
 
-            if (!string.IsNullOrEmpty(overrideSerializationPath))
-                MessageBox.Show("Subscriptions serialized to " + serializationPath);
+                if (!string.IsNullOrEmpty(overrideSerializationPath))
+                    MessageBox.Show("Subscriptions serialized to " + serializationPath);
+            }
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
@@ -468,7 +500,7 @@ namespace YouTubeSubscriptionDownloader
             Log("Iterations stopped");
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void pictureBoxSettings_Click(object sender, EventArgs e)
         {
             if (Form.ModifierKeys == Keys.Control)
                 SerializeSubscriptions(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Subscriptions.xml"));
@@ -477,6 +509,24 @@ namespace YouTubeSubscriptionDownloader
                 SettingsWindow settingsWindow = new SettingsWindow();
                 settingsWindow.ShowDialog();
             }
+        }
+
+        private void pictureBoxPlaylists_Click(object sender, EventArgs e)
+        {
+            if (timer.Enabled)
+            {
+                MessageBox.Show("Please stop the program first");
+                return;
+            }
+
+            PlaylistManager manager = new PlaylistManager(service, userSubscriptions.Where(p => p.IsPlaylist).ToList());
+            manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) => 
+            {
+                userSubscriptions.RemoveAll(p => p.IsPlaylist);
+                playlistSubscriptions.ForEach(p => userSubscriptions.Add(p));
+                SerializeSubscriptions();
+            };
+            manager.ShowDialog();
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -515,8 +565,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Settings.Instance.SerializeSubscriptions)
-                SerializeSubscriptions();
+            SerializeSubscriptions();
         }
     }
 }

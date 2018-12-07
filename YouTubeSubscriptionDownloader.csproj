@@ -101,6 +101,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="PlaylistManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PlaylistManager.Designer.cs">
+      <DependentUpon>PlaylistManager.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
@@ -113,6 +119,9 @@
     <Compile Include="Subscription.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PlaylistManager.resx">
+      <DependentUpon>PlaylistManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -145,6 +154,8 @@
     <None Include="Resources\gear %281%29.png" />
     <None Include="Resources\Help2.png" />
     <None Include="FodyWeavers.xml" />
+    <None Include="Resources\playlist.png" />
+    <None Include="Resources\plus-black-symbol.png" />
     <Content Include="youtubedownload_wFk_icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

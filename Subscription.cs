@@ -12,6 +12,7 @@ namespace YouTubeSubscriptionDownloader
         public string Title { get; set; }
         public string UploadsPlaylist { get; set; }
         public DateTime LastVideoPublishDate { get; set; }
+        public bool IsPlaylist { get; set; }
 
         public override string ToString()
         {

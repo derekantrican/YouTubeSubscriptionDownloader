@@ -227,6 +227,7 @@
             this.Controls.Add(this.buttonCancel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "SettingsWindow";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SettingsWindow";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).EndInit();
             this.ResumeLayout(false);

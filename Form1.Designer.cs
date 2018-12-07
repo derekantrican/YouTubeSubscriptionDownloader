@@ -34,8 +34,10 @@
             this.richTextBoxLog = new System.Windows.Forms.RichTextBox();
             this.buttonStop = new System.Windows.Forms.Button();
             this.notifyIconFormInTray = new System.Windows.Forms.NotifyIcon(this.components);
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.pictureBoxPlaylists = new System.Windows.Forms.PictureBox();
+            this.pictureBoxSettings = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxPlaylists)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSettings)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonStart
@@ -76,23 +78,35 @@
             this.notifyIconFormInTray.Visible = true;
             this.notifyIconFormInTray.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconFormInTray_MouseDoubleClick);
             // 
-            // pictureBox1
+            // pictureBoxPlaylists
             // 
-            this.pictureBox1.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.gear__1_;
-            this.pictureBox1.Location = new System.Drawing.Point(393, 0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(25, 25);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 3;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.pictureBoxPlaylists.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.playlist;
+            this.pictureBoxPlaylists.Location = new System.Drawing.Point(367, 3);
+            this.pictureBoxPlaylists.Name = "pictureBoxPlaylists";
+            this.pictureBoxPlaylists.Size = new System.Drawing.Size(20, 20);
+            this.pictureBoxPlaylists.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxPlaylists.TabIndex = 4;
+            this.pictureBoxPlaylists.TabStop = false;
+            this.pictureBoxPlaylists.Click += new System.EventHandler(this.pictureBoxPlaylists_Click);
+            // 
+            // pictureBoxSettings
+            // 
+            this.pictureBoxSettings.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.gear__1_;
+            this.pictureBoxSettings.Location = new System.Drawing.Point(393, 0);
+            this.pictureBoxSettings.Name = "pictureBoxSettings";
+            this.pictureBoxSettings.Size = new System.Drawing.Size(25, 25);
+            this.pictureBoxSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxSettings.TabIndex = 3;
+            this.pictureBoxSettings.TabStop = false;
+            this.pictureBoxSettings.Click += new System.EventHandler(this.pictureBoxSettings_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(418, 261);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.pictureBoxPlaylists);
+            this.Controls.Add(this.pictureBoxSettings);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.richTextBoxLog);
             this.Controls.Add(this.buttonStart);
@@ -103,7 +117,8 @@
             this.Text = "YouTube Subscription Downloader";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxPlaylists)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSettings)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -114,7 +129,8 @@
         private System.Windows.Forms.RichTextBox richTextBoxLog;
         private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.NotifyIcon notifyIconFormInTray;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBoxSettings;
+        private System.Windows.Forms.PictureBox pictureBoxPlaylists;
     }
 }
 
