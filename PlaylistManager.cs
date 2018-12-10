@@ -79,22 +79,23 @@ namespace YouTubeSubscriptionDownloader
                 else
                 {
                     AddPlaylistToList(textBoxPlaylistURL.Text);
+                    listBoxPlaylists.TopIndex = listBoxPlaylists.Items.Count - 1; //Scroll to bottom of list to show item was added
                     textBoxPlaylistURL.Clear();
                 }
             }
             else
-                MessageBox.Show("That is not a valid playlist URL");
+                MessageBox.Show("That is not a valid playlist URL or ID");
         }
 
         private bool IsValidPlaylist(string playlistURL)
         {
-            string playlistID = Regex.Match(playlistURL, @"[PL|UU][\w-]*").ToString();
+            string playlistID = Regex.Match(playlistURL, @"(PL|UU)[\w-]*").ToString();
             return !string.IsNullOrEmpty(playlistID);
         }
 
         private void AddPlaylistToList(string playlistURL)
         {
-            string playlistID = Regex.Match(playlistURL, @"[PL|UU][\w-]*").ToString();
+            string playlistID = Regex.Match(playlistURL, @"(PL|UU)[\w-]*").ToString();
 
             PlaylistsResource.ListRequest listRequest = service.Playlists.List("snippet");
             listRequest.Id = playlistID;
