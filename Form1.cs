@@ -336,17 +336,42 @@ namespace YouTubeSubscriptionDownloader
             {
                 PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
                 listRequest.PlaylistId = sub.UploadsPlaylist;
+                PlaylistItemListResponse response;
+                List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
 
-                ////------------------------------------
-                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
-                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
-                ////   will get the top 15 results and order them by upload date (hopefully 15 is enough to contain the
-                ////   most recent upload).
+                if (sub.IsPlaylist)
+                {
+                    //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
+                    //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly
 
-                listRequest.MaxResults = qty;
-                PlaylistItemListResponse response = listRequest.Execute();
-                List<PlaylistItem> resultsByDate = response.Items.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
-                ////------------------------------------
+                    List<PlaylistItem> results = new List<PlaylistItem>();
+                    listRequest.MaxResults = 50; //50 is the maximum
+                    response = listRequest.Execute();
+                    results.AddRange(response.Items);
+
+                    while (response.NextPageToken != null)
+                    {
+                        listRequest.PageToken = response.NextPageToken;
+                        response = listRequest.Execute();
+                        results.AddRange(response.Items);
+                    }
+
+                    resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                }
+                else
+                {
+                    ////------------------------------------
+                    ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
+                    ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
+                    ////   will get the top 15 results and order them by upload date (hopefully 15 is enough to contain the
+                    ////   most recent upload).
+
+                    listRequest.MaxResults = qty;
+                    response = listRequest.Execute();
+                    resultsByDate = response.Items.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                    ////------------------------------------
+                }
+
 
                 return resultsByDate;
             }
@@ -500,7 +525,12 @@ namespace YouTubeSubscriptionDownloader
             manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) => 
             {
                 userSubscriptions.RemoveAll(p => p.IsPlaylist);
-                playlistSubscriptions.ForEach(p => userSubscriptions.Add(p));
+                foreach (Subscription playlist in playlistSubscriptions)
+                {
+                    playlist.LastVideoPublishDate = GetMostRecentUploadDate(playlist);
+                    userSubscriptions.Add(playlist);
+                }
+                
                 SerializeSubscriptions();
             };
             manager.ShowDialog();
