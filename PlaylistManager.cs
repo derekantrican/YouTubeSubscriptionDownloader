@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -54,11 +55,16 @@ namespace YouTubeSubscriptionDownloader
 
                 this.listBoxPlaylists.SelectedIndex = index;
 
-                ContextMenu removeMenu = new ContextMenu();
+                ContextMenu contexMenu = new ContextMenu();
+                MenuItem openItem = new MenuItem() { Text = "Open" };
+                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (listBoxPlaylists.Items[index] as Subscription).UploadsPlaylist); };
+                contexMenu.MenuItems.Add(openItem);
+
                 MenuItem removeItem = new MenuItem() { Text = "Remove" };
                 removeItem.Click += (s, args) => { listBoxPlaylists.Items.RemoveAt(index); };
-                removeMenu.MenuItems.Add(removeItem);
-                removeMenu.Show((sender as ListBox), new Point(e.X, e.Y));
+                contexMenu.MenuItems.Add(removeItem);
+
+                contexMenu.Show((sender as ListBox), new Point(e.X, e.Y));
 
                 return;
             }
