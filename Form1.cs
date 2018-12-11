@@ -197,7 +197,7 @@ namespace YouTubeSubscriptionDownloader
             Log("Getting latest subscriptions from YouTube");
             foreach (Subscription missingSubscription in tempUserSubscriptions.Where(p => userSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null))
             {
-                Subscription sub = GetUploadsPlaylist(missingSubscription);
+                Subscription sub = AssignUploadsPlaylist(missingSubscription);
                 sub.LastVideoPublishDate = GetMostRecentUploadDate(sub);
                 userSubscriptions.Add(sub);
             }
@@ -208,7 +208,7 @@ namespace YouTubeSubscriptionDownloader
                 userSubscriptions.Remove(unsubscribedSubscription);
 
             //Remove any duplicates
-            userSubscriptions = userSubscriptions.GroupBy(p => p.UploadsPlaylist).Select(p => p.First()).ToList();
+            userSubscriptions = userSubscriptions.GroupBy(p => p.PlaylistIdToWatch).Select(p => p.First()).ToList();
 
             if (Settings.Instance.SerializeSubscriptions &&
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
@@ -232,8 +232,8 @@ namespace YouTubeSubscriptionDownloader
         {
             for (int i = 0; i < userSubscriptions.Count(); i++)
             {
-                if (string.IsNullOrEmpty(userSubscriptions[i].UploadsPlaylist))
-                    userSubscriptions[i] = GetUploadsPlaylist(userSubscriptions[i]);
+                if (string.IsNullOrEmpty(userSubscriptions[i].PlaylistIdToWatch))
+                    userSubscriptions[i] = AssignUploadsPlaylist(userSubscriptions[i]);
 
                 Subscription sub = userSubscriptions[i];
                 DateTime mostRecentUploadDate = GetMostRecentUploadDate(sub);
@@ -241,38 +241,7 @@ namespace YouTubeSubscriptionDownloader
                     continue;
 
                 List<PlaylistItem> moreRecentUploads = new List<PlaylistItem>();
-
-                //Todo: get all videos between sub.LastVideoPublishDate and mostRecentUploadDate
-                PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
-                listRequest.PlaylistId = sub.UploadsPlaylist;
-                listRequest.MaxResults = 50;
-                PlaylistItemListResponse response = listRequest.Execute();
-                List<PlaylistItem> responseItems = response.Items.ToList();
-
-                ////------------------------------------
-                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
-                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
-                ////   will reorder the results by upload date
-
-                responseItems = responseItems.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
-                ////------------------------------------
-
-                //while (responseItems.Where(p => p.Id != )) //Todo: In the future we should store the "mostRecentUploadId" on a Subscription and get that instead
-                while (responseItems.Where(p => p.Snippet.PublishedAt <= sub.LastVideoPublishDate).FirstOrDefault() == null)
-                {
-                    moreRecentUploads.AddRange(responseItems);
-
-                    listRequest.PageToken = response.NextPageToken;
-                    responseItems = listRequest.Execute().Items.ToList();
-                }
-
-                foreach (PlaylistItem item in responseItems)
-                {
-                    if (item.Snippet.PublishedAt <= sub.LastVideoPublishDate) //Todo: In the future we should store the "mostRecentUploadId" on a Subscription and get that instead
-                        break;
-
-                    moreRecentUploads.Add(item);
-                }
+                moreRecentUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
 
                 foreach (PlaylistItem moreRecent in moreRecentUploads)
                 {
@@ -295,7 +264,7 @@ namespace YouTubeSubscriptionDownloader
             {
                 subscriptions.Add(new Subscription()
                 {
-                    Id = item.Snippet.ResourceId.ChannelId,
+                    ChannelId = item.Snippet.ResourceId.ChannelId,
                     Title = item.Snippet.Title
                 });
             }
@@ -303,21 +272,28 @@ namespace YouTubeSubscriptionDownloader
             return subscriptions;
         }
 
-        private Subscription GetUploadsPlaylist(Subscription sub)
+        private Subscription AssignUploadsPlaylist(Subscription sub)
         {
-            if (string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
+            if (string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
             {
-                ChannelsResource.ListRequest listRequest = service.Channels.List("contentDetails");
-                listRequest.Id = sub.Id;
-                ChannelListResponse response = listRequest.Execute();
-
-                if (response.Items.Count <= 0)
-                    return sub;
-
-                sub.UploadsPlaylist = response.Items.FirstOrDefault().ContentDetails.RelatedPlaylists.Uploads;
+                string uploadsPlaylistId = GetChannelUploadsPlaylistId(sub);
+                if (!string.IsNullOrEmpty(uploadsPlaylistId))
+                    sub.PlaylistIdToWatch = uploadsPlaylistId;
             }
 
             return sub;
+        }
+
+        private string GetChannelUploadsPlaylistId(Subscription sub)
+        {
+            ChannelsResource.ListRequest listRequest = service.Channels.List("contentDetails");
+            listRequest.Id = sub.ChannelId;
+            ChannelListResponse response = listRequest.Execute();
+
+            if (response.Items.Count <= 0)
+                return null;
+
+            return response.Items.FirstOrDefault().ContentDetails.RelatedPlaylists.Uploads;
         }
 
         private DateTime GetMostRecentUploadDate(Subscription sub)
@@ -330,21 +306,22 @@ namespace YouTubeSubscriptionDownloader
             return (DateTime)item.Snippet.PublishedAt;
         }
 
-        private List<PlaylistItem> GetMostRecentUploads(Subscription sub, int qty = 15)
+        private List<PlaylistItem> GetMostRecentUploads(Subscription sub, DateTime? sinceDate = null)
         {
-            if (!string.IsNullOrWhiteSpace(sub.UploadsPlaylist))
+            List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
+            if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
             {
                 PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
-                listRequest.PlaylistId = sub.UploadsPlaylist;
+                listRequest.PlaylistId = sub.PlaylistIdToWatch;
                 PlaylistItemListResponse response;
-                List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
 
-                if (sub.IsPlaylist)
+                List<PlaylistItem> results = new List<PlaylistItem>();
+                if (sub.IsPlaylist &&
+                    GetChannelUploadsPlaylistId(sub) != sub.PlaylistIdToWatch) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
                 {
                     //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
                     //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly
 
-                    List<PlaylistItem> results = new List<PlaylistItem>();
                     listRequest.MaxResults = 50; //50 is the maximum
                     response = listRequest.Execute();
                     results.AddRange(response.Items);
@@ -355,35 +332,38 @@ namespace YouTubeSubscriptionDownloader
                         response = listRequest.Execute();
                         results.AddRange(response.Items);
                     }
-
-                    resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
                 }
                 else
                 {
-                    ////------------------------------------
-                    ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
-                    ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
-                    ////   will get the top 15 results and order them by upload date (hopefully 15 is enough to contain the
-                    ////   most recent upload).
-
-                    listRequest.MaxResults = qty;
+                    listRequest.MaxResults = 50;
                     response = listRequest.Execute();
-                    resultsByDate = response.Items.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
-                    ////------------------------------------
+                    results.AddRange(response.Items);
+                    
+                    //If we still haven't gotten any items older than the "sinceDate", get more
+                    if (sinceDate != null)
+                    {
+                        while (!resultsByDate.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
+                        {
+                            listRequest.PageToken = response.NextPageToken;
+                            response = listRequest.Execute();
+                            results.AddRange(response.Items);
+                        }
+                    }
                 }
 
+                ////------------------------------------
+                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
+                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
+                ////   will get the top 50 results and order them by upload date
 
-                return resultsByDate;
+                resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                ////------------------------------------
             }
 
-            return new List<PlaylistItem>();
-        }
-
-        private List<PlaylistItem> GetUploadsSince(Subscription sub, DateTime date)
-        {
-            List<PlaylistItem> mostRecentUploads = GetMostRecentUploads(sub);
-
-            return mostRecentUploads.Where(p => p.Snippet.PublishedAt > date).ToList();
+            if (sinceDate != null)
+                return resultsByDate.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
+            else
+                return resultsByDate;
         }
 
         private void CheckForNewVideoFromSubscriptions()
@@ -393,7 +373,7 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Subscription sub in userSubscriptions)
             {
-                List<PlaylistItem> newUploads = GetUploadsSince(sub, sub.LastVideoPublishDate);
+                List<PlaylistItem> newUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
@@ -458,6 +438,7 @@ namespace YouTubeSubscriptionDownloader
                 FileStream fileStream = new FileStream(serializationPath, FileMode.Open);
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
                 userSubscriptions.AddRange((List<Subscription>)xmlSerializer.Deserialize(fileStream));
+                fileStream.Close();
             }
         }
 

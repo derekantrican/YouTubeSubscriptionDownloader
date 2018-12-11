@@ -8,9 +8,9 @@ namespace YouTubeSubscriptionDownloader
 {
     public class Subscription
     {
-        public string Id { get; set; }
+        public string ChannelId { get; set; }
         public string Title { get; set; }
-        public string UploadsPlaylist { get; set; }
+        public string PlaylistIdToWatch { get; set; }
         public DateTime LastVideoPublishDate { get; set; }
         public bool IsPlaylist { get; set; }
 

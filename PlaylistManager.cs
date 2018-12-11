@@ -57,7 +57,7 @@ namespace YouTubeSubscriptionDownloader
 
                 ContextMenu contexMenu = new ContextMenu();
                 MenuItem openItem = new MenuItem() { Text = "Open" };
-                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (listBoxPlaylists.Items[index] as Subscription).UploadsPlaylist); };
+                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (listBoxPlaylists.Items[index] as Subscription).PlaylistIdToWatch); };
                 contexMenu.MenuItems.Add(openItem);
 
                 MenuItem removeItem = new MenuItem() { Text = "Remove" };
@@ -80,7 +80,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (IsValidPlaylist(textBoxPlaylistURL.Text))
             {
-                if (listBoxPlaylists.Items.Cast<Subscription>().FirstOrDefault(p => textBoxPlaylistURL.Text.Contains(p.UploadsPlaylist)) != null)
+                if (listBoxPlaylists.Items.Cast<Subscription>().FirstOrDefault(p => textBoxPlaylistURL.Text.Contains(p.PlaylistIdToWatch)) != null)
                     MessageBox.Show("That playlist already exists in the list");
                 else
                 {
@@ -112,8 +112,8 @@ namespace YouTubeSubscriptionDownloader
 
             Subscription playlistSubscription = new Subscription();
             playlistSubscription.LastVideoPublishDate = DateTime.Now;
-            playlistSubscription.Id = channelId;
-            playlistSubscription.UploadsPlaylist = playlistID;
+            playlistSubscription.ChannelId = channelId;
+            playlistSubscription.PlaylistIdToWatch = playlistID;
             playlistSubscription.Title = playlistTitle;
             playlistSubscription.IsPlaylist = true;
 
