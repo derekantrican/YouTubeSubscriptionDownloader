@@ -104,10 +104,13 @@ namespace YouTubeSubscriptionDownloader
             timer.Tick += Timer_Tick;
         }
 
-        private void showNotification(string notificationSubTitle, string notificationTitle = "")
+        private void showNotification(string notificationSubTitle, string notificationTitle = "", string imageURL = "")
         {
             if (Settings.Instance.ShowNotifications)
-                notifyIconFormInTray.ShowBalloonTip(1000, notificationTitle, notificationSubTitle, ToolTipIcon.None);
+            {
+                Notification notification2 = new Notification(notificationTitle, notificationSubTitle, imageURL);
+                notification2.Show();
+            }
         }
 
         private void Log(string itemToLog)
@@ -342,7 +345,7 @@ namespace YouTubeSubscriptionDownloader
                     //If we still haven't gotten any items older than the "sinceDate", get more
                     if (sinceDate != null)
                     {
-                        while (!resultsByDate.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
+                        while (!results.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
                         {
                             listRequest.PageToken = response.NextPageToken;
                             response = listRequest.Execute();
@@ -377,7 +380,7 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
-                    showNotification(newUploadDetails.Title, "New video from " + sub.Title);
+                    showNotification(newUploadDetails.Title, "New video from " + sub.Title, item.Snippet.Thumbnails.Standard.Url);
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                     DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
                     AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);
