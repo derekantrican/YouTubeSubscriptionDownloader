@@ -104,11 +104,14 @@ namespace YouTubeSubscriptionDownloader
             timer.Tick += Timer_Tick;
         }
 
-        private void showNotification(string notificationSubTitle, string notificationTitle = "", string imageURL = "")
+        private void showNotification(string notificationSubTitle, string notificationTitle = "", string imageURL = "", string videoURL = "")
         {
             if (Settings.Instance.ShowNotifications)
             {
-                Notification notification2 = new Notification(notificationTitle, notificationSubTitle, imageURL);
+                //if (!Settings.Instance.ShowThumbnailInNotification)
+                //    imageURL = null;
+
+                Notification notification2 = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
                 notification2.Show();
             }
         }
@@ -380,7 +383,8 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
-                    showNotification(newUploadDetails.Title, "New video from " + sub.Title, item.Snippet.Thumbnails.Standard.Url);
+                    showNotification(newUploadDetails.Title, "New video from " + sub.Title, item.Snippet.Thumbnails.Standard.Url,
+                                     "https://www.youtube.com/watch?v=" + newUploadDetails.ResourceId.VideoId);
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                     DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
                     AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);

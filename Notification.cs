@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -15,10 +16,20 @@ namespace YouTubeSubscriptionDownloader
     {
         private static readonly List<Notification> OpenNotifications = new List<Notification>();
         private Timer lifeTimer = new Timer();
+        string videoURL = "";
 
-        public Notification(string notificationTitle, string notificationMessage, string imageURL = null)
+        public Notification(string notificationTitle, string notificationMessage, string imageURL = null, string videoURL = "")
         {
             InitializeComponent();
+
+            //Subscribe to all click events
+            this.Click += NotificationClick;
+            notificationImage.Click += NotificationClick;
+            pictureBoxIcon.Click += NotificationClick;
+            labelTitle.Click += NotificationClick;
+            labelMessage.Click += NotificationClick;
+
+            this.videoURL = videoURL;
 
             labelTitle.Text = notificationTitle;
             labelMessage.Text = notificationMessage;
@@ -63,6 +74,14 @@ namespace YouTubeSubscriptionDownloader
 
             OpenNotifications.Add(this);
             lifeTimer.Start();
+        }
+
+        private void NotificationClick(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(videoURL))
+                Process.Start(videoURL);
+
+            this.Close();
         }
     }
 }
