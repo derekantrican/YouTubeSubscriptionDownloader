@@ -43,12 +43,13 @@
             this.numericUpDownIterationFrequency = new System.Windows.Forms.NumericUpDown();
             this.labelMinutes = new System.Windows.Forms.Label();
             this.checkBoxRunIterationsOnStartup = new System.Windows.Forms.CheckBox();
+            this.checkBoxShowThumbnails = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(256, 226);
+            this.buttonCancel.Location = new System.Drawing.Point(256, 248);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 0;
@@ -58,7 +59,7 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(175, 226);
+            this.buttonSave.Location = new System.Drawing.Point(175, 248);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 1;
@@ -127,6 +128,7 @@
             this.checkBoxShowNotifications.TabIndex = 7;
             this.checkBoxShowNotifications.Text = "Show Notifications?";
             this.checkBoxShowNotifications.UseVisualStyleBackColor = true;
+            this.checkBoxShowNotifications.CheckedChanged += new System.EventHandler(this.checkBoxShowNotifications_CheckedChanged);
             // 
             // checkBoxDownloadVideos
             // 
@@ -142,7 +144,7 @@
             // checkBoxAddPocket
             // 
             this.checkBoxAddPocket.AutoSize = true;
-            this.checkBoxAddPocket.Location = new System.Drawing.Point(12, 124);
+            this.checkBoxAddPocket.Location = new System.Drawing.Point(12, 146);
             this.checkBoxAddPocket.Name = "checkBoxAddPocket";
             this.checkBoxAddPocket.Size = new System.Drawing.Size(134, 17);
             this.checkBoxAddPocket.TabIndex = 9;
@@ -153,7 +155,7 @@
             // checkBoxSerializeSubscriptions
             // 
             this.checkBoxSerializeSubscriptions.AutoSize = true;
-            this.checkBoxSerializeSubscriptions.Location = new System.Drawing.Point(12, 148);
+            this.checkBoxSerializeSubscriptions.Location = new System.Drawing.Point(12, 170);
             this.checkBoxSerializeSubscriptions.Name = "checkBoxSerializeSubscriptions";
             this.checkBoxSerializeSubscriptions.Size = new System.Drawing.Size(291, 17);
             this.checkBoxSerializeSubscriptions.TabIndex = 10;
@@ -163,7 +165,7 @@
             // labelIterationFrequency
             // 
             this.labelIterationFrequency.AutoSize = true;
-            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 192);
+            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 214);
             this.labelIterationFrequency.Name = "labelIterationFrequency";
             this.labelIterationFrequency.Size = new System.Drawing.Size(91, 13);
             this.labelIterationFrequency.TabIndex = 11;
@@ -171,7 +173,7 @@
             // 
             // numericUpDownIterationFrequency
             // 
-            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 190);
+            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 212);
             this.numericUpDownIterationFrequency.Minimum = new decimal(new int[] {
             1,
             0,
@@ -189,7 +191,7 @@
             // labelMinutes
             // 
             this.labelMinutes.AutoSize = true;
-            this.labelMinutes.Location = new System.Drawing.Point(152, 192);
+            this.labelMinutes.Location = new System.Drawing.Point(152, 214);
             this.labelMinutes.Name = "labelMinutes";
             this.labelMinutes.Size = new System.Drawing.Size(43, 13);
             this.labelMinutes.TabIndex = 13;
@@ -198,18 +200,29 @@
             // checkBoxRunIterationsOnStartup
             // 
             this.checkBoxRunIterationsOnStartup.AutoSize = true;
-            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 172);
+            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 194);
             this.checkBoxRunIterationsOnStartup.Name = "checkBoxRunIterationsOnStartup";
             this.checkBoxRunIterationsOnStartup.Size = new System.Drawing.Size(228, 17);
             this.checkBoxRunIterationsOnStartup.TabIndex = 14;
             this.checkBoxRunIterationsOnStartup.Text = "Start running iterations on program startup?";
             this.checkBoxRunIterationsOnStartup.UseVisualStyleBackColor = true;
             // 
+            // checkBoxShowThumbnails
+            // 
+            this.checkBoxShowThumbnails.AutoSize = true;
+            this.checkBoxShowThumbnails.Location = new System.Drawing.Point(12, 123);
+            this.checkBoxShowThumbnails.Name = "checkBoxShowThumbnails";
+            this.checkBoxShowThumbnails.Size = new System.Drawing.Size(206, 17);
+            this.checkBoxShowThumbnails.TabIndex = 15;
+            this.checkBoxShowThumbnails.Text = "Show video thumbnail in notifications?";
+            this.checkBoxShowThumbnails.UseVisualStyleBackColor = true;
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 261);
+            this.ClientSize = new System.Drawing.Size(343, 311);
+            this.Controls.Add(this.checkBoxShowThumbnails);
             this.Controls.Add(this.checkBoxRunIterationsOnStartup);
             this.Controls.Add(this.labelMinutes);
             this.Controls.Add(this.numericUpDownIterationFrequency);
@@ -252,5 +265,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownIterationFrequency;
         private System.Windows.Forms.Label labelMinutes;
         private System.Windows.Forms.CheckBox checkBoxRunIterationsOnStartup;
+        private System.Windows.Forms.CheckBox checkBoxShowThumbnails;
     }
 }

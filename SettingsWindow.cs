@@ -22,6 +22,7 @@ namespace YouTubeSubscriptionDownloader
             textBoxDownloadDirectory.Text = Settings.Instance.DownloadDirectory;
             comboBoxPreferredQuality.SelectedIndex = comboBoxPreferredQuality.FindStringExact(Settings.Instance.PreferredQuality);
             checkBoxShowNotifications.Checked = Settings.Instance.ShowNotifications;
+            checkBoxShowThumbnails.Checked = Settings.Instance.ShowThumbnailInNotification;
             checkBoxDownloadVideos.Checked = Settings.Instance.DownloadVideos;
             checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
             checkBoxSerializeSubscriptions.Checked = Settings.Instance.SerializeSubscriptions;
@@ -29,6 +30,7 @@ namespace YouTubeSubscriptionDownloader
             checkBoxRunIterationsOnStartup.Checked = Settings.Instance.StartIterationsOnStartup;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
+            checkBoxShowNotifications_CheckedChanged(null, null);
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -43,6 +45,7 @@ namespace YouTubeSubscriptionDownloader
             Settings.Instance.DownloadDirectory = textBoxDownloadDirectory.Text;
             Settings.Instance.PreferredQuality = comboBoxPreferredQuality.Text;
             Settings.Instance.ShowNotifications = checkBoxShowNotifications.Checked;
+            Settings.Instance.ShowThumbnailInNotification = checkBoxShowThumbnails.Checked;
             Settings.Instance.DownloadVideos = checkBoxDownloadVideos.Checked;
             if (!checkBoxAddPocket.Checked)
                 Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)
@@ -75,6 +78,11 @@ namespace YouTubeSubscriptionDownloader
             textBoxDownloadDirectory.Enabled = checkBoxDownloadVideos.Checked;
             buttonFolderPicker.Enabled = checkBoxDownloadVideos.Checked;
             comboBoxPreferredQuality.Enabled = checkBoxDownloadVideos.Checked;
+        }
+
+        private void checkBoxShowNotifications_CheckedChanged(object sender, EventArgs e)
+        {
+            checkBoxShowThumbnails.Enabled = checkBoxShowNotifications.Checked;
         }
 
         private void checkBoxAddPocket_CheckedChanged(object sender, EventArgs e)
