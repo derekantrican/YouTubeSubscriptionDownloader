@@ -25,6 +25,7 @@ namespace YouTubeSubscriptionDownloader
         public string DownloadDirectory { get; set; }
         public string PreferredQuality { get; set; }
         public bool ShowNotifications { get; set; }
+        public bool ShowThumbnailInNotification { get; set; }
         public bool DownloadVideos { get; set; }
         public bool AddToPocket { get; set; }
         public string PocketAuthCode { get; set; }
@@ -39,6 +40,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.DownloadDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             defaultSettings.PreferredQuality = "Highest";
             defaultSettings.ShowNotifications = true;
+            defaultSettings.ShowThumbnailInNotification = true;
             defaultSettings.DownloadVideos = true;
             defaultSettings.AddToPocket = false;
             defaultSettings.PocketAuthCode = "";
@@ -80,6 +82,14 @@ namespace YouTubeSubscriptionDownloader
             catch (Exception ex)
             {
                 Instance = GetDefaultValues();
+
+                //Dump Exception
+                string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
+                string exceptionString = "";
+                exceptionString = "[" + DateTime.Now + "] EXCEPTION MESSAGE: " + ex?.Message + Environment.NewLine + Environment.NewLine;
+                exceptionString += "[" + DateTime.Now + "] INNER EXCEPTION: " + ex?.InnerException + Environment.NewLine + Environment.NewLine;
+                exceptionString += "[" + DateTime.Now + "] STACK TRACE: " + ex?.StackTrace + Environment.NewLine + Environment.NewLine;
+                File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
             }
         }
         #endregion Read Settings
