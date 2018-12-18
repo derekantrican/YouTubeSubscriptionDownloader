@@ -108,8 +108,8 @@ namespace YouTubeSubscriptionDownloader
         {
             if (Settings.Instance.ShowNotifications)
             {
-                //if (!Settings.Instance.ShowThumbnailInNotification)
-                //    imageURL = null;
+                if (!Settings.Instance.ShowThumbnailInNotification)
+                    imageURL = null;
 
                 Notification notification2 = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
                 this.Invoke((MethodInvoker)delegate ()
