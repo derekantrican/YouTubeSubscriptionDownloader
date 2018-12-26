@@ -56,7 +56,7 @@ namespace YouTubeSubscriptionDownloader
             buttonStop.Enabled = false;
 
             if (Settings.Instance.StartIterationsOnStartup || start)
-                buttonStart_Click(null, null);
+                Task.Run(() => buttonStart_Click(null, null));
         }
 
         private void Form1_HandleCreated(object sender, EventArgs e)
@@ -144,9 +144,15 @@ namespace YouTubeSubscriptionDownloader
             if (!CheckForInternetConnection())
                 return;
 
-            richTextBoxLog.Clear();
-            buttonStart.Enabled = false;
-            buttonStop.Enabled = true;
+            if (this.IsHandleCreated)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    richTextBoxLog.Clear();
+                    buttonStart.Enabled = false;
+                    buttonStop.Enabled = true;
+                });
+            }
 
             List<Subscription> tempUserSubscriptions = new List<Subscription>();
 
