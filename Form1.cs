@@ -39,6 +39,7 @@ namespace YouTubeSubscriptionDownloader
         static string[] Scopes = { YouTubeService.Scope.Youtube };
 
         List<Subscription> userSubscriptions = new List<Subscription>();
+        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
         public Form1(bool start = false)
         {
@@ -56,7 +57,7 @@ namespace YouTubeSubscriptionDownloader
             buttonStop.Enabled = false;
 
             if (Settings.Instance.StartIterationsOnStartup || start)
-                Task.Run(() => buttonStart_Click(null, null));
+                Task.Run(() => Start(cancelTokenSource.Token));
         }
 
         private void Form1_HandleCreated(object sender, EventArgs e)
@@ -141,6 +142,14 @@ namespace YouTubeSubscriptionDownloader
 
         private void buttonStart_Click(object sender, EventArgs e)
         {
+            cancelTokenSource.Dispose();
+            cancelTokenSource = new CancellationTokenSource();
+
+            Task.Run(() => Start(cancelTokenSource.Token));
+        }
+
+        private void Start(CancellationToken token)
+        {
             if (!CheckForInternetConnection())
                 return;
 
@@ -191,6 +200,10 @@ namespace YouTubeSubscriptionDownloader
                 });
             }
 
+
+            if (token.IsCancellationRequested)
+                return;
+
             Log("Retrieving subscriptions...");
             DeserializeSubscriptions();
 
@@ -200,7 +213,7 @@ namespace YouTubeSubscriptionDownloader
             listSubscriptions.MaxResults = 50;
             SubscriptionListResponse response = listSubscriptions.Execute();
 
-            while (response.NextPageToken != null)
+            while (response.NextPageToken != null && !token.IsCancellationRequested)
             {
                 tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
                 listSubscriptions.PageToken = response.NextPageToken;
@@ -208,6 +221,9 @@ namespace YouTubeSubscriptionDownloader
             }
 
             tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
+
+            if (token.IsCancellationRequested)
+                return;
 
             Log("Getting latest subscriptions from YouTube");
             foreach (Subscription missingSubscription in tempUserSubscriptions.Where(p => userSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null))
@@ -222,6 +238,9 @@ namespace YouTubeSubscriptionDownloader
             foreach (Subscription unsubscribedSubscription in unsubscribedSubscriptions)
                 userSubscriptions.Remove(unsubscribedSubscription);
 
+            if (token.IsCancellationRequested)
+                return;
+
             //Remove any duplicates
             userSubscriptions = userSubscriptions.GroupBy(p => p.PlaylistIdToWatch).Select(p => p.First()).ToList();
 
@@ -229,8 +248,11 @@ namespace YouTubeSubscriptionDownloader
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
                 Log("Looking for recent uploads");
-                LookForMoreRecentUploads();
+                LookForMoreRecentUploads(token);
             }
+
+            if (token.IsCancellationRequested)
+                return;
 
             Log("Iterations started");
             initializeTimer();
@@ -243,10 +265,13 @@ namespace YouTubeSubscriptionDownloader
             Task.Run(() => CheckForNewVideoFromSubscriptions());
         }
 
-        private void LookForMoreRecentUploads()
+        private void LookForMoreRecentUploads(CancellationToken token)
         {
             for (int i = 0; i < userSubscriptions.Count(); i++)
             {
+                if (token.IsCancellationRequested)
+                    return;
+
                 if (string.IsNullOrEmpty(userSubscriptions[i].PlaylistIdToWatch))
                     userSubscriptions[i] = AssignUploadsPlaylist(userSubscriptions[i]);
 
@@ -491,6 +516,8 @@ namespace YouTubeSubscriptionDownloader
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
+            cancelTokenSource.Cancel();
+
             buttonStop.Enabled = false;
             buttonStart.Enabled = true;
 
