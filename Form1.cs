@@ -262,7 +262,7 @@ namespace YouTubeSubscriptionDownloader
         private void Timer_Tick(object sender, EventArgs e)
         {
             Log("Checking for new uploads...");
-            Task.Run(() => CheckForNewVideoFromSubscriptions());
+            Task.Run(() => CheckForNewVideoFromSubscriptions(cancelTokenSource.Token));
         }
 
         private void LookForMoreRecentUploads(CancellationToken token)
@@ -286,7 +286,7 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem moreRecent in moreRecentUploads)
                 {
                     if (Settings.Instance.DownloadVideos)
-                        DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
+                        DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
 
                     if (Settings.Instance.AddToPocket)
                         AddYouTubeVideoToPocket(moreRecent.Snippet.ResourceId.VideoId);
@@ -406,7 +406,7 @@ namespace YouTubeSubscriptionDownloader
                 return resultsByDate;
         }
 
-        private void CheckForNewVideoFromSubscriptions()
+        private void CheckForNewVideoFromSubscriptions(CancellationToken token)
         {
             if (!CheckForInternetConnection())
                 return;
@@ -420,7 +420,7 @@ namespace YouTubeSubscriptionDownloader
                     ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, item.Snippet.Thumbnails.Standard.Url,
                                      "https://www.youtube.com/watch?v=" + newUploadDetails.ResourceId.VideoId);
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
-                    DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory);
+                    DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
                     AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);
                 }
 
@@ -442,7 +442,7 @@ namespace YouTubeSubscriptionDownloader
             }
         }
 
-        private async void DownloadYouTubeVideo(string youTubeVideoId, string destinationFolder)
+        private async void DownloadYouTubeVideo(string youTubeVideoId, string destinationFolder, CancellationToken token)
         {
             if (Settings.Instance.DownloadVideos)
             {
@@ -466,7 +466,7 @@ namespace YouTubeSubscriptionDownloader
                 Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
                 fileName = r.Replace(fileName, "");
 
-                await client.DownloadMediaStreamAsync(streamInfo, Path.Combine(destinationFolder, fileName));
+                await client.DownloadMediaStreamAsync(streamInfo, Path.Combine(destinationFolder, fileName), cancellationToken: token);
                 Log("Download complete");
             }
         }
