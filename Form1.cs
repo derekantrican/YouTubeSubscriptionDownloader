@@ -150,9 +150,6 @@ namespace YouTubeSubscriptionDownloader
 
         private void Start(CancellationToken token)
         {
-            if (!CheckForInternetConnection())
-                return;
-
             if (this.IsHandleCreated)
             {
                 this.Invoke((MethodInvoker)delegate
@@ -162,6 +159,21 @@ namespace YouTubeSubscriptionDownloader
                     buttonStop.Enabled = true;
                 });
             }
+
+            if (!CheckForInternetConnection())
+            {
+                if (this.IsHandleCreated)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        buttonStart.Enabled = true;
+                        buttonStop.Enabled = false;
+                    });
+                }
+
+                return;
+            }
+
 
             List<Subscription> tempUserSubscriptions = new List<Subscription>();
 
@@ -256,7 +268,7 @@ namespace YouTubeSubscriptionDownloader
 
             Log("Iterations started");
             initializeTimer();
-            timer.Start();
+            this.Invoke((MethodInvoker)delegate { timer.Start(); });
         }
 
         private void Timer_Tick(object sender, EventArgs e)
