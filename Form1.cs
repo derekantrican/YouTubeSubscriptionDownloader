@@ -57,7 +57,10 @@ namespace YouTubeSubscriptionDownloader
             buttonStop.Enabled = false;
 
             if (Settings.Instance.StartIterationsOnStartup || start)
-                Task.Run(() => Start(cancelTokenSource.Token));
+            {
+                Task task = Task.Run(() => Start(cancelTokenSource.Token));
+                task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
+            }
         }
 
         private void Form1_HandleCreated(object sender, EventArgs e)
@@ -140,12 +143,36 @@ namespace YouTubeSubscriptionDownloader
             });
         }
 
+        private void HandleAsyncException(Exception ex)
+        {
+            Log("Error encountered: " + ex.Message);
+            Log("Please contact the developer");
+
+            string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
+            string exceptionString = "";
+            exceptionString = "[" + DateTime.Now + "] EXCEPTION MESSAGE: " + ex?.Message + Environment.NewLine + Environment.NewLine;
+            exceptionString += "[" + DateTime.Now + "] INNER EXCEPTION: " + ex?.InnerException + Environment.NewLine + Environment.NewLine;
+            exceptionString += "[" + DateTime.Now + "] STACK TRACE: " + ex?.StackTrace + Environment.NewLine + Environment.NewLine;
+            File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
+
+            //Stop iterations
+            cancelTokenSource.Cancel();
+
+            buttonStop.Enabled = false;
+            buttonStart.Enabled = true;
+
+            timer.Stop();
+
+            Log("Iterations stopped");
+        }
+
         private void buttonStart_Click(object sender, EventArgs e)
         {
             cancelTokenSource.Dispose();
             cancelTokenSource = new CancellationTokenSource();
 
-            Task.Run(() => Start(cancelTokenSource.Token));
+            Task task = Task.Run(() => Start(cancelTokenSource.Token));
+            task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void Start(CancellationToken token)
@@ -173,7 +200,6 @@ namespace YouTubeSubscriptionDownloader
 
                 return;
             }
-
 
             List<Subscription> tempUserSubscriptions = new List<Subscription>();
 
@@ -274,7 +300,8 @@ namespace YouTubeSubscriptionDownloader
         private void Timer_Tick(object sender, EventArgs e)
         {
             Log("Checking for new uploads...");
-            Task.Run(() => CheckForNewVideoFromSubscriptions(cancelTokenSource.Token));
+            Task task = Task.Run(() => CheckForNewVideoFromSubscriptions(cancelTokenSource.Token));
+            task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void LookForMoreRecentUploads(CancellationToken token)
@@ -403,6 +430,8 @@ namespace YouTubeSubscriptionDownloader
                     }
                 }
 
+                results.RemoveAll(p => p.Snippet.Thumbnails == null); //Remove items where the "Thumbnails" object is null (private videos)
+
                 ////------------------------------------
                 ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
                 ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
@@ -429,7 +458,8 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
-                    ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, item.Snippet.Thumbnails.Standard.Url,
+
+                    ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, newUploadDetails.Thumbnails?.Standard.Url,
                                      "https://www.youtube.com/watch?v=" + newUploadDetails.ResourceId.VideoId);
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                     DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
