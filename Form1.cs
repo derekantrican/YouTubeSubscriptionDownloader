@@ -324,6 +324,8 @@ namespace YouTubeSubscriptionDownloader
 
                 foreach (PlaylistItem moreRecent in moreRecentUploads)
                 {
+                    Log("New uploaded detected: " + sub.Title + " (" + moreRecent.Snippet.Title + ")");
+
                     if (Settings.Instance.DownloadVideos)
                         DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
 
@@ -390,16 +392,17 @@ namespace YouTubeSubscriptionDownloader
             List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
             if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
             {
-                PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet");
+                PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet,status");
                 listRequest.PlaylistId = sub.PlaylistIdToWatch;
                 PlaylistItemListResponse response;
 
                 List<PlaylistItem> results = new List<PlaylistItem>();
+                List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
                 if (sub.IsPlaylist &&
                     GetChannelUploadsPlaylistId(sub) != sub.PlaylistIdToWatch) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
                 {
                     //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
-                    //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly
+                    //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
 
                     listRequest.MaxResults = 50; //50 is the maximum
                     response = listRequest.Execute();
@@ -430,7 +433,34 @@ namespace YouTubeSubscriptionDownloader
                     }
                 }
 
-                results.RemoveAll(p => p.Snippet.Thumbnails == null); //Remove items where the "Thumbnails" object is null (private videos)
+                //Check to see if any of the sub's private videos have change to public
+                foreach (string videoId in sub.PrivateVideosToWatch)
+                {
+                    PlaylistItem matchingItem = results.Find(p => p.Snippet.ResourceId.VideoId == videoId);
+                    if (matchingItem != null && matchingItem.Status.PrivacyStatus == "public")
+                    {
+                        privateToPublic.Add(matchingItem);
+                        MessageBox.Show("A private video has change to public! (You should now remove this message from the code)");
+                    }
+                }
+
+                //Stop watching for private video status change if it is now in "privateToPublic"
+                sub.PrivateVideosToWatch.RemoveAll(p => privateToPublic.Find(o => o.Snippet.ResourceId.VideoId == p) != null);
+
+                List<PlaylistItem> recentPrivateVideos = results.Where(p => p.Status.PrivacyStatus == "private").ToList();
+                foreach (PlaylistItem video in recentPrivateVideos)
+                {
+                    string videoId = video.Snippet.ResourceId.VideoId;
+                    if (!sub.PrivateVideosToWatch.Contains(videoId))
+                        sub.PrivateVideosToWatch.Add(videoId);
+
+                    results.Remove(video);
+                }
+
+                if (sinceDate != null)
+                    results = results.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
+
+                results.AddRange(privateToPublic);
 
                 ////------------------------------------
                 ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
@@ -441,10 +471,7 @@ namespace YouTubeSubscriptionDownloader
                 ////------------------------------------
             }
 
-            if (sinceDate != null)
-                return resultsByDate.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
-            else
-                return resultsByDate;
+            return resultsByDate;
         }
 
         private void CheckForNewVideoFromSubscriptions(CancellationToken token)
@@ -454,7 +481,22 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Subscription sub in userSubscriptions)
             {
-                List<PlaylistItem> newUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
+                List<PlaylistItem> newUploads = new List<PlaylistItem>();
+                try
+                {
+                    newUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
+                }
+                catch (Google.GoogleApiException ex)
+                {
+                    if (ex.HttpStatusCode == HttpStatusCode.InternalServerError)
+                    {
+                        Log("There was a problem contacting YouTube...");
+                        continue;
+                    }
+                    else
+                        throw ex;
+                }
+
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
