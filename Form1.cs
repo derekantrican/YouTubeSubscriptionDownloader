@@ -438,10 +438,7 @@ namespace YouTubeSubscriptionDownloader
                 {
                     PlaylistItem matchingItem = results.Find(p => p.Snippet.ResourceId.VideoId == videoId);
                     if (matchingItem != null && matchingItem.Status.PrivacyStatus == "public")
-                    {
                         privateToPublic.Add(matchingItem);
-                        MessageBox.Show("A private video has change to public! (You should now remove this message from the code)");
-                    }
                 }
 
                 //Stop watching for private video status change if it is now in "privateToPublic"
