@@ -78,7 +78,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void NotificationClick(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(videoURL))
+            if (!string.IsNullOrEmpty(videoURL) && Settings.Instance.NotificationClickOpensYouTubeVideo)
                 Process.Start(videoURL);
 
             this.Close();

@@ -44,12 +44,14 @@
             this.labelMinutes = new System.Windows.Forms.Label();
             this.checkBoxRunIterationsOnStartup = new System.Windows.Forms.CheckBox();
             this.checkBoxShowThumbnails = new System.Windows.Forms.CheckBox();
+            this.comboBoxNotificationClick = new System.Windows.Forms.ComboBox();
+            this.labelClickNotification = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(256, 248);
+            this.buttonCancel.Location = new System.Drawing.Point(258, 267);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 0;
@@ -59,7 +61,7 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(175, 248);
+            this.buttonSave.Location = new System.Drawing.Point(177, 267);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 1;
@@ -144,7 +146,7 @@
             // checkBoxAddPocket
             // 
             this.checkBoxAddPocket.AutoSize = true;
-            this.checkBoxAddPocket.Location = new System.Drawing.Point(12, 146);
+            this.checkBoxAddPocket.Location = new System.Drawing.Point(12, 169);
             this.checkBoxAddPocket.Name = "checkBoxAddPocket";
             this.checkBoxAddPocket.Size = new System.Drawing.Size(134, 17);
             this.checkBoxAddPocket.TabIndex = 9;
@@ -155,7 +157,7 @@
             // checkBoxSerializeSubscriptions
             // 
             this.checkBoxSerializeSubscriptions.AutoSize = true;
-            this.checkBoxSerializeSubscriptions.Location = new System.Drawing.Point(12, 170);
+            this.checkBoxSerializeSubscriptions.Location = new System.Drawing.Point(12, 193);
             this.checkBoxSerializeSubscriptions.Name = "checkBoxSerializeSubscriptions";
             this.checkBoxSerializeSubscriptions.Size = new System.Drawing.Size(291, 17);
             this.checkBoxSerializeSubscriptions.TabIndex = 10;
@@ -165,7 +167,7 @@
             // labelIterationFrequency
             // 
             this.labelIterationFrequency.AutoSize = true;
-            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 214);
+            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 237);
             this.labelIterationFrequency.Name = "labelIterationFrequency";
             this.labelIterationFrequency.Size = new System.Drawing.Size(91, 13);
             this.labelIterationFrequency.TabIndex = 11;
@@ -173,7 +175,7 @@
             // 
             // numericUpDownIterationFrequency
             // 
-            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 212);
+            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 235);
             this.numericUpDownIterationFrequency.Minimum = new decimal(new int[] {
             1,
             0,
@@ -191,7 +193,7 @@
             // labelMinutes
             // 
             this.labelMinutes.AutoSize = true;
-            this.labelMinutes.Location = new System.Drawing.Point(152, 214);
+            this.labelMinutes.Location = new System.Drawing.Point(152, 237);
             this.labelMinutes.Name = "labelMinutes";
             this.labelMinutes.Size = new System.Drawing.Size(43, 13);
             this.labelMinutes.TabIndex = 13;
@@ -200,7 +202,7 @@
             // checkBoxRunIterationsOnStartup
             // 
             this.checkBoxRunIterationsOnStartup.AutoSize = true;
-            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 194);
+            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 217);
             this.checkBoxRunIterationsOnStartup.Name = "checkBoxRunIterationsOnStartup";
             this.checkBoxRunIterationsOnStartup.Size = new System.Drawing.Size(228, 17);
             this.checkBoxRunIterationsOnStartup.TabIndex = 14;
@@ -210,18 +212,41 @@
             // checkBoxShowThumbnails
             // 
             this.checkBoxShowThumbnails.AutoSize = true;
-            this.checkBoxShowThumbnails.Location = new System.Drawing.Point(12, 123);
+            this.checkBoxShowThumbnails.Location = new System.Drawing.Point(12, 146);
             this.checkBoxShowThumbnails.Name = "checkBoxShowThumbnails";
             this.checkBoxShowThumbnails.Size = new System.Drawing.Size(206, 17);
             this.checkBoxShowThumbnails.TabIndex = 15;
             this.checkBoxShowThumbnails.Text = "Show video thumbnail in notifications?";
             this.checkBoxShowThumbnails.UseVisualStyleBackColor = true;
             // 
+            // comboBoxNotificationClick
+            // 
+            this.comboBoxNotificationClick.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxNotificationClick.FormattingEnabled = true;
+            this.comboBoxNotificationClick.Items.AddRange(new object[] {
+            "Opens video",
+            "Dismisses notification"});
+            this.comboBoxNotificationClick.Location = new System.Drawing.Point(137, 119);
+            this.comboBoxNotificationClick.Name = "comboBoxNotificationClick";
+            this.comboBoxNotificationClick.Size = new System.Drawing.Size(137, 21);
+            this.comboBoxNotificationClick.TabIndex = 17;
+            // 
+            // labelClickNotification
+            // 
+            this.labelClickNotification.AutoSize = true;
+            this.labelClickNotification.Location = new System.Drawing.Point(30, 122);
+            this.labelClickNotification.Name = "labelClickNotification";
+            this.labelClickNotification.Size = new System.Drawing.Size(94, 13);
+            this.labelClickNotification.TabIndex = 16;
+            this.labelClickNotification.Text = "Notification click...";
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 281);
+            this.ClientSize = new System.Drawing.Size(343, 299);
+            this.Controls.Add(this.comboBoxNotificationClick);
+            this.Controls.Add(this.labelClickNotification);
             this.Controls.Add(this.checkBoxShowThumbnails);
             this.Controls.Add(this.checkBoxRunIterationsOnStartup);
             this.Controls.Add(this.labelMinutes);
@@ -266,5 +291,7 @@
         private System.Windows.Forms.Label labelMinutes;
         private System.Windows.Forms.CheckBox checkBoxRunIterationsOnStartup;
         private System.Windows.Forms.CheckBox checkBoxShowThumbnails;
+        private System.Windows.Forms.ComboBox comboBoxNotificationClick;
+        private System.Windows.Forms.Label labelClickNotification;
     }
 }

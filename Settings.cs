@@ -19,7 +19,7 @@ namespace YouTubeSubscriptionDownloader
         private static string userSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
         private static string settingsPath = Path.Combine(userSettingsPath, "Settings.xml");
         public static PocketClient pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf");
-        public static Settings Instance = new Settings();
+        public static Settings Instance = GetDefaultValues();
 
         #region Settings
         public string DownloadDirectory { get; set; }
@@ -32,6 +32,7 @@ namespace YouTubeSubscriptionDownloader
         public bool SerializeSubscriptions { get; set; }
         public int IterationFrequency { get; set; } //In minutes
         public bool StartIterationsOnStartup { get; set; }
+        public bool NotificationClickOpensYouTubeVideo { get; set; }
 
         private static Settings GetDefaultValues()
         {
@@ -47,6 +48,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.SerializeSubscriptions = false;
             defaultSettings.IterationFrequency = 5;
             defaultSettings.StartIterationsOnStartup = false;
+            defaultSettings.NotificationClickOpensYouTubeVideo = true;
 
             return defaultSettings;
         }
