@@ -379,6 +379,24 @@ namespace YouTubeSubscriptionDownloader
 
         private DateTime GetMostRecentUploadDate(Subscription sub)
         {
+            PlaylistItem mostRecentUpload;
+            try
+            {
+                mostRecentUpload = GetMostRecentUploads(sub).FirstOrDefault();
+            }
+            catch (WebException ex)
+            {
+                Log("There was a problem contacting YouTube...");
+            }
+            catch (Google.GoogleApiException ex)
+            {
+                if (ex.HttpStatusCode == HttpStatusCode.InternalServerError)
+                    Log("There was a problem contacting YouTube...");
+                else
+                    throw ex;
+            }
+
+
             PlaylistItem item = GetMostRecentUploads(sub).FirstOrDefault();
 
             if (item == null)
@@ -420,7 +438,7 @@ namespace YouTubeSubscriptionDownloader
                     listRequest.MaxResults = 50;
                     response = listRequest.Execute();
                     results.AddRange(response.Items);
-                    
+
                     //If we still haven't gotten any items older than the "sinceDate", get more
                     if (sinceDate != null)
                     {
@@ -483,6 +501,11 @@ namespace YouTubeSubscriptionDownloader
                 {
                     newUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
                 }
+                catch (WebException ex)
+                {
+                    Log("There was a problem contacting YouTube...");
+                    continue;
+                }
                 catch (Google.GoogleApiException ex)
                 {
                     if (ex.HttpStatusCode == HttpStatusCode.InternalServerError)
@@ -510,6 +533,35 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
+
+                    //--------------------TEMP (debugging)--------------------------
+                    if (newUploadDetails == null)
+                        Log("[DEBUG] newUploadDetails is null");
+
+                    if (newUploadDetails.Title == null)
+                        Log("[DEBUG] newUploadDetails.Title is null");
+
+                    if (sub == null)
+                        Log("[DEBUG] sub is null");
+
+                    if (sub.Title == null)
+                        Log("[DEBUG] sub.Title is null");
+
+                    if (newUploadDetails.Thumbnails == null)
+                        Log("[DEBUG] newUploadDetails.Thumbnails is null");
+
+                    if (newUploadDetails.Thumbnails?.Standard == null)
+                        Log("[DEBUG] newUploadDetails.Thumbnails?.Standard is null");
+
+                    if (newUploadDetails.Thumbnails?.Standard.Url == null)
+                        Log("[DEBUG] newUploadDetails.Thumbnails?.Standard.Url is null");
+
+                    if (newUploadDetails.ResourceId == null)
+                        Log("[DEBUG] newUploadDetails.ResourceId is null");
+
+                    if (newUploadDetails.ResourceId.VideoId == null)
+                        Log("[DEBUG] newUploadDetails.ResourceId.VideoId is null");
+                    //--------------------TEMP (debugging)--------------------------
 
                     ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, newUploadDetails.Thumbnails?.Standard.Url,
                                      "https://www.youtube.com/watch?v=" + newUploadDetails.ResourceId.VideoId);
@@ -640,7 +692,7 @@ namespace YouTubeSubscriptionDownloader
             }
 
             PlaylistManager manager = new PlaylistManager(service, userSubscriptions.Where(p => p.IsPlaylist).ToList());
-            manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) => 
+            manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) =>
             {
                 userSubscriptions.RemoveAll(p => p.IsPlaylist);
                 foreach (Subscription playlist in playlistSubscriptions)
@@ -648,7 +700,7 @@ namespace YouTubeSubscriptionDownloader
                     playlist.LastVideoPublishDate = GetMostRecentUploadDate(playlist);
                     userSubscriptions.Add(playlist);
                 }
-                
+
                 SerializeSubscriptions();
             };
             manager.ShowDialog();
@@ -671,7 +723,7 @@ namespace YouTubeSubscriptionDownloader
 
             //Move the window if it's not visible on any screen
             bool visible = false;
-            foreach(Screen screen in Screen.AllScreens)
+            foreach (Screen screen in Screen.AllScreens)
             {
                 Point formLocation = new Point(this.Left, this.Top);
                 if (screen.WorkingArea.Contains(formLocation))
