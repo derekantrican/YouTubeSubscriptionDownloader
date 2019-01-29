@@ -494,6 +494,19 @@ namespace YouTubeSubscriptionDownloader
                         throw ex;
                 }
 
+                if (newUploads.Count >= 2)
+                {
+                    PlaylistItem latestUpload = newUploads.OrderBy(p => p.Snippet.PublishedAt).ToList()[0];
+                    PlaylistItem secondToLatestUpload = newUploads.OrderBy(p => p.Snippet.PublishedAt).ToList()[1];
+                    newUploads.RemoveAt(0);
+
+                    //Sometimes we sense a new video twice in "newUploads". Not sure why, but this will prevent
+                    //notifying for that video twice
+                    if (latestUpload != null && secondToLatestUpload != null &&
+                        latestUpload.Snippet.ResourceId.VideoId == secondToLatestUpload.Snippet.ResourceId.VideoId)
+                        newUploads.RemoveAt(0);
+                }
+
                 foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
