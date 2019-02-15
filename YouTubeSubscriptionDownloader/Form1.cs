@@ -390,7 +390,8 @@ namespace YouTubeSubscriptionDownloader
             }
             catch (Google.GoogleApiException ex)
             {
-                if (ex.HttpStatusCode == HttpStatusCode.InternalServerError)
+                if (ex.HttpStatusCode == HttpStatusCode.InternalServerError ||
+                    (ex.InnerException != null && ex.InnerException is WebException))
                     Log("There was a problem contacting YouTube...");
                 else
                     throw ex;
@@ -508,7 +509,8 @@ namespace YouTubeSubscriptionDownloader
                 }
                 catch (Google.GoogleApiException ex)
                 {
-                    if (ex.HttpStatusCode == HttpStatusCode.InternalServerError)
+                    if (ex.HttpStatusCode == HttpStatusCode.InternalServerError ||
+                        (ex.InnerException != null && ex.InnerException is WebException))
                     {
                         Log("There was a problem contacting YouTube...");
                         continue;
@@ -534,36 +536,7 @@ namespace YouTubeSubscriptionDownloader
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
 
-                    //--------------------TEMP (debugging)--------------------------
-                    if (newUploadDetails == null)
-                        Log("[DEBUG] newUploadDetails is null");
-
-                    if (newUploadDetails.Title == null)
-                        Log("[DEBUG] newUploadDetails.Title is null");
-
-                    if (sub == null)
-                        Log("[DEBUG] sub is null");
-
-                    if (sub.Title == null)
-                        Log("[DEBUG] sub.Title is null");
-
-                    if (newUploadDetails.Thumbnails == null)
-                        Log("[DEBUG] newUploadDetails.Thumbnails is null");
-
-                    if (newUploadDetails.Thumbnails?.Standard == null)
-                        Log("[DEBUG] newUploadDetails.Thumbnails?.Standard is null");
-
-                    if (newUploadDetails.Thumbnails?.Standard.Url == null)
-                        Log("[DEBUG] newUploadDetails.Thumbnails?.Standard.Url is null");
-
-                    if (newUploadDetails.ResourceId == null)
-                        Log("[DEBUG] newUploadDetails.ResourceId is null");
-
-                    if (newUploadDetails.ResourceId.VideoId == null)
-                        Log("[DEBUG] newUploadDetails.ResourceId.VideoId is null");
-                    //--------------------TEMP (debugging)--------------------------
-
-                    ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, newUploadDetails.Thumbnails?.Standard.Url,
+                    ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, newUploadDetails.Thumbnails?.Standard?.Url,
                                      "https://www.youtube.com/watch?v=" + newUploadDetails.ResourceId.VideoId);
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                     DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
