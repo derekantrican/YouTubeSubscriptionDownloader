@@ -602,10 +602,11 @@ namespace YouTubeSubscriptionDownloader
             string serializationPath = Path.Combine(UserSettings, "Subscriptions.xml");
             if (File.Exists(serializationPath))
             {
-                FileStream fileStream = new FileStream(serializationPath, FileMode.Open);
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-                userSubscriptions.AddRange((List<Subscription>)xmlSerializer.Deserialize(fileStream));
-                fileStream.Close();
+                using (FileStream fileStream = new FileStream(serializationPath, FileMode.Open))
+                {
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
+                    userSubscriptions.AddRange((List<Subscription>)xmlSerializer.Deserialize(fileStream));
+                }
             }
         }
 
@@ -630,10 +631,11 @@ namespace YouTubeSubscriptionDownloader
 
             if (subscriptionsToSerialize.Any())
             {
-                TextWriter writer = new StreamWriter(serializationPath);
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-                xmlSerializer.Serialize(writer, subscriptionsToSerialize); //Could wrap this in a try{ }catch{ } (and writer.Close() in a finally{ }), but we're catching all exceptions already
-                writer.Close();
+                using (TextWriter writer = new StreamWriter(serializationPath))
+                {
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
+                    xmlSerializer.Serialize(writer, subscriptionsToSerialize); //Could wrap this in a try{ }catch{ } (and writer.Close() in a finally{ }), but we're catching all exceptions already
+                }
 
                 if (!string.IsNullOrEmpty(overrideSerializationPath))
                     MessageBox.Show("Subscriptions serialized to " + serializationPath);
