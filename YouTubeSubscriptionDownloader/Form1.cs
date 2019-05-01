@@ -384,7 +384,7 @@ namespace YouTubeSubscriptionDownloader
             {
                 mostRecentUpload = GetMostRecentUploads(sub).FirstOrDefault();
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 Log("There was a problem contacting YouTube...");
             }
@@ -453,6 +453,10 @@ namespace YouTubeSubscriptionDownloader
                         }
                     }
                 }
+
+                //Remove any that do not match the regex filter
+                if (!string.IsNullOrEmpty(sub.FilterRegex))
+                    results.RemoveAll(p => !Regex.IsMatch(p.Snippet.Title, sub.FilterRegex));
 
                 //Check to see if any of the sub's private videos have change to public
                 foreach (string videoId in sub.PrivateVideosToWatch)
@@ -527,7 +531,6 @@ namespace YouTubeSubscriptionDownloader
                 {
                     PlaylistItem latestUpload = newUploads.OrderBy(p => p.Snippet.PublishedAt).ToList()[0];
                     PlaylistItem secondToLatestUpload = newUploads.OrderBy(p => p.Snippet.PublishedAt).ToList()[1];
-                    newUploads.RemoveAt(0);
 
                     //Sometimes we sense a new video twice in "newUploads". Not sure why, but this will prevent
                     //notifying for that video twice

@@ -25,7 +25,20 @@ namespace YouTubeSubscriptionDownloader
             this.service = service;
 
             foreach (Subscription playlist in exisitingPlaylists)
-                listBoxPlaylists.Items.Add(playlist);
+                Add(playlist);
+        }
+
+        private void Add(Subscription playlist)
+        {
+            ListViewItem item = new ListViewItem()
+            {
+                Text = playlist.Title,
+                Tag = playlist
+            };
+
+            item.SubItems.Add(playlist.FilterRegex);
+
+            listViewPlaylists.Items.Add(item);
         }
 
         public delegate void SubscriptionsUpdatedDelegate(List<Subscription> updatedSubscriptions);
@@ -33,7 +46,10 @@ namespace YouTubeSubscriptionDownloader
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            List<Subscription> resultPlaylists = listBoxPlaylists.Items.Cast<Subscription>().ToList();
+            List<Subscription> resultPlaylists = new List<Subscription>();
+            foreach (ListViewItem item in listViewPlaylists.Items)
+                resultPlaylists.Add(item.Tag as Subscription);
+
             SubscriptionsUpdated.Invoke(resultPlaylists);
 
             this.Close();
@@ -48,20 +64,21 @@ namespace YouTubeSubscriptionDownloader
         {
             if (e.Button == MouseButtons.Right)
             {
-                int index = this.listBoxPlaylists.IndexFromPoint(new Point(e.X, e.Y));
+                Point p = this.listViewPlaylists.PointToClient(new Point(e.X, e.Y));
+                int index = this.listViewPlaylists.GetItemAt(p.X, p.Y).Index;
 
                 if (index < 0)
                     return;
 
-                this.listBoxPlaylists.SelectedIndex = index;
+                this.listViewPlaylists.Items[index].Selected = true;
 
                 ContextMenu contexMenu = new ContextMenu();
                 MenuItem openItem = new MenuItem() { Text = "Open" };
-                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (listBoxPlaylists.Items[index] as Subscription).PlaylistIdToWatch); };
+                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (listViewPlaylists.Items[index].Tag as Subscription).PlaylistIdToWatch); };
                 contexMenu.MenuItems.Add(openItem);
 
                 MenuItem removeItem = new MenuItem() { Text = "Remove" };
-                removeItem.Click += (s, args) => { listBoxPlaylists.Items.RemoveAt(index); };
+                removeItem.Click += (s, args) => { listViewPlaylists.Items.RemoveAt(index); };
                 contexMenu.MenuItems.Add(removeItem);
 
                 contexMenu.Show((sender as ListBox), new Point(e.X, e.Y));
@@ -73,20 +90,25 @@ namespace YouTubeSubscriptionDownloader
         private void listBoxPlaylists_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
-                listBoxPlaylists.Items.Remove(listBoxPlaylists.SelectedItem);
+                listViewPlaylists.Items.Remove(listViewPlaylists.SelectedItems[0]);
         }
 
         private void pictureBoxAdd_Click(object sender, EventArgs e)
         {
             if (IsValidPlaylist(textBoxPlaylistURL.Text))
             {
-                if (listBoxPlaylists.Items.Cast<Subscription>().FirstOrDefault(p => textBoxPlaylistURL.Text.Contains(p.PlaylistIdToWatch)) != null)
+                List<Subscription> playlists = new List<Subscription>();
+                foreach (ListViewItem item in listViewPlaylists.Items)
+                    playlists.Add(item.Tag as Subscription);
+
+                if (playlists.FirstOrDefault(p => textBoxPlaylistURL.Text.Contains(p.PlaylistIdToWatch)) != null)
                     MessageBox.Show("That playlist already exists in the list");
                 else
                 {
                     AddPlaylistToList(textBoxPlaylistURL.Text);
-                    listBoxPlaylists.TopIndex = listBoxPlaylists.Items.Count - 1; //Scroll to bottom of list to show item was added
+                    listViewPlaylists.EnsureVisible(listViewPlaylists.Items.Count - 1); //Scroll to bottom of list to show item was added
                     textBoxPlaylistURL.Clear();
+                    textBoxRegex.Clear();
                 }
             }
             else
@@ -116,8 +138,9 @@ namespace YouTubeSubscriptionDownloader
             playlistSubscription.PlaylistIdToWatch = playlistID;
             playlistSubscription.Title = playlistTitle;
             playlistSubscription.IsPlaylist = true;
+            playlistSubscription.FilterRegex = textBoxRegex.Text;
 
-            listBoxPlaylists.Items.Add(playlistSubscription);
+            Add(playlistSubscription);
         }
     }
 }

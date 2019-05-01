@@ -17,6 +17,7 @@ namespace YouTubeSubscriptionDownloader
         public string Title { get; set; }
         public string PlaylistIdToWatch { get; set; }
         public DateTime LastVideoPublishDate { get; set; }
+        public string FilterRegex { get; set; }
         public bool IsPlaylist { get; set; }
         public List<string> PrivateVideosToWatch { get; set; }
 
