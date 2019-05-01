@@ -463,7 +463,7 @@ namespace YouTubeSubscriptionDownloader
                 //Stop watching for private video status change if it is now in "privateToPublic"
                 sub.PrivateVideosToWatch.RemoveAll(p => privateToPublic.Find(o => o.Snippet.ResourceId.VideoId == p) != null);
 
-                List<PlaylistItem> recentPrivateVideos = results.Where(p => p.Status.PrivacyStatus == "private").ToList();
+                List<PlaylistItem> recentPrivateVideos = results.Where(p => p.Status != null && p.Status.PrivacyStatus == "private").ToList();
                 foreach (PlaylistItem video in recentPrivateVideos)
                 {
                     string videoId = video.Snippet.ResourceId.VideoId;
