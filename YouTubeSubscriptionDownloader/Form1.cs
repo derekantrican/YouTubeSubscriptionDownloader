@@ -394,7 +394,9 @@ namespace YouTubeSubscriptionDownloader
                     (ex.InnerException != null && ex.InnerException is WebException))
                     Log("There was a problem contacting YouTube...");
                 else
-                    throw ex;
+                {
+                    throw;
+                }                  
             }
 
 
@@ -516,7 +518,9 @@ namespace YouTubeSubscriptionDownloader
                         continue;
                     }
                     else
-                        throw ex;
+                    {
+                        throw;
+                    }                       
                 }
 
                 if (newUploads.Count >= 2)
