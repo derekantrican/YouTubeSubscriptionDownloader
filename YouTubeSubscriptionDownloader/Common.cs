@@ -14,10 +14,12 @@ namespace YouTubeSubscriptionDownloader
         public static string UserSettings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
         public static string CredentialsPath = Path.Combine(UserSettings, "Credentials");
         public static string SubscriptionsPath = Path.Combine(UserSettings, "Subscriptions.xml");
+        public static string SettingsPath = Path.Combine(UserSettings, "Settings.xml");
+
+        public const string YOUTUBEBASEURL = "https://www.youtube.com/watch?v=";
+        public const string POCKETCONSUMERKEY = "69847-fc525ffd3205de609a7429bf";
 
         public static List<Subscription> TrackedSubscriptions = new List<Subscription>();
-
-        private const string PocketConsumerKey = "69847-fc525ffd3205de609a7429bf";
 
         public static bool HasInternetConnection()
         {
@@ -65,7 +67,19 @@ namespace YouTubeSubscriptionDownloader
         public static void InitializePocket()
         {
             if (Settings.Instance.AddToPocket && Settings.Instance.PocketAuthCode != "")
-                Settings.pocketClient = new PocketClient(PocketConsumerKey, Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
+                Settings.PocketClient = new PocketClient(POCKETCONSUMERKEY, Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
+        }
+
+        public static void DumpException(Exception ex)
+        {
+            MessageBox.Show("There was an unhandled exception. Please contact the developer and relay this information: \n\nMessage: " + ex?.Message);
+
+            string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
+            string exceptionString = "";
+            exceptionString = "[" + DateTime.Now + "] EXCEPTION MESSAGE: " + ex?.Message + Environment.NewLine + Environment.NewLine;
+            exceptionString += "[" + DateTime.Now + "] INNER EXCEPTION: " + ex?.InnerException + Environment.NewLine + Environment.NewLine;
+            exceptionString += "[" + DateTime.Now + "] STACK TRACE: " + ex?.StackTrace + Environment.NewLine + Environment.NewLine;
+            File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
         }
     }
 }

@@ -8,11 +8,7 @@ namespace YouTubeSubscriptionDownloader
 {
     public class Settings
     {
-
-        private static string ApplicationName = "YouTube Subscription Downloader";
-        private static string userSettingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
-        private static string settingsPath = Path.Combine(userSettingsPath, "Settings.xml");
-        public static PocketClient pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf");
+        public static PocketClient PocketClient = new PocketClient(Common.POCKETCONSUMERKEY);
         public static Settings Instance = GetDefaultValues();
 
         #region Settings
@@ -51,7 +47,7 @@ namespace YouTubeSubscriptionDownloader
         #region Save Settings
         public static void SaveSettings()
         {
-            TextWriter writer = new StreamWriter(settingsPath);
+            TextWriter writer = new StreamWriter(Common.SettingsPath);
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
             xmlSerializer.Serialize(writer, Instance);
             writer.Close();
@@ -63,7 +59,7 @@ namespace YouTubeSubscriptionDownloader
         {
             try
             {
-                using (FileStream fileStream = new FileStream(settingsPath, FileMode.Open))
+                using (FileStream fileStream = new FileStream(Common.SettingsPath, FileMode.Open))
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
                     Instance = (Settings)xmlSerializer.Deserialize(fileStream);
@@ -78,14 +74,7 @@ namespace YouTubeSubscriptionDownloader
             catch (Exception ex)
             {
                 Instance = GetDefaultValues();
-
-                //Dump Exception
-                string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
-                string exceptionString = "";
-                exceptionString = "[" + DateTime.Now + "] EXCEPTION MESSAGE: " + ex?.Message + Environment.NewLine + Environment.NewLine;
-                exceptionString += "[" + DateTime.Now + "] INNER EXCEPTION: " + ex?.InnerException + Environment.NewLine + Environment.NewLine;
-                exceptionString += "[" + DateTime.Now + "] STACK TRACE: " + ex?.StackTrace + Environment.NewLine + Environment.NewLine;
-                File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
+                Common.DumpException(ex);
             }
         }
         #endregion Read Settings

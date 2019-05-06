@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -205,7 +204,7 @@ namespace YouTubeSubscriptionDownloader
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Exception when trying to get uploads: {ex.Message}");
+                    Common.DumpException(ex);
                 }
             }
 

@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
 using Google.Apis.YouTube.v3.Data;
-using System.Net;
-using YoutubeExplode;
-using System.Text.RegularExpressions;
-using YoutubeExplode.Models.MediaStreams;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -70,10 +64,7 @@ namespace YouTubeSubscriptionDownloader
 
             //TEMP
             //if (Settings.Instance.StartIterationsOnStartup || start)
-            //{
-            //    Task task = Task.Run(() => Start(cancelTokenSource.Token));
-            //    task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
-            //}
+            //    Start(cancelTokenSource.Token);
         }
 
         private void Form1_HandleCreated(object sender, EventArgs e)
@@ -120,36 +111,12 @@ namespace YouTubeSubscriptionDownloader
             });
         }
 
-        private void HandleAsyncException(Exception ex)
-        {
-            Log("Error encountered: " + ex.Message);
-            Log("Please contact the developer");
-
-            string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
-            string exceptionString = "";
-            exceptionString = "[" + DateTime.Now + "] EXCEPTION MESSAGE: " + ex?.Message + Environment.NewLine + Environment.NewLine;
-            exceptionString += "[" + DateTime.Now + "] INNER EXCEPTION: " + ex?.InnerException + Environment.NewLine + Environment.NewLine;
-            exceptionString += "[" + DateTime.Now + "] STACK TRACE: " + ex?.StackTrace + Environment.NewLine + Environment.NewLine;
-            File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
-
-            //Stop iterations
-            cancelTokenSource.Cancel();
-
-            buttonStop.Enabled = false;
-            buttonStart.Enabled = true;
-
-            timer.Stop();
-
-            Log("Iterations stopped");
-        }
-
         private void buttonStart_Click(object sender, EventArgs e)
         {
             cancelTokenSource.Dispose();
             cancelTokenSource = new CancellationTokenSource();
 
-            Task task = Task.Run(() => Start(cancelTokenSource.Token));
-            task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
+            Start(cancelTokenSource.Token);
         }
 
         private void Start(CancellationToken token)
@@ -221,8 +188,7 @@ namespace YouTubeSubscriptionDownloader
         private void Timer_Tick(object sender, EventArgs e)
         {
             Log("Checking for new uploads...");
-            Task task = Task.Run(() => CheckForNewVideoFromSubscriptions(cancelTokenSource.Token));
-            task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
+            CheckForNewVideoFromSubscriptions(cancelTokenSource.Token);
         }
 
         private void CheckForNewVideoFromSubscriptions(CancellationToken token)
@@ -239,7 +205,6 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem item in newUploads)
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
-
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
                     DoActionsForNewUpload(newUploadDetails, sub, token);
                 }
@@ -256,7 +221,7 @@ namespace YouTubeSubscriptionDownloader
             if (Settings.Instance.ShowNotifications)
             {
                 ShowNotification(newUpload.Title, "New video from " + sub.Title, newUpload.Thumbnails?.Standard?.Url,
-                                 "https://www.youtube.com/watch?v=" + newUpload.ResourceId.VideoId);
+                                 Common.YOUTUBEBASEURL + newUpload.ResourceId.VideoId);
             }
 
             if (Settings.Instance.DownloadVideos)
@@ -288,8 +253,8 @@ namespace YouTubeSubscriptionDownloader
         private void AddYouTubeVideoToPocket(string youTubeVideoId)
         {
             Log("Adding video to Pocket...");
-            string youTubeURL = "https://www.youtube.com/watch?v=" + youTubeVideoId;
-            Settings.pocketClient.Add(new Uri(youTubeURL)).Wait(); //Async
+            string youTubeURL = Common.YOUTUBEBASEURL + youTubeVideoId;
+            Settings.PocketClient.Add(new Uri(youTubeURL)).Wait(); //Async
             Log("Video added to Pocket");
         }
 

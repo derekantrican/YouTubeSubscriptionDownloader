@@ -88,9 +88,9 @@ namespace YouTubeSubscriptionDownloader
 
         private async void AuthorizePocket()
         {
-            Settings.pocketClient.CallbackUri = "https://getpocket.com/a/queue/"; //Todo: Need to change this to an automatically closing page
-            string requestCode = await Settings.pocketClient.GetRequestCode();
-            Uri authenticationUri = Settings.pocketClient.GenerateAuthenticationUri();
+            Settings.PocketClient.CallbackUri = "https://getpocket.com/a/queue/"; //Todo: Need to change this to an automatically closing page
+            string requestCode = await Settings.PocketClient.GetRequestCode();
+            Uri authenticationUri = Settings.PocketClient.GenerateAuthenticationUri();
             Process.Start(authenticationUri.ToString());
 
             PocketUser user = null;
@@ -98,7 +98,7 @@ namespace YouTubeSubscriptionDownloader
             {
                 try
                 {
-                    user = await Settings.pocketClient.GetUser(requestCode);
+                    user = await Settings.PocketClient.GetUser(requestCode);
                     break;
                 }
                 catch { }
