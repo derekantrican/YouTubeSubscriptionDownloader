@@ -26,6 +26,8 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Subscription playlist in exisitingPlaylists)
                 Add(playlist);
+
+            PlaylistManager_Resize(null, null);
         }
 
         private void Add(Subscription playlist)
@@ -141,6 +143,27 @@ namespace YouTubeSubscriptionDownloader
             playlistSubscription.FilterRegex = textBoxRegex.Text;
 
             Add(playlistSubscription);
+        }
+
+        private void PlaylistManager_Resize(object sender, EventArgs e)
+        {
+            //Do resizing/repositioning of all contents in the window
+
+            listViewPlaylists.Height = this.Height - 189;
+            listViewPlaylists.Width = this.Width - 22;
+            listViewPlaylists.Columns[0].Width = (int)(listViewPlaylists.Width * 0.75) - 5;
+            listViewPlaylists.Columns[1].Width = -2; //AutoSize
+
+            pictureBoxAdd.Left = this.Width - 48;
+            textBoxPlaylistURL.Width = this.Width - 135;
+            textBoxRegex.Width = this.Width - 175;
+
+            labelPlaylistURL.Top = this.Height - 180;
+            textBoxPlaylistURL.Top = this.Height - 183;
+            pictureBoxAdd.Top = this.Height - 183;
+
+            labelRegex.Top = this.Height - 157;
+            textBoxRegex.Top = this.Height - 160;
         }
     }
 }

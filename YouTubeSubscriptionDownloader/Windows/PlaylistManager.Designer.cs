@@ -40,12 +40,17 @@
             this.itemRegex = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.textBoxRegex = new System.Windows.Forms.TextBox();
             this.labelRegex = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).BeginInit();
+            this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(252, 314);
+            this.buttonSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonSave.Location = new System.Drawing.Point(613, 4);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 3;
@@ -55,7 +60,8 @@
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(333, 314);
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancel.Location = new System.Drawing.Point(694, 4);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 2;
@@ -65,9 +71,10 @@
             // 
             // labelPlaylistOverview
             // 
-            this.labelPlaylistOverview.Location = new System.Drawing.Point(12, 9);
+            this.labelPlaylistOverview.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelPlaylistOverview.Location = new System.Drawing.Point(0, 0);
             this.labelPlaylistOverview.Name = "labelPlaylistOverview";
-            this.labelPlaylistOverview.Size = new System.Drawing.Size(394, 32);
+            this.labelPlaylistOverview.Size = new System.Drawing.Size(781, 32);
             this.labelPlaylistOverview.TabIndex = 4;
             this.labelPlaylistOverview.Text = "Here you can define a list of playlists to be checked for new uploads alongside y" +
     "our user subscriptions";
@@ -75,7 +82,7 @@
             // labelPlaylistURL
             // 
             this.labelPlaylistURL.AutoSize = true;
-            this.labelPlaylistURL.Location = new System.Drawing.Point(12, 256);
+            this.labelPlaylistURL.Location = new System.Drawing.Point(8, 459);
             this.labelPlaylistURL.Name = "labelPlaylistURL";
             this.labelPlaylistURL.Size = new System.Drawing.Size(67, 13);
             this.labelPlaylistURL.TabIndex = 5;
@@ -83,15 +90,15 @@
             // 
             // textBoxPlaylistURL
             // 
-            this.textBoxPlaylistURL.Location = new System.Drawing.Point(85, 253);
+            this.textBoxPlaylistURL.Location = new System.Drawing.Point(81, 456);
             this.textBoxPlaylistURL.Name = "textBoxPlaylistURL";
-            this.textBoxPlaylistURL.Size = new System.Drawing.Size(278, 20);
+            this.textBoxPlaylistURL.Size = new System.Drawing.Size(662, 20);
             this.textBoxPlaylistURL.TabIndex = 6;
             // 
             // pictureBoxAdd
             // 
             this.pictureBoxAdd.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.plus_black_symbol;
-            this.pictureBoxAdd.Location = new System.Drawing.Point(369, 253);
+            this.pictureBoxAdd.Location = new System.Drawing.Point(749, 456);
             this.pictureBoxAdd.Name = "pictureBoxAdd";
             this.pictureBoxAdd.Size = new System.Drawing.Size(20, 20);
             this.pictureBoxAdd.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -105,10 +112,10 @@
             this.itemText,
             this.itemRegex});
             this.listViewPlaylists.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewPlaylists.Location = new System.Drawing.Point(12, 44);
+            this.listViewPlaylists.Location = new System.Drawing.Point(3, 0);
             this.listViewPlaylists.MultiSelect = false;
             this.listViewPlaylists.Name = "listViewPlaylists";
-            this.listViewPlaylists.Size = new System.Drawing.Size(400, 203);
+            this.listViewPlaylists.Size = new System.Drawing.Size(775, 429);
             this.listViewPlaylists.TabIndex = 8;
             this.listViewPlaylists.UseCompatibleStateImageBehavior = false;
             this.listViewPlaylists.View = System.Windows.Forms.View.Details;
@@ -125,43 +132,63 @@
             // 
             // textBoxRegex
             // 
-            this.textBoxRegex.Location = new System.Drawing.Point(125, 276);
+            this.textBoxRegex.Location = new System.Drawing.Point(121, 479);
             this.textBoxRegex.Name = "textBoxRegex";
-            this.textBoxRegex.Size = new System.Drawing.Size(238, 20);
+            this.textBoxRegex.Size = new System.Drawing.Size(622, 20);
             this.textBoxRegex.TabIndex = 9;
             // 
             // labelRegex
             // 
             this.labelRegex.AutoSize = true;
-            this.labelRegex.Location = new System.Drawing.Point(12, 279);
+            this.labelRegex.Location = new System.Drawing.Point(8, 482);
             this.labelRegex.Name = "labelRegex";
             this.labelRegex.Size = new System.Drawing.Size(107, 13);
             this.labelRegex.TabIndex = 10;
             this.labelRegex.Text = "Filter regex (optional):";
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.buttonCancel);
+            this.panel1.Controls.Add(this.buttonSave);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 561);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(781, 39);
+            this.panel1.TabIndex = 11;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.listViewPlaylists);
+            this.panel2.Controls.Add(this.labelPlaylistURL);
+            this.panel2.Controls.Add(this.labelRegex);
+            this.panel2.Controls.Add(this.textBoxPlaylistURL);
+            this.panel2.Controls.Add(this.textBoxRegex);
+            this.panel2.Controls.Add(this.pictureBoxAdd);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(0, 32);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(781, 529);
+            this.panel2.TabIndex = 12;
+            // 
             // PlaylistManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 349);
-            this.Controls.Add(this.labelRegex);
-            this.Controls.Add(this.textBoxRegex);
-            this.Controls.Add(this.listViewPlaylists);
-            this.Controls.Add(this.pictureBoxAdd);
-            this.Controls.Add(this.textBoxPlaylistURL);
-            this.Controls.Add(this.labelPlaylistURL);
+            this.ClientSize = new System.Drawing.Size(781, 600);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.labelPlaylistOverview);
-            this.Controls.Add(this.buttonSave);
-            this.Controls.Add(this.buttonCancel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(420, 349);
             this.Name = "PlaylistManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "PlaylistManager";
+            this.Resize += new System.EventHandler(this.PlaylistManager_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -177,5 +204,7 @@
         private System.Windows.Forms.ColumnHeader itemRegex;
         private System.Windows.Forms.TextBox textBoxRegex;
         private System.Windows.Forms.Label labelRegex;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel2;
     }
 }
