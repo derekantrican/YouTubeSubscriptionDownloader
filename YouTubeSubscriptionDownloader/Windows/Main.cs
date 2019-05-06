@@ -1,27 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Google.Apis.YouTube.v3;
-using Google.Apis.Auth.OAuth2;
 using System.IO;
 using System.Threading;
-using Google.Apis.Util.Store;
-using Google.Apis.Services;
 using Google.Apis.YouTube.v3.Data;
-using System.Net.Mail;
 using System.Net;
 using YoutubeExplode;
-using YoutubeExplode.Models;
 using System.Text.RegularExpressions;
 using YoutubeExplode.Models.MediaStreams;
-using System.Xml.Serialization;
-using PocketSharp;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -31,8 +21,17 @@ namespace YouTubeSubscriptionDownloader
 
         System.Windows.Forms.Timer timer = null;
 
-        List<Subscription> userSubscriptions = new List<Subscription>();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+
+        /*====================================================
+         * TODO:
+         * - add a setting for something like "Automatically get latest subscriptions from YouTube" that will automatically get latest subscriptions (if subscribed to a new channel on YouTube).
+         *      This would also control if a subscription gets removed from this program when unsubscribed on YouTube
+         *  
+         * - Show Subscription Manager on first time run?
+         * 
+         * ====================================================
+         */
 
         public Main(bool start = false)
         {
@@ -42,12 +41,27 @@ namespace YouTubeSubscriptionDownloader
             if (!Directory.Exists(Common.UserSettings))
                 Directory.CreateDirectory(Common.UserSettings);
 
+            Log("Reading settings...");
             Settings.ReadSettings();
 
-            initializePocket();
-            initializeTimer();
+            Common.InitializePocket();
+            InitializeTimer();
+
+            if (YouTubeFunctions.Service == null)
+            {
+                Log("Authorizing YouTube...");
+                YouTubeFunctions.AuthService();
+            }
+
+            if (File.Exists(Common.SubscriptionsPath)) //Don't show the message if there are no subscriptions saved (eg first time startup)
+            {
+                Log("Getting subscriptions...");
+                Common.DeserializeSubscriptions();
+            }
 
             buttonStop.Enabled = false;
+
+            Log("Ready!");
 
             //TEMP
             //if (Settings.Instance.StartIterationsOnStartup || start)
@@ -71,28 +85,7 @@ namespace YouTubeSubscriptionDownloader
             }
         }
 
-        private bool CheckForInternetConnection()
-        {
-            try
-            {
-                using (WebClient client = new WebClient())
-                using (client.OpenRead("http://www.youtube.com"))
-                    return true;
-            }
-            catch
-            {
-                Log("!!NO INTERNET CONNECTION!!");
-                return false;
-            }
-        }
-
-        private void initializePocket()
-        {
-            if (Settings.Instance.AddToPocket && Settings.Instance.PocketAuthCode != "")
-                Settings.pocketClient = new PocketClient("69847-fc525ffd3205de609a7429bf", Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
-        }
-
-        private void initializeTimer()
+        private void InitializeTimer()
         {
             if (timer != null)
                 timer.Dispose();
@@ -181,7 +174,7 @@ namespace YouTubeSubscriptionDownloader
                 });
             }
 
-            if (!CheckForInternetConnection())
+            if (!Common.HasInternetConnection())
             {
                 if (this.IsHandleCreated)
                 {
@@ -195,57 +188,27 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
-            List<Subscription> tempUserSubscriptions = new List<Subscription>();
-
-            if (YouTubeFunctions.Service == null)
-            {
-                Log("Authorizing...");
-                YouTubeFunctions.AuthService();
-            }
-
-
             if (token.IsCancellationRequested)
                 return;
 
-            Log("Retrieving subscriptions...");
-            DeserializeSubscriptions();
-
-            SubscriptionsResource.ListRequest listSubscriptions = YouTubeFunctions.Service.Subscriptions.List("snippet");
-            listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
-            listSubscriptions.Mine = true;
-            listSubscriptions.MaxResults = 50;
-            SubscriptionListResponse response = listSubscriptions.Execute();
-
-            while (response.NextPageToken != null && !token.IsCancellationRequested)
-            {
-                tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
-                listSubscriptions.PageToken = response.NextPageToken;
-                response = listSubscriptions.Execute();
-            }
-
-            tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
-
-            if (token.IsCancellationRequested)
-                return;
-
-            Log("Getting latest subscriptions from YouTube");
-            foreach (Subscription missingSubscription in tempUserSubscriptions.Where(p => userSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null))
-            {
-                Subscription sub = AssignUploadsPlaylist(missingSubscription);
-                sub.LastVideoPublishDate = GetMostRecentUploadDate(sub);
-                userSubscriptions.Add(sub);
-            }
+            //Log("Getting latest subscriptions from YouTube");
+            //foreach (Subscription missingSubscription in tempUserSubscriptions.Where(p => Common.TrackedSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null))
+            //{
+            //    Subscription sub = AssignUploadsPlaylist(missingSubscription);
+            //    sub.LastVideoPublishDate = GetMostRecentUploadDate(sub);
+            //    Common.TrackedSubscriptions.Add(sub);
+            //}
 
             //Remove any extraneous (unsubscribed since last time the program was run) subscriptions
-            List<Subscription> unsubscribedSubscriptions = userSubscriptions.Where(p => tempUserSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null && !p.IsPlaylist).ToList();
-            foreach (Subscription unsubscribedSubscription in unsubscribedSubscriptions)
-                userSubscriptions.Remove(unsubscribedSubscription);
+            //List<Subscription> unsubscribedSubscriptions = Common.TrackedSubscriptions.Where(p => tempUserSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null && !p.IsPlaylist).ToList();
+            //foreach (Subscription unsubscribedSubscription in unsubscribedSubscriptions)
+            //    Common.TrackedSubscriptions.Remove(unsubscribedSubscription);
 
-            if (token.IsCancellationRequested)
-                return;
+            //if (token.IsCancellationRequested)
+            //    return;
 
             //Remove any duplicates
-            userSubscriptions = userSubscriptions.GroupBy(p => p.PlaylistIdToWatch).Select(p => p.First()).ToList();
+            //Common.TrackedSubscriptions = Common.TrackedSubscriptions.GroupBy(p => p.PlaylistIdToWatch).Select(p => p.First()).ToList();
 
             if (Settings.Instance.SerializeSubscriptions &&
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
@@ -258,7 +221,7 @@ namespace YouTubeSubscriptionDownloader
                 return;
 
             Log("Iterations started");
-            initializeTimer();
+            InitializeTimer();
             this.Invoke((MethodInvoker)delegate { timer.Start(); });
         }
 
@@ -271,15 +234,15 @@ namespace YouTubeSubscriptionDownloader
 
         private void LookForMoreRecentUploads(CancellationToken token)
         {
-            for (int i = 0; i < userSubscriptions.Count(); i++)
+            for (int i = 0; i < Common.TrackedSubscriptions.Count(); i++)
             {
                 if (token.IsCancellationRequested)
                     return;
 
-                if (string.IsNullOrEmpty(userSubscriptions[i].PlaylistIdToWatch))
-                    userSubscriptions[i] = AssignUploadsPlaylist(userSubscriptions[i]);
+                if (string.IsNullOrEmpty(Common.TrackedSubscriptions[i].PlaylistIdToWatch))
+                    Common.TrackedSubscriptions[i] = AssignUploadsPlaylist(Common.TrackedSubscriptions[i]);
 
-                Subscription sub = userSubscriptions[i];
+                Subscription sub = Common.TrackedSubscriptions[i];
                 DateTime mostRecentUploadDate = GetMostRecentUploadDate(sub);
                 if (sub.LastVideoPublishDate == mostRecentUploadDate)
                     continue;
@@ -299,22 +262,6 @@ namespace YouTubeSubscriptionDownloader
 
                 sub.LastVideoPublishDate = mostRecentUploadDate;
             }
-        }
-
-        private List<Subscription> ConvertSubscriptionItems(List<Google.Apis.YouTube.v3.Data.Subscription> itemList)
-        {
-            List<Subscription> subscriptions = new List<Subscription>();
-
-            foreach (Google.Apis.YouTube.v3.Data.Subscription item in itemList)
-            {
-                subscriptions.Add(new Subscription()
-                {
-                    ChannelId = item.Snippet.ResourceId.ChannelId,
-                    Title = item.Snippet.Title
-                });
-            }
-
-            return subscriptions;
         }
 
         private Subscription AssignUploadsPlaylist(Subscription sub)
@@ -362,10 +309,10 @@ namespace YouTubeSubscriptionDownloader
 
         private void CheckForNewVideoFromSubscriptions(CancellationToken token)
         {
-            if (!CheckForInternetConnection())
+            if (!Common.HasInternetConnection())
                 return;
 
-            foreach (Subscription sub in userSubscriptions)
+            foreach (Subscription sub in Common.TrackedSubscriptions)
             {
                 List<PlaylistItem> newUploads = new List<PlaylistItem>();
                 try
@@ -417,7 +364,7 @@ namespace YouTubeSubscriptionDownloader
                 if (newUploads.Count > 0)
                     sub.LastVideoPublishDate = (DateTime)newUploads.First().Snippet.PublishedAt;
 
-                SerializeSubscriptions();
+                Common.SerializeSubscriptions();
             }
         }
 
@@ -461,51 +408,6 @@ namespace YouTubeSubscriptionDownloader
             }
         }
 
-        private void DeserializeSubscriptions()
-        {
-            string serializationPath = Path.Combine(Common.UserSettings, "Subscriptions.xml");
-            if (File.Exists(serializationPath))
-            {
-                using (FileStream fileStream = new FileStream(serializationPath, FileMode.Open))
-                {
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-                    userSubscriptions.AddRange((List<Subscription>)xmlSerializer.Deserialize(fileStream));
-                }
-            }
-        }
-
-        private void SerializeSubscriptions(string overrideSerializationPath = null)
-        {
-            if (userSubscriptions == null || userSubscriptions.Count <= 0)
-            {
-                Log("The program has not been started so no subscriptions have been retrieved");
-                Log("Start the program and try again");
-                return;
-            }
-
-            List<Subscription> subscriptionsToSerialize = new List<Subscription>();
-            if (Settings.Instance.SerializeSubscriptions)
-                subscriptionsToSerialize = userSubscriptions;
-            else
-                subscriptionsToSerialize = userSubscriptions.Where(p => p.IsPlaylist).ToList();
-
-            string serializationPath = string.IsNullOrEmpty(overrideSerializationPath) ? Path.Combine(Common.UserSettings, "Subscriptions.xml") : overrideSerializationPath;
-            if (File.Exists(serializationPath))
-                File.Delete(serializationPath);
-
-            if (subscriptionsToSerialize.Any())
-            {
-                using (TextWriter writer = new StreamWriter(serializationPath))
-                {
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-                    xmlSerializer.Serialize(writer, subscriptionsToSerialize); //Could wrap this in a try{ }catch{ } (and writer.Close() in a finally{ }), but we're catching all exceptions already
-                }
-
-                if (!string.IsNullOrEmpty(overrideSerializationPath))
-                    MessageBox.Show("Subscriptions serialized to " + serializationPath);
-            }
-        }
-
         private void buttonStop_Click(object sender, EventArgs e)
         {
             cancelTokenSource.Cancel();
@@ -521,7 +423,7 @@ namespace YouTubeSubscriptionDownloader
         private void pictureBoxSettings_Click(object sender, EventArgs e)
         {
             if (Form.ModifierKeys == Keys.Control)
-                SerializeSubscriptions(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Subscriptions.xml"));
+                Common.SerializeSubscriptions(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Subscriptions.xml"));
             else
             {
                 SettingsWindow settingsWindow = new SettingsWindow();
@@ -537,17 +439,17 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
-            PlaylistManager manager = new PlaylistManager(YouTubeFunctions.Service, userSubscriptions.Where(p => p.IsPlaylist).ToList());
+            PlaylistManager manager = new PlaylistManager();
             manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) =>
             {
-                userSubscriptions.RemoveAll(p => p.IsPlaylist);
+                Common.TrackedSubscriptions.RemoveAll(p => p.IsPlaylist);
                 foreach (Subscription playlist in playlistSubscriptions)
                 {
                     playlist.LastVideoPublishDate = GetMostRecentUploadDate(playlist);
-                    userSubscriptions.Add(playlist);
+                    Common.TrackedSubscriptions.Add(playlist);
                 }
 
-                SerializeSubscriptions();
+                Common.SerializeSubscriptions();
             };
             manager.ShowDialog();
         }
@@ -588,7 +490,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SerializeSubscriptions();
+            Common.SerializeSubscriptions();
         }
     }
 }

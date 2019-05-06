@@ -1,34 +1,24 @@
-﻿using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace YouTubeSubscriptionDownloader
 {
     public partial class PlaylistManager : Form
     {
-        YouTubeService service;
-
-        public PlaylistManager(YouTubeService service, List<Subscription> exisitingPlaylists)
+        public PlaylistManager()
         {
             InitializeComponent();
 
             //Turn on double buffering for faster grid loading
             gridPlaylists.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(gridPlaylists, true, null);
 
-            this.service = service;
-
-            foreach (Subscription playlist in exisitingPlaylists)
+            foreach (Subscription playlist in Common.TrackedSubscriptions)
                 Add(playlist);
 
             PlaylistManager_Resize(null, null);
@@ -124,19 +114,7 @@ namespace YouTubeSubscriptionDownloader
         {
             string playlistID = Regex.Match(playlistURL, @"(PL|UU)[\w-]*").ToString();
 
-            PlaylistsResource.ListRequest listRequest = service.Playlists.List("snippet");
-            listRequest.Id = playlistID;
-            PlaylistListResponse response = listRequest.Execute();
-
-            string channelId = response.Items.FirstOrDefault().Snippet.ChannelId;
-            string playlistTitle = response.Items.FirstOrDefault().Snippet.Title;
-
-            Subscription playlistSubscription = new Subscription();
-            playlistSubscription.LastVideoPublishDate = DateTime.Now;
-            playlistSubscription.ChannelId = channelId;
-            playlistSubscription.PlaylistIdToWatch = playlistID;
-            playlistSubscription.Title = playlistTitle;
-            playlistSubscription.IsPlaylist = true;
+            Subscription playlistSubscription = YouTubeFunctions.GetPlaylistAsSubscription(playlistID);
             playlistSubscription.FilterRegex = textBoxRegex.Text;
 
             Add(playlistSubscription);

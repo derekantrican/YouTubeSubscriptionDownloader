@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -50,6 +49,63 @@ namespace YouTubeSubscriptionDownloader
                 HttpClientInitializer = credential,
                 ApplicationName = Common.ApplicationName
             });
+        }
+
+        public static List<Subscription> GetUserSubscriptions(CancellationToken token)
+        {
+            List<Subscription> tempUserSubscriptions = new List<Subscription>();
+
+            SubscriptionsResource.ListRequest listSubscriptions = YouTubeFunctions.Service.Subscriptions.List("snippet");
+            listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
+            listSubscriptions.Mine = true;
+            listSubscriptions.MaxResults = 50;
+            SubscriptionListResponse response = listSubscriptions.Execute();
+
+            while (response.NextPageToken != null && !token.IsCancellationRequested)
+            {
+                tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
+                listSubscriptions.PageToken = response.NextPageToken;
+                response = listSubscriptions.Execute();
+            }
+
+            tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
+
+            return tempUserSubscriptions;
+        }
+
+        private static List<Subscription> ConvertSubscriptionItems(List<Google.Apis.YouTube.v3.Data.Subscription> itemList)
+        {
+            List<Subscription> subscriptions = new List<Subscription>();
+
+            foreach (Google.Apis.YouTube.v3.Data.Subscription item in itemList)
+            {
+                subscriptions.Add(new Subscription()
+                {
+                    ChannelId = item.Snippet.ResourceId.ChannelId,
+                    Title = item.Snippet.Title
+                });
+            }
+
+            return subscriptions;
+        }
+
+        public static Subscription GetPlaylistAsSubscription(string playlistId)
+        {
+            PlaylistsResource.ListRequest listRequest = Service.Playlists.List("snippet");
+            listRequest.Id = playlistId;
+            PlaylistListResponse response = listRequest.Execute();
+
+            string channelId = response.Items.FirstOrDefault().Snippet.ChannelId;
+            string playlistTitle = response.Items.FirstOrDefault().Snippet.Title;
+
+            Subscription playlistSubscription = new Subscription();
+            playlistSubscription.LastVideoPublishDate = DateTime.Now;
+            playlistSubscription.ChannelId = channelId;
+            playlistSubscription.PlaylistIdToWatch = playlistId;
+            playlistSubscription.Title = playlistTitle;
+            playlistSubscription.IsPlaylist = true;
+
+            return playlistSubscription;
         }
 
         public static List<PlaylistItem> GetMostRecentUploads(Subscription sub, DateTime? sinceDate = null)
