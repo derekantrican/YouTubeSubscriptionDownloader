@@ -25,10 +25,12 @@ namespace YouTubeSubscriptionDownloader
 
         /*====================================================
          * TODO:
+         * - currently there is no "Get subscriptions from YouTube" functionality. Need to add this to Subscription Manager
+         * 
          * - add a setting for something like "Automatically get latest subscriptions from YouTube" that will automatically get latest subscriptions (if subscribed to a new channel on YouTube).
          *      This would also control if a subscription gets removed from this program when unsubscribed on YouTube
          *  
-         * - Show Subscription Manager on first time run?
+         * - show Subscription Manager on first time run?
          * 
          * ====================================================
          */
