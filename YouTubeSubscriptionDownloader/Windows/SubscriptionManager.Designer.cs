@@ -35,16 +35,17 @@
             this.labelPlaylistURL = new System.Windows.Forms.Label();
             this.textBoxPlaylistURL = new System.Windows.Forms.TextBox();
             this.pictureBoxAdd = new System.Windows.Forms.PictureBox();
-            this.listViewPlaylists = new System.Windows.Forms.ListView();
-            this.itemText = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.itemRegex = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.textBoxRegex = new System.Windows.Forms.TextBox();
             this.labelRegex = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.gridPlaylists = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPlaylists)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonSave
@@ -76,8 +77,8 @@
             this.labelPlaylistOverview.Name = "labelPlaylistOverview";
             this.labelPlaylistOverview.Size = new System.Drawing.Size(781, 32);
             this.labelPlaylistOverview.TabIndex = 4;
-            this.labelPlaylistOverview.Text = "Here you can define a list of playlists to be checked for new uploads alongside y" +
-    "our user subscriptions";
+            this.labelPlaylistOverview.Text = "Manage the playlists (your YouTube subscriptions and other YouTube playlists) tha" +
+    "t will be watched for new uploads";
             // 
             // labelPlaylistURL
             // 
@@ -105,30 +106,6 @@
             this.pictureBoxAdd.TabIndex = 7;
             this.pictureBoxAdd.TabStop = false;
             this.pictureBoxAdd.Click += new System.EventHandler(this.pictureBoxAdd_Click);
-            // 
-            // listViewPlaylists
-            // 
-            this.listViewPlaylists.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.itemText,
-            this.itemRegex});
-            this.listViewPlaylists.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewPlaylists.Location = new System.Drawing.Point(3, 0);
-            this.listViewPlaylists.MultiSelect = false;
-            this.listViewPlaylists.Name = "listViewPlaylists";
-            this.listViewPlaylists.Size = new System.Drawing.Size(775, 429);
-            this.listViewPlaylists.TabIndex = 8;
-            this.listViewPlaylists.UseCompatibleStateImageBehavior = false;
-            this.listViewPlaylists.View = System.Windows.Forms.View.Details;
-            // 
-            // itemText
-            // 
-            this.itemText.Text = "Playlist";
-            this.itemText.Width = 245;
-            // 
-            // itemRegex
-            // 
-            this.itemRegex.Text = "Search (regex)";
-            this.itemRegex.Width = 150;
             // 
             // textBoxRegex
             // 
@@ -158,7 +135,7 @@
             // 
             // panel2
             // 
-            this.panel2.Controls.Add(this.listViewPlaylists);
+            this.panel2.Controls.Add(this.gridPlaylists);
             this.panel2.Controls.Add(this.labelPlaylistURL);
             this.panel2.Controls.Add(this.labelRegex);
             this.panel2.Controls.Add(this.textBoxPlaylistURL);
@@ -169,6 +146,38 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(781, 529);
             this.panel2.TabIndex = 12;
+            // 
+            // gridPlaylists
+            // 
+            this.gridPlaylists.AllowUserToAddRows = false;
+            this.gridPlaylists.AllowUserToResizeColumns = false;
+            this.gridPlaylists.AllowUserToResizeRows = false;
+            this.gridPlaylists.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
+            this.gridPlaylists.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridPlaylists.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column1,
+            this.Column2});
+            this.gridPlaylists.Location = new System.Drawing.Point(3, 0);
+            this.gridPlaylists.MultiSelect = false;
+            this.gridPlaylists.Name = "gridPlaylists";
+            this.gridPlaylists.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
+            this.gridPlaylists.RowHeadersVisible = false;
+            this.gridPlaylists.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gridPlaylists.Size = new System.Drawing.Size(775, 429);
+            this.gridPlaylists.TabIndex = 11;
+            this.gridPlaylists.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GridPlaylists_KeyDown);
+            this.gridPlaylists.MouseDown += new System.Windows.Forms.MouseEventHandler(this.GridPlaylists_MouseDown);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "Playlist";
+            this.Column1.Name = "Column1";
+            // 
+            // Column2
+            // 
+            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Column2.HeaderText = "Search Regex";
+            this.Column2.Name = "Column2";
             // 
             // PlaylistManager
             // 
@@ -182,12 +191,13 @@
             this.MinimumSize = new System.Drawing.Size(420, 349);
             this.Name = "PlaylistManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "PlaylistManager";
+            this.Text = "Subscription Manager";
             this.Resize += new System.EventHandler(this.PlaylistManager_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPlaylists)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -199,12 +209,12 @@
         private System.Windows.Forms.Label labelPlaylistURL;
         private System.Windows.Forms.TextBox textBoxPlaylistURL;
         private System.Windows.Forms.PictureBox pictureBoxAdd;
-        private System.Windows.Forms.ListView listViewPlaylists;
-        private System.Windows.Forms.ColumnHeader itemText;
-        private System.Windows.Forms.ColumnHeader itemRegex;
         private System.Windows.Forms.TextBox textBoxRegex;
         private System.Windows.Forms.Label labelRegex;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.DataGridView gridPlaylists;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
     }
 }

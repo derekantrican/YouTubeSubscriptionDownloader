@@ -56,11 +56,12 @@ namespace YouTubeSubscriptionDownloader
 
             buttonStop.Enabled = false;
 
-            if (Settings.Instance.StartIterationsOnStartup || start)
-            {
-                Task task = Task.Run(() => Start(cancelTokenSource.Token));
-                task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
-            }
+            //TEMP
+            //if (Settings.Instance.StartIterationsOnStartup || start)
+            //{
+            //    Task task = Task.Run(() => Start(cancelTokenSource.Token));
+            //    task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
+            //}
         }
 
         private void Form1_HandleCreated(object sender, EventArgs e)

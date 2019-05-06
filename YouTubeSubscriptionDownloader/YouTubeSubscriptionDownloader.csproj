@@ -107,11 +107,11 @@
     <Compile Include="Windows\Notification.Designer.cs">
       <DependentUpon>Notification.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\PlaylistManager.cs">
+    <Compile Include="Windows\SubscriptionManager.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Windows\PlaylistManager.Designer.cs">
-      <DependentUpon>PlaylistManager.cs</DependentUpon>
+    <Compile Include="Windows\SubscriptionManager.Designer.cs">
+      <DependentUpon>SubscriptionManager.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -129,8 +129,8 @@
     <EmbeddedResource Include="Windows\Notification.resx">
       <DependentUpon>Notification.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Windows\PlaylistManager.resx">
-      <DependentUpon>PlaylistManager.cs</DependentUpon>
+    <EmbeddedResource Include="Windows\SubscriptionManager.resx">
+      <DependentUpon>SubscriptionManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

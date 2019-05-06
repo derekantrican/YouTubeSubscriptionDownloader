@@ -7,6 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -22,6 +23,9 @@ namespace YouTubeSubscriptionDownloader
         {
             InitializeComponent();
 
+            //Turn on double buffering for faster grid loading
+            gridPlaylists.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(gridPlaylists, true, null);
+
             this.service = service;
 
             foreach (Subscription playlist in exisitingPlaylists)
@@ -32,15 +36,8 @@ namespace YouTubeSubscriptionDownloader
 
         private void Add(Subscription playlist)
         {
-            ListViewItem item = new ListViewItem()
-            {
-                Text = playlist.Title,
-                Tag = playlist
-            };
-
-            item.SubItems.Add(playlist.FilterRegex);
-
-            listViewPlaylists.Items.Add(item);
+            int newRowIndex = gridPlaylists.Rows.Add(playlist.Title, playlist.FilterRegex);
+            gridPlaylists.Rows[newRowIndex].Tag = playlist;
         }
 
         public delegate void SubscriptionsUpdatedDelegate(List<Subscription> updatedSubscriptions);
@@ -49,10 +46,10 @@ namespace YouTubeSubscriptionDownloader
         private void buttonSave_Click(object sender, EventArgs e)
         {
             List<Subscription> resultPlaylists = new List<Subscription>();
-            foreach (ListViewItem item in listViewPlaylists.Items)
+            foreach (DataGridViewRow item in gridPlaylists.Rows)
                 resultPlaylists.Add(item.Tag as Subscription);
 
-            SubscriptionsUpdated.Invoke(resultPlaylists);
+            SubscriptionsUpdated.Invoke(resultPlaylists); //Todo: this takes a long time
 
             this.Close();
         }
@@ -62,37 +59,37 @@ namespace YouTubeSubscriptionDownloader
             this.Close();
         }
 
-        private void listBoxPlaylists_MouseDown(object sender, MouseEventArgs e)
+        private void GridPlaylists_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                Point p = this.listViewPlaylists.PointToClient(new Point(e.X, e.Y));
-                int index = this.listViewPlaylists.GetItemAt(p.X, p.Y).Index;
+                int index = this.gridPlaylists.HitTest(e.X, e.Y).RowIndex;
 
                 if (index < 0)
                     return;
 
-                this.listViewPlaylists.Items[index].Selected = true;
+                this.gridPlaylists.ClearSelection();
+                this.gridPlaylists.Rows[index].Selected = true;
 
                 ContextMenu contexMenu = new ContextMenu();
                 MenuItem openItem = new MenuItem() { Text = "Open" };
-                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (listViewPlaylists.Items[index].Tag as Subscription).PlaylistIdToWatch); };
+                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (gridPlaylists.Rows[index].Tag as Subscription).PlaylistIdToWatch); };
                 contexMenu.MenuItems.Add(openItem);
 
                 MenuItem removeItem = new MenuItem() { Text = "Remove" };
-                removeItem.Click += (s, args) => { listViewPlaylists.Items.RemoveAt(index); };
+                removeItem.Click += (s, args) => { gridPlaylists.Rows.RemoveAt(index); };
                 contexMenu.MenuItems.Add(removeItem);
 
-                contexMenu.Show((sender as ListBox), new Point(e.X, e.Y));
+                contexMenu.Show((sender as DataGridView), new Point(e.X, e.Y));
 
                 return;
             }
         }
 
-        private void listBoxPlaylists_KeyDown(object sender, KeyEventArgs e)
+        private void GridPlaylists_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
-                listViewPlaylists.Items.Remove(listViewPlaylists.SelectedItems[0]);
+                gridPlaylists.Rows.Remove(gridPlaylists.SelectedRows[0]);
         }
 
         private void pictureBoxAdd_Click(object sender, EventArgs e)
@@ -100,7 +97,7 @@ namespace YouTubeSubscriptionDownloader
             if (IsValidPlaylist(textBoxPlaylistURL.Text))
             {
                 List<Subscription> playlists = new List<Subscription>();
-                foreach (ListViewItem item in listViewPlaylists.Items)
+                foreach (DataGridViewRow item in gridPlaylists.Rows)
                     playlists.Add(item.Tag as Subscription);
 
                 if (playlists.FirstOrDefault(p => textBoxPlaylistURL.Text.Contains(p.PlaylistIdToWatch)) != null)
@@ -108,7 +105,7 @@ namespace YouTubeSubscriptionDownloader
                 else
                 {
                     AddPlaylistToList(textBoxPlaylistURL.Text);
-                    listViewPlaylists.EnsureVisible(listViewPlaylists.Items.Count - 1); //Scroll to bottom of list to show item was added
+                    gridPlaylists.FirstDisplayedScrollingRowIndex = gridPlaylists.RowCount - 1; //Scroll to bottom of list to show item was added
                     textBoxPlaylistURL.Clear();
                     textBoxRegex.Clear();
                 }
@@ -149,10 +146,10 @@ namespace YouTubeSubscriptionDownloader
         {
             //Do resizing/repositioning of all contents in the window
 
-            listViewPlaylists.Height = this.Height - 189;
-            listViewPlaylists.Width = this.Width - 22;
-            listViewPlaylists.Columns[0].Width = (int)(listViewPlaylists.Width * 0.75) - 5;
-            listViewPlaylists.Columns[1].Width = -2; //AutoSize
+            gridPlaylists.Height = this.Height - 189;
+            gridPlaylists.Width = this.Width - 22;
+            gridPlaylists.Columns[0].Width = (int)(gridPlaylists.Width * 0.75) - 5;
+            gridPlaylists.Columns[1].Width = -2; //AutoSize
 
             pictureBoxAdd.Left = this.Width - 48;
             textBoxPlaylistURL.Width = this.Width - 135;
