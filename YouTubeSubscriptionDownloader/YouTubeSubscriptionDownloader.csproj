@@ -95,6 +95,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common.cs" />
     <Compile Include="Windows\Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -123,6 +124,7 @@
       <DependentUpon>SettingsWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Subscription.cs" />
+    <Compile Include="YouTubeFunctions.cs" />
     <EmbeddedResource Include="Windows\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>

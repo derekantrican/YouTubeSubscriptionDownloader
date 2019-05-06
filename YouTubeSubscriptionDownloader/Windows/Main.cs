@@ -27,16 +27,9 @@ namespace YouTubeSubscriptionDownloader
 {
     public partial class Main : Form
     {
-        static string ApplicationName = "YouTube Subscription Downloader";
-        static string UserSettings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
-        static string CredentialsPath = Path.Combine(UserSettings, "Credentials");
-
         List<string> missingLogLines = new List<string>();
 
         System.Windows.Forms.Timer timer = null;
-
-        YouTubeService service = null;
-        static string[] Scopes = { YouTubeService.Scope.Youtube };
 
         List<Subscription> userSubscriptions = new List<Subscription>();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
@@ -46,8 +39,8 @@ namespace YouTubeSubscriptionDownloader
             InitializeComponent();
             this.HandleCreated += Form1_HandleCreated;
 
-            if (!Directory.Exists(UserSettings))
-                Directory.CreateDirectory(UserSettings);
+            if (!Directory.Exists(Common.UserSettings))
+                Directory.CreateDirectory(Common.UserSettings);
 
             Settings.ReadSettings();
 
@@ -204,39 +197,10 @@ namespace YouTubeSubscriptionDownloader
 
             List<Subscription> tempUserSubscriptions = new List<Subscription>();
 
-            if (service == null)
+            if (YouTubeFunctions.Service == null)
             {
                 Log("Authorizing...");
-
-                UserCredential credential;
-                string clientSecretString = "{\"installed\":" +
-                                                "{" +
-                                                    "\"client_id\":\"761670588704-lgl5qbcv5odmq1vlq3lcgqv67fr8vkdn.apps.googleusercontent.com\"," +
-                                                    "\"project_id\":\"youtube-downloader-174123\"," +
-                                                    "\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\"," +
-                                                    "\"token_uri\":\"https://accounts.google.com/o/oauth2/token\"," +
-                                                    "\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\"," +
-                                                    "\"client_secret\":\"_uzJUnD4gNiIpIL991kmCuvB\"," +
-                                                    "\"redirect_uris\":[\"urn:ietf:wg:oauth:2.0:oob\",\"http://localhost\"]" +
-                                                "}" +
-                                            "}";
-                byte[] byteArray = Encoding.ASCII.GetBytes(clientSecretString);
-
-                using (var stream = new MemoryStream(byteArray))
-                {
-                    credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                        GoogleClientSecrets.Load(stream).Secrets,
-                        Scopes,
-                        "user",
-                        CancellationToken.None,
-                        new FileDataStore(CredentialsPath, true)).Result;
-                }
-
-                service = new YouTubeService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = credential,
-                    ApplicationName = ApplicationName
-                });
+                YouTubeFunctions.AuthService();
             }
 
 
@@ -246,7 +210,7 @@ namespace YouTubeSubscriptionDownloader
             Log("Retrieving subscriptions...");
             DeserializeSubscriptions();
 
-            SubscriptionsResource.ListRequest listSubscriptions = service.Subscriptions.List("snippet");
+            SubscriptionsResource.ListRequest listSubscriptions = YouTubeFunctions.Service.Subscriptions.List("snippet");
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
             listSubscriptions.Mine = true;
             listSubscriptions.MaxResults = 50;
@@ -320,8 +284,7 @@ namespace YouTubeSubscriptionDownloader
                 if (sub.LastVideoPublishDate == mostRecentUploadDate)
                     continue;
 
-                List<PlaylistItem> moreRecentUploads = new List<PlaylistItem>();
-                moreRecentUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
+                List<PlaylistItem> moreRecentUploads = YouTubeFunctions.GetMostRecentUploads(sub, sub.LastVideoPublishDate);
 
                 foreach (PlaylistItem moreRecent in moreRecentUploads)
                 {
@@ -358,7 +321,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
             {
-                string uploadsPlaylistId = GetChannelUploadsPlaylistId(sub);
+                string uploadsPlaylistId = YouTubeFunctions.GetChannelUploadsPlaylistId(sub);
                 if (!string.IsNullOrEmpty(uploadsPlaylistId))
                     sub.PlaylistIdToWatch = uploadsPlaylistId;
             }
@@ -366,24 +329,12 @@ namespace YouTubeSubscriptionDownloader
             return sub;
         }
 
-        private string GetChannelUploadsPlaylistId(Subscription sub)
-        {
-            ChannelsResource.ListRequest listRequest = service.Channels.List("contentDetails");
-            listRequest.Id = sub.ChannelId;
-            ChannelListResponse response = listRequest.Execute();
-
-            if (response.Items.Count <= 0)
-                return null;
-
-            return response.Items.FirstOrDefault().ContentDetails.RelatedPlaylists.Uploads;
-        }
-
         private DateTime GetMostRecentUploadDate(Subscription sub)
         {
             PlaylistItem mostRecentUpload;
             try
             {
-                mostRecentUpload = GetMostRecentUploads(sub).FirstOrDefault();
+                mostRecentUpload = YouTubeFunctions.GetMostRecentUploads(sub).FirstOrDefault();
             }
             catch (WebException)
             {
@@ -401,100 +352,12 @@ namespace YouTubeSubscriptionDownloader
             }
 
 
-            PlaylistItem item = GetMostRecentUploads(sub).FirstOrDefault();
+            PlaylistItem item = YouTubeFunctions.GetMostRecentUploads(sub).FirstOrDefault();
 
             if (item == null)
                 return DateTime.MinValue;
 
             return (DateTime)item.Snippet.PublishedAt;
-        }
-
-        private List<PlaylistItem> GetMostRecentUploads(Subscription sub, DateTime? sinceDate = null)
-        {
-            List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
-            if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
-            {
-                PlaylistItemsResource.ListRequest listRequest = service.PlaylistItems.List("snippet,status");
-                listRequest.PlaylistId = sub.PlaylistIdToWatch;
-                PlaylistItemListResponse response;
-
-                List<PlaylistItem> results = new List<PlaylistItem>();
-                List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
-                if (sub.IsPlaylist &&
-                    GetChannelUploadsPlaylistId(sub) != sub.PlaylistIdToWatch) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
-                {
-                    //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
-                    //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
-
-                    listRequest.MaxResults = 50; //50 is the maximum
-                    response = listRequest.Execute();
-                    results.AddRange(response.Items);
-
-                    while (response.NextPageToken != null)
-                    {
-                        listRequest.PageToken = response.NextPageToken;
-                        response = listRequest.Execute();
-                        results.AddRange(response.Items);
-                    }
-                }
-                else
-                {
-                    listRequest.MaxResults = 50;
-                    response = listRequest.Execute();
-                    results.AddRange(response.Items);
-
-                    //If we still haven't gotten any items older than the "sinceDate", get more
-                    if (sinceDate != null)
-                    {
-                        while (!results.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
-                        {
-                            listRequest.PageToken = response.NextPageToken;
-                            response = listRequest.Execute();
-                            results.AddRange(response.Items);
-                        }
-                    }
-                }
-
-                //Remove any that do not match the regex filter
-                if (!string.IsNullOrEmpty(sub.FilterRegex))
-                    results.RemoveAll(p => !Regex.IsMatch(p.Snippet.Title, sub.FilterRegex));
-
-                //Check to see if any of the sub's private videos have change to public
-                foreach (string videoId in sub.PrivateVideosToWatch)
-                {
-                    PlaylistItem matchingItem = results.Find(p => p.Snippet.ResourceId.VideoId == videoId);
-                    if (matchingItem != null && matchingItem.Status.PrivacyStatus == "public")
-                        privateToPublic.Add(matchingItem);
-                }
-
-                //Stop watching for private video status change if it is now in "privateToPublic"
-                sub.PrivateVideosToWatch.RemoveAll(p => privateToPublic.Find(o => o.Snippet.ResourceId.VideoId == p) != null);
-
-                List<PlaylistItem> recentPrivateVideos = results.Where(p => p.Status != null && p.Status.PrivacyStatus == "private").ToList();
-                foreach (PlaylistItem video in recentPrivateVideos)
-                {
-                    string videoId = video.Snippet.ResourceId.VideoId;
-                    if (!sub.PrivateVideosToWatch.Contains(videoId))
-                        sub.PrivateVideosToWatch.Add(videoId);
-
-                    results.Remove(video);
-                }
-
-                if (sinceDate != null)
-                    results = results.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
-
-                results.AddRange(privateToPublic);
-
-                ////------------------------------------
-                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
-                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
-                ////   will get the top 50 results and order them by upload date
-
-                resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
-                ////------------------------------------
-            }
-
-            return resultsByDate;
         }
 
         private void CheckForNewVideoFromSubscriptions(CancellationToken token)
@@ -507,9 +370,9 @@ namespace YouTubeSubscriptionDownloader
                 List<PlaylistItem> newUploads = new List<PlaylistItem>();
                 try
                 {
-                    newUploads = GetMostRecentUploads(sub, sub.LastVideoPublishDate);
+                    newUploads = YouTubeFunctions.GetMostRecentUploads(sub, sub.LastVideoPublishDate);
                 }
-                catch (WebException ex)
+                catch (WebException)
                 {
                     Log("There was a problem contacting YouTube...");
                     continue;
@@ -600,7 +463,7 @@ namespace YouTubeSubscriptionDownloader
 
         private void DeserializeSubscriptions()
         {
-            string serializationPath = Path.Combine(UserSettings, "Subscriptions.xml");
+            string serializationPath = Path.Combine(Common.UserSettings, "Subscriptions.xml");
             if (File.Exists(serializationPath))
             {
                 using (FileStream fileStream = new FileStream(serializationPath, FileMode.Open))
@@ -626,7 +489,7 @@ namespace YouTubeSubscriptionDownloader
             else
                 subscriptionsToSerialize = userSubscriptions.Where(p => p.IsPlaylist).ToList();
 
-            string serializationPath = string.IsNullOrEmpty(overrideSerializationPath) ? Path.Combine(UserSettings, "Subscriptions.xml") : overrideSerializationPath;
+            string serializationPath = string.IsNullOrEmpty(overrideSerializationPath) ? Path.Combine(Common.UserSettings, "Subscriptions.xml") : overrideSerializationPath;
             if (File.Exists(serializationPath))
                 File.Delete(serializationPath);
 
@@ -674,7 +537,7 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
-            PlaylistManager manager = new PlaylistManager(service, userSubscriptions.Where(p => p.IsPlaylist).ToList());
+            PlaylistManager manager = new PlaylistManager(YouTubeFunctions.Service, userSubscriptions.Where(p => p.IsPlaylist).ToList());
             manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) =>
             {
                 userSubscriptions.RemoveAll(p => p.IsPlaylist);
