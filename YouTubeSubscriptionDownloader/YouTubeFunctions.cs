@@ -53,7 +53,7 @@ namespace YouTubeSubscriptionDownloader
 
         public static List<Subscription> GetUserSubscriptions(CancellationToken token)
         {
-            List<Subscription> tempUserSubscriptions = new List<Subscription>();
+            List<Subscription> result = new List<Subscription>();
 
             SubscriptionsResource.ListRequest listSubscriptions = YouTubeFunctions.Service.Subscriptions.List("snippet");
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
@@ -63,14 +63,17 @@ namespace YouTubeSubscriptionDownloader
 
             while (response.NextPageToken != null && !token.IsCancellationRequested)
             {
-                tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
+                result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
                 listSubscriptions.PageToken = response.NextPageToken;
                 response = listSubscriptions.Execute();
             }
 
-            tempUserSubscriptions.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
+            result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
 
-            return tempUserSubscriptions;
+            //Populate uploads playlists for subscriptions
+            result.ForEach(p => p.PlaylistIdToWatch = GetChannelUploadsPlaylistId(p));
+
+            return result;
         }
 
         private static List<Subscription> ConvertSubscriptionItems(List<Google.Apis.YouTube.v3.Data.Subscription> itemList)
@@ -79,11 +82,13 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Google.Apis.YouTube.v3.Data.Subscription item in itemList)
             {
-                subscriptions.Add(new Subscription()
+                Subscription sub = new Subscription()
                 {
                     ChannelId = item.Snippet.ResourceId.ChannelId,
                     Title = item.Snippet.Title
-                });
+                };
+
+                subscriptions.Add(sub);
             }
 
             return subscriptions;

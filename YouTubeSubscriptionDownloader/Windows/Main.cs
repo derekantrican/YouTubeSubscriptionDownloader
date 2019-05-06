@@ -241,9 +241,6 @@ namespace YouTubeSubscriptionDownloader
                 if (token.IsCancellationRequested)
                     return;
 
-                if (string.IsNullOrEmpty(Common.TrackedSubscriptions[i].PlaylistIdToWatch))
-                    Common.TrackedSubscriptions[i] = AssignUploadsPlaylist(Common.TrackedSubscriptions[i]);
-
                 Subscription sub = Common.TrackedSubscriptions[i];
                 DateTime mostRecentUploadDate = GetMostRecentUploadDate(sub);
                 if (sub.LastVideoPublishDate == mostRecentUploadDate)
@@ -264,18 +261,6 @@ namespace YouTubeSubscriptionDownloader
 
                 sub.LastVideoPublishDate = mostRecentUploadDate;
             }
-        }
-
-        private Subscription AssignUploadsPlaylist(Subscription sub)
-        {
-            if (string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
-            {
-                string uploadsPlaylistId = YouTubeFunctions.GetChannelUploadsPlaylistId(sub);
-                if (!string.IsNullOrEmpty(uploadsPlaylistId))
-                    sub.PlaylistIdToWatch = uploadsPlaylistId;
-            }
-
-            return sub;
         }
 
         private DateTime GetMostRecentUploadDate(Subscription sub)
