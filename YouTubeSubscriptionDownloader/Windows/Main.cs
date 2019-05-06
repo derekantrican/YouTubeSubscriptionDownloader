@@ -350,9 +350,9 @@ namespace YouTubeSubscriptionDownloader
 
                 if (newUploads.Count > 0)
                     sub.LastVideoPublishDate = (DateTime)newUploads.First().Snippet.PublishedAt;
-
-                Common.SerializeSubscriptions();
             }
+
+            Common.SerializeSubscriptions();
         }
 
         private async void AddYouTubeVideoToPocket(string youTubeVideoId)
