@@ -32,6 +32,9 @@ namespace YouTubeSubscriptionDownloader
          *  
          * - show Subscription Manager on first time run?
          * 
+         * - need to handle editing in Subscription Manager
+         * 
+         * - improve speed later (make lots of things async)
          * ====================================================
          */
 
@@ -95,21 +98,6 @@ namespace YouTubeSubscriptionDownloader
             timer = new System.Windows.Forms.Timer();
             timer.Interval = Settings.Instance.IterationFrequency * 60 * 1000;
             timer.Tick += Timer_Tick;
-        }
-
-        private void ShowNotification(string notificationSubTitle, string notificationTitle = "", string imageURL = "", string videoURL = "")
-        {
-            if (Settings.Instance.ShowNotifications)
-            {
-                if (!Settings.Instance.ShowThumbnailInNotification)
-                    imageURL = null;
-
-                Notification notification2 = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
-                this.Invoke((MethodInvoker)delegate ()
-                {
-                    notification2.Show();
-                });
-            }
         }
 
         private void Log(string itemToLog)
@@ -212,11 +200,14 @@ namespace YouTubeSubscriptionDownloader
             //Remove any duplicates
             //Common.TrackedSubscriptions = Common.TrackedSubscriptions.GroupBy(p => p.PlaylistIdToWatch).Select(p => p.First()).ToList();
 
-            if (Settings.Instance.SerializeSubscriptions &&
+            if (Settings.Instance.CheckForMissedUploads &&
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
                 Log("Looking for recent uploads");
-                LookForMoreRecentUploads(token);
+                bool tempNotificationSetting = Settings.Instance.ShowNotifications;
+                Settings.Instance.ShowNotifications = false; //Turn off notifications temporarily because we don't want a bunch of notifications on startup
+                CheckForNewVideoFromSubscriptions(token);
+                Settings.Instance.ShowNotifications = tempNotificationSetting;
             }
 
             if (token.IsCancellationRequested)
@@ -234,66 +225,6 @@ namespace YouTubeSubscriptionDownloader
             task.ContinueWith(t => HandleAsyncException(t.Exception.InnerException), TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        private void LookForMoreRecentUploads(CancellationToken token)
-        {
-            for (int i = 0; i < Common.TrackedSubscriptions.Count(); i++)
-            {
-                if (token.IsCancellationRequested)
-                    return;
-
-                Subscription sub = Common.TrackedSubscriptions[i];
-                DateTime mostRecentUploadDate = GetMostRecentUploadDate(sub);
-                if (sub.LastVideoPublishDate == mostRecentUploadDate)
-                    continue;
-
-                List<PlaylistItem> moreRecentUploads = YouTubeFunctions.GetMostRecentUploads(sub, sub.LastVideoPublishDate);
-
-                foreach (PlaylistItem moreRecent in moreRecentUploads)
-                {
-                    Log("New uploaded detected: " + sub.Title + " (" + moreRecent.Snippet.Title + ")");
-
-                    if (Settings.Instance.DownloadVideos)
-                        DownloadYouTubeVideo(moreRecent.Snippet.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
-
-                    if (Settings.Instance.AddToPocket)
-                        AddYouTubeVideoToPocket(moreRecent.Snippet.ResourceId.VideoId);
-                }
-
-                sub.LastVideoPublishDate = mostRecentUploadDate;
-            }
-        }
-
-        private DateTime GetMostRecentUploadDate(Subscription sub)
-        {
-            PlaylistItem mostRecentUpload;
-            try
-            {
-                mostRecentUpload = YouTubeFunctions.GetMostRecentUploads(sub).FirstOrDefault();
-            }
-            catch (WebException)
-            {
-                Log("There was a problem contacting YouTube...");
-            }
-            catch (Google.GoogleApiException ex)
-            {
-                if (ex.HttpStatusCode == HttpStatusCode.InternalServerError ||
-                    (ex.InnerException != null && ex.InnerException is WebException))
-                    Log("There was a problem contacting YouTube...");
-                else
-                {
-                    throw;
-                }                  
-            }
-
-
-            PlaylistItem item = YouTubeFunctions.GetMostRecentUploads(sub).FirstOrDefault();
-
-            if (item == null)
-                return DateTime.MinValue;
-
-            return (DateTime)item.Snippet.PublishedAt;
-        }
-
         private void CheckForNewVideoFromSubscriptions(CancellationToken token)
         {
             if (!Common.HasInternetConnection())
@@ -301,51 +232,16 @@ namespace YouTubeSubscriptionDownloader
 
             foreach (Subscription sub in Common.TrackedSubscriptions)
             {
-                List<PlaylistItem> newUploads = new List<PlaylistItem>();
-                try
-                {
-                    newUploads = YouTubeFunctions.GetMostRecentUploads(sub, sub.LastVideoPublishDate);
-                }
-                catch (WebException)
-                {
-                    Log("There was a problem contacting YouTube...");
-                    continue;
-                }
-                catch (Google.GoogleApiException ex)
-                {
-                    if (ex.HttpStatusCode == HttpStatusCode.InternalServerError ||
-                        (ex.InnerException != null && ex.InnerException is WebException))
-                    {
-                        Log("There was a problem contacting YouTube...");
-                        continue;
-                    }
-                    else
-                    {
-                        throw;
-                    }                       
-                }
+                if (token.IsCancellationRequested)
+                    return;
 
-                if (newUploads.Count >= 2)
-                {
-                    PlaylistItem latestUpload = newUploads.OrderBy(p => p.Snippet.PublishedAt).ToList()[0];
-                    PlaylistItem secondToLatestUpload = newUploads.OrderBy(p => p.Snippet.PublishedAt).ToList()[1];
-
-                    //Sometimes we sense a new video twice in "newUploads". Not sure why, but this will prevent
-                    //notifying for that video twice
-                    if (latestUpload != null && secondToLatestUpload != null &&
-                        latestUpload.Snippet.ResourceId.VideoId == secondToLatestUpload.Snippet.ResourceId.VideoId)
-                        newUploads.RemoveAt(0);
-                }
-
-                foreach (PlaylistItem item in newUploads.OrderBy(p => p.Snippet.PublishedAt)) //Loop through uploads backwards so that newest upload is last
+                List<PlaylistItem> newUploads = YouTubeFunctions.GetMostRecentUploads(sub, sub.LastVideoPublishDate);
+                foreach (PlaylistItem item in newUploads)
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
 
-                    ShowNotification(newUploadDetails.Title, "New video from " + sub.Title, newUploadDetails.Thumbnails?.Standard?.Url,
-                                     "https://www.youtube.com/watch?v=" + newUploadDetails.ResourceId.VideoId);
                     Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
-                    DownloadYouTubeVideo(newUploadDetails.ResourceId.VideoId, Settings.Instance.DownloadDirectory, token);
-                    AddYouTubeVideoToPocket(newUploadDetails.ResourceId.VideoId);
+                    DoActionsForNewUpload(newUploadDetails, sub, token);
                 }
 
                 if (newUploads.Count > 0)
@@ -355,44 +251,46 @@ namespace YouTubeSubscriptionDownloader
             Common.SerializeSubscriptions();
         }
 
-        private async void AddYouTubeVideoToPocket(string youTubeVideoId)
+        private void DoActionsForNewUpload(PlaylistItemSnippet newUpload, Subscription sub, CancellationToken downloadCancellation)
         {
-            if (Settings.Instance.AddToPocket)
+            if (Settings.Instance.ShowNotifications)
             {
-                Log("Adding video to Pocket...");
-                string youTubeURL = "https://www.youtube.com/watch?v=" + youTubeVideoId;
-                await Settings.pocketClient.Add(new Uri(youTubeURL));
-                Log("Video added to Pocket");
+                ShowNotification(newUpload.Title, "New video from " + sub.Title, newUpload.Thumbnails?.Standard?.Url,
+                                 "https://www.youtube.com/watch?v=" + newUpload.ResourceId.VideoId);
             }
+
+            if (Settings.Instance.DownloadVideos)
+                DownloadYouTubeVideo(newUpload.ResourceId.VideoId, Settings.Instance.DownloadDirectory, downloadCancellation);
+
+            if (Settings.Instance.AddToPocket)
+                AddYouTubeVideoToPocket(newUpload.ResourceId.VideoId);
         }
 
-        private async void DownloadYouTubeVideo(string youTubeVideoId, string destinationFolder, CancellationToken token)
+        private void ShowNotification(string notificationSubTitle, string notificationTitle = "", string imageURL = "", string videoURL = "")
         {
-            if (Settings.Instance.DownloadVideos)
+            if (!Settings.Instance.ShowThumbnailInNotification)
+                imageURL = null;
+
+            Notification notification2 = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
+            this.Invoke((MethodInvoker)delegate ()
             {
-                Log("Downloading video...");
-                YoutubeClient client = new YoutubeClient();
-                var videoInfo = await client.GetVideoAsync(youTubeVideoId);
-                var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(youTubeVideoId);
+                notification2.Show();
+            });
+        }
 
-                MuxedStreamInfo streamInfo = null;
-                if (Settings.Instance.PreferredQuality != "Highest")
-                    streamInfo = streamInfoSet.Muxed.Where(p => p.VideoQualityLabel == Settings.Instance.PreferredQuality).FirstOrDefault();
+        private void DownloadYouTubeVideo(string youTubeVideoId, string destinationFolder, CancellationToken token)
+        {
+            Log("Downloading video...");
+            YouTubeFunctions.DownloadYouTubeVideoAsync(youTubeVideoId, destinationFolder, token).Wait(); //Async
+            Log("Download complete");
+        }
 
-                if (Settings.Instance.PreferredQuality == "Highest" || streamInfo == null)
-                    streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
-
-                string fileExtension = streamInfo.Container.GetFileExtension();
-                string fileName = "[" + videoInfo.Author + "] " + videoInfo.Title + "." + fileExtension;
-
-                //Remove invalid characters from filename
-                string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-                Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
-                fileName = r.Replace(fileName, "");
-
-                await client.DownloadMediaStreamAsync(streamInfo, Path.Combine(destinationFolder, fileName), cancellationToken: token);
-                Log("Download complete");
-            }
+        private void AddYouTubeVideoToPocket(string youTubeVideoId)
+        {
+            Log("Adding video to Pocket...");
+            string youTubeURL = "https://www.youtube.com/watch?v=" + youTubeVideoId;
+            Settings.pocketClient.Add(new Uri(youTubeURL)).Wait(); //Async
+            Log("Video added to Pocket");
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
@@ -427,17 +325,6 @@ namespace YouTubeSubscriptionDownloader
             }
 
             PlaylistManager manager = new PlaylistManager();
-            manager.SubscriptionsUpdated += (List<Subscription> playlistSubscriptions) =>
-            {
-                Common.TrackedSubscriptions.RemoveAll(p => p.IsPlaylist);
-                foreach (Subscription playlist in playlistSubscriptions)
-                {
-                    playlist.LastVideoPublishDate = GetMostRecentUploadDate(playlist);
-                    Common.TrackedSubscriptions.Add(playlist);
-                }
-
-                Common.SerializeSubscriptions();
-            };
             manager.ShowDialog();
         }
 

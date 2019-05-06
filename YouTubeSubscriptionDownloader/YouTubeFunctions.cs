@@ -7,9 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using YoutubeExplode;
+using YoutubeExplode.Models.MediaStreams;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -118,85 +122,98 @@ namespace YouTubeSubscriptionDownloader
             List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
             if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
             {
-                PlaylistItemsResource.ListRequest listRequest = Service.PlaylistItems.List("snippet,status");
-                listRequest.PlaylistId = sub.PlaylistIdToWatch;
-                PlaylistItemListResponse response;
-
-                List<PlaylistItem> results = new List<PlaylistItem>();
-                List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
-                if (sub.IsPlaylist &&
-                    GetChannelUploadsPlaylistId(sub) != sub.PlaylistIdToWatch) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
+                try
                 {
-                    //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
-                    //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
+                    PlaylistItemsResource.ListRequest listRequest = Service.PlaylistItems.List("snippet,status");
+                    listRequest.PlaylistId = sub.PlaylistIdToWatch;
+                    PlaylistItemListResponse response;
 
-                    listRequest.MaxResults = 50; //50 is the maximum
-                    response = listRequest.Execute();
-                    results.AddRange(response.Items);
-
-                    while (response.NextPageToken != null)
+                    List<PlaylistItem> results = new List<PlaylistItem>();
+                    List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
+                    if (sub.IsPlaylist &&
+                        GetChannelUploadsPlaylistId(sub) != sub.PlaylistIdToWatch) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
                     {
-                        listRequest.PageToken = response.NextPageToken;
+                        //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
+                        //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
+
+                        listRequest.MaxResults = 50; //50 is the maximum
                         response = listRequest.Execute();
                         results.AddRange(response.Items);
-                    }
-                }
-                else
-                {
-                    listRequest.MaxResults = 50;
-                    response = listRequest.Execute();
-                    results.AddRange(response.Items);
 
-                    //If we still haven't gotten any items older than the "sinceDate", get more
-                    if (sinceDate != null)
-                    {
-                        while (!results.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
+                        while (response.NextPageToken != null)
                         {
                             listRequest.PageToken = response.NextPageToken;
                             response = listRequest.Execute();
                             results.AddRange(response.Items);
                         }
                     }
+                    else
+                    {
+                        listRequest.MaxResults = 50;
+                        response = listRequest.Execute();
+                        results.AddRange(response.Items);
+
+                        //If we still haven't gotten any items older than the "sinceDate", get more
+                        if (sinceDate != null)
+                        {
+                            while (!results.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
+                            {
+                                listRequest.PageToken = response.NextPageToken;
+                                response = listRequest.Execute();
+                                results.AddRange(response.Items);
+                            }
+                        }
+                    }
+
+                    //Remove any that do not match the regex filter
+                    if (!string.IsNullOrEmpty(sub.FilterRegex))
+                        results.RemoveAll(p => !Regex.IsMatch(p.Snippet.Title, sub.FilterRegex));
+
+                    //Check to see if any of the sub's private videos have change to public
+                    foreach (string videoId in sub.PrivateVideosToWatch)
+                    {
+                        PlaylistItem matchingItem = results.Find(p => p.Snippet.ResourceId.VideoId == videoId);
+                        if (matchingItem != null && matchingItem.Status.PrivacyStatus == "public")
+                            privateToPublic.Add(matchingItem);
+                    }
+
+                    //Stop watching for private video status change if it is now in "privateToPublic"
+                    sub.PrivateVideosToWatch.RemoveAll(p => privateToPublic.Find(o => o.Snippet.ResourceId.VideoId == p) != null);
+
+                    List<PlaylistItem> recentPrivateVideos = results.Where(p => p.Status != null && p.Status.PrivacyStatus == "private").ToList();
+                    foreach (PlaylistItem video in recentPrivateVideos)
+                    {
+                        string videoId = video.Snippet.ResourceId.VideoId;
+                        if (!sub.PrivateVideosToWatch.Contains(videoId))
+                            sub.PrivateVideosToWatch.Add(videoId);
+
+                        results.Remove(video);
+                    }
+
+                    if (sinceDate != null)
+                        results = results.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
+
+                    results.AddRange(privateToPublic);
+
+                    ////------------------------------------
+                    ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
+                    ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
+                    ////   will get the top 50 results and order them by upload date
+
+                    resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                    ////------------------------------------
                 }
-
-                //Remove any that do not match the regex filter
-                if (!string.IsNullOrEmpty(sub.FilterRegex))
-                    results.RemoveAll(p => !Regex.IsMatch(p.Snippet.Title, sub.FilterRegex));
-
-                //Check to see if any of the sub's private videos have change to public
-                foreach (string videoId in sub.PrivateVideosToWatch)
+                catch (Exception ex)
                 {
-                    PlaylistItem matchingItem = results.Find(p => p.Snippet.ResourceId.VideoId == videoId);
-                    if (matchingItem != null && matchingItem.Status.PrivacyStatus == "public")
-                        privateToPublic.Add(matchingItem);
+                    Console.WriteLine($"Exception when trying to get uploads: {ex.Message}");
                 }
-
-                //Stop watching for private video status change if it is now in "privateToPublic"
-                sub.PrivateVideosToWatch.RemoveAll(p => privateToPublic.Find(o => o.Snippet.ResourceId.VideoId == p) != null);
-
-                List<PlaylistItem> recentPrivateVideos = results.Where(p => p.Status != null && p.Status.PrivacyStatus == "private").ToList();
-                foreach (PlaylistItem video in recentPrivateVideos)
-                {
-                    string videoId = video.Snippet.ResourceId.VideoId;
-                    if (!sub.PrivateVideosToWatch.Contains(videoId))
-                        sub.PrivateVideosToWatch.Add(videoId);
-
-                    results.Remove(video);
-                }
-
-                if (sinceDate != null)
-                    results = results.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
-
-                results.AddRange(privateToPublic);
-
-                ////------------------------------------
-                ////   There is currently a bug with retrieving uploads playlists where the returned order does not match
-                ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
-                ////   will get the top 50 results and order them by upload date
-
-                resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
-                ////------------------------------------
             }
+
+            //Sometimes we sense a new video twice in "newUploads". Not sure why (if it's a YouTube API bug or my code), but this will prevent
+            //notifying for that video twice (removes duplicate videoIds from the results list)
+            resultsByDate = (from v in resultsByDate
+                             group v by v.Snippet.ResourceId.VideoId into g
+                             select g.First()).ToList();
 
             return resultsByDate;
         }
@@ -211,6 +228,30 @@ namespace YouTubeSubscriptionDownloader
                 return null;
 
             return response.Items.FirstOrDefault().ContentDetails.RelatedPlaylists.Uploads;
+        }
+
+        public static async Task DownloadYouTubeVideoAsync(string youTubeVideoId, string destinationFolder, CancellationToken token)
+        {
+            YoutubeClient client = new YoutubeClient();
+            var videoInfo = await client.GetVideoAsync(youTubeVideoId);
+            var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(youTubeVideoId);
+
+            MuxedStreamInfo streamInfo = null;
+            if (Settings.Instance.PreferredQuality != "Highest")
+                streamInfo = streamInfoSet.Muxed.Where(p => p.VideoQualityLabel == Settings.Instance.PreferredQuality).FirstOrDefault();
+
+            if (Settings.Instance.PreferredQuality == "Highest" || streamInfo == null)
+                streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
+
+            string fileExtension = streamInfo.Container.GetFileExtension();
+            string fileName = "[" + videoInfo.Author + "] " + videoInfo.Title + "." + fileExtension;
+
+            //Remove invalid characters from filename
+            string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+            fileName = r.Replace(fileName, "");
+
+            await client.DownloadMediaStreamAsync(streamInfo, Path.Combine(destinationFolder, fileName), cancellationToken: token);
         }
     }
 }

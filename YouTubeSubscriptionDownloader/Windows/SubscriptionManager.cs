@@ -35,11 +35,14 @@ namespace YouTubeSubscriptionDownloader
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            List<Subscription> resultPlaylists = new List<Subscription>();
+            Common.TrackedSubscriptions.Clear();
             foreach (DataGridViewRow item in gridPlaylists.Rows)
-                resultPlaylists.Add(item.Tag as Subscription);
+            {
+                Subscription sub = item.Tag as Subscription;
+                Common.TrackedSubscriptions.Add(sub);
+            }
 
-            SubscriptionsUpdated.Invoke(resultPlaylists); //Todo: this takes a long time
+            Common.SerializeSubscriptions();
 
             this.Close();
         }

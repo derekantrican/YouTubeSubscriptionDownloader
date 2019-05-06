@@ -23,7 +23,7 @@ namespace YouTubeSubscriptionDownloader
         public bool DownloadVideos { get; set; }
         public bool AddToPocket { get; set; }
         public string PocketAuthCode { get; set; }
-        public bool SerializeSubscriptions { get; set; }
+        public bool CheckForMissedUploads { get; set; }
         public int IterationFrequency { get; set; } //In minutes
         public bool StartIterationsOnStartup { get; set; }
         public bool NotificationClickOpensYouTubeVideo { get; set; }
@@ -39,7 +39,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.DownloadVideos = true;
             defaultSettings.AddToPocket = false;
             defaultSettings.PocketAuthCode = "";
-            defaultSettings.SerializeSubscriptions = false;
+            defaultSettings.CheckForMissedUploads = false;
             defaultSettings.IterationFrequency = 5;
             defaultSettings.StartIterationsOnStartup = false;
             defaultSettings.NotificationClickOpensYouTubeVideo = true;

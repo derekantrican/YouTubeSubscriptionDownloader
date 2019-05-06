@@ -19,7 +19,7 @@ namespace YouTubeSubscriptionDownloader
             checkBoxShowThumbnails.Checked = Settings.Instance.ShowThumbnailInNotification;
             checkBoxDownloadVideos.Checked = Settings.Instance.DownloadVideos;
             checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
-            checkBoxSerializeSubscriptions.Checked = Settings.Instance.SerializeSubscriptions;
+            checkBoxSerializeSubscriptions.Checked = Settings.Instance.CheckForMissedUploads;
             numericUpDownIterationFrequency.Value = Settings.Instance.IterationFrequency;
             checkBoxRunIterationsOnStartup.Checked = Settings.Instance.StartIterationsOnStartup;
 
@@ -45,7 +45,7 @@ namespace YouTubeSubscriptionDownloader
             if (!checkBoxAddPocket.Checked)
                 Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)
 
-            Settings.Instance.SerializeSubscriptions = checkBoxSerializeSubscriptions.Checked;
+            Settings.Instance.CheckForMissedUploads = checkBoxSerializeSubscriptions.Checked;
             Settings.Instance.IterationFrequency = Convert.ToInt32(numericUpDownIterationFrequency.Value);
             Settings.Instance.StartIterationsOnStartup = checkBoxRunIterationsOnStartup.Checked;
 
