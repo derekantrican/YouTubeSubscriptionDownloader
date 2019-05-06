@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Models.MediaStreams;
+using YTSubscription = Google.Apis.YouTube.v3.Data.Subscription;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -58,7 +59,7 @@ namespace YouTubeSubscriptionDownloader
         {
             List<Subscription> result = new List<Subscription>();
 
-            SubscriptionsResource.ListRequest listSubscriptions = YouTubeFunctions.Service.Subscriptions.List("snippet");
+            SubscriptionsResource.ListRequest listSubscriptions = Service.Subscriptions.List("snippet");
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
             listSubscriptions.Mine = true;
             listSubscriptions.MaxResults = 50;
@@ -79,11 +80,11 @@ namespace YouTubeSubscriptionDownloader
             return result;
         }
 
-        private static List<Subscription> ConvertSubscriptionItems(List<Google.Apis.YouTube.v3.Data.Subscription> itemList)
+        private static List<Subscription> ConvertSubscriptionItems(List<YTSubscription> itemList)
         {
             List<Subscription> subscriptions = new List<Subscription>();
 
-            foreach (Google.Apis.YouTube.v3.Data.Subscription item in itemList)
+            foreach (YTSubscription item in itemList)
             {
                 Subscription sub = new Subscription()
                 {

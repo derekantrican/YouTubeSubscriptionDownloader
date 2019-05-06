@@ -119,6 +119,18 @@ namespace YouTubeSubscriptionDownloader
             Start(cancelTokenSource.Token);
         }
 
+        private void buttonStop_Click(object sender, EventArgs e)
+        {
+            cancelTokenSource.Cancel();
+
+            buttonStart.Enabled = true;
+            buttonStop.Enabled = false;
+
+            timer.Stop();
+
+            Log("Iterations stopped");
+        }
+
         private void Start(CancellationToken token)
         {
             if (this.IsHandleCreated)
@@ -137,8 +149,7 @@ namespace YouTubeSubscriptionDownloader
                 {
                     this.Invoke((MethodInvoker)delegate
                     {
-                        buttonStart.Enabled = true;
-                        buttonStop.Enabled = false;
+                        buttonStop_Click(null, null);
                     });
                 }
 
@@ -256,18 +267,6 @@ namespace YouTubeSubscriptionDownloader
             string youTubeURL = Common.YOUTUBEBASEURL + youTubeVideoId;
             Settings.PocketClient.Add(new Uri(youTubeURL)).Wait(); //Async
             Log("Video added to Pocket");
-        }
-
-        private void buttonStop_Click(object sender, EventArgs e)
-        {
-            cancelTokenSource.Cancel();
-
-            buttonStop.Enabled = false;
-            buttonStart.Enabled = true;
-
-            timer.Stop();
-
-            Log("Iterations stopped");
         }
 
         private void pictureBoxSettings_Click(object sender, EventArgs e)
