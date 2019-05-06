@@ -25,7 +25,7 @@ using PocketSharp;
 
 namespace YouTubeSubscriptionDownloader
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
         static string ApplicationName = "YouTube Subscription Downloader";
         static string UserSettings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ApplicationName);
@@ -41,7 +41,7 @@ namespace YouTubeSubscriptionDownloader
         List<Subscription> userSubscriptions = new List<Subscription>();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
-        public Form1(bool start = false)
+        public Main(bool start = false)
         {
             InitializeComponent();
             this.HandleCreated += Form1_HandleCreated;

@@ -31,10 +31,10 @@ namespace YouTubeSubscriptionDownloader
             if (args != null && args.Length > 0)
             {
                 if (args.ToList().Contains("start"))
-                    Application.Run(new Form1(true));
+                    Application.Run(new Main(true));
             }
             else
-                Application.Run(new Form1());
+                Application.Run(new Main());
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
