@@ -12,16 +12,17 @@ namespace YouTubeSubscriptionDownloader
         {
             InitializeComponent();
 
+            checkBoxDownloadVideos.Checked = Settings.Instance.DownloadVideos;
             textBoxDownloadDirectory.Text = Settings.Instance.DownloadDirectory;
             comboBoxPreferredQuality.SelectedIndex = comboBoxPreferredQuality.FindStringExact(Settings.Instance.PreferredQuality);
             checkBoxShowNotifications.Checked = Settings.Instance.ShowNotifications;
             comboBoxNotificationClick.SelectedIndex = Settings.Instance.NotificationClickOpensYouTubeVideo ? 0 : 1;
             checkBoxShowThumbnails.Checked = Settings.Instance.ShowThumbnailInNotification;
-            checkBoxDownloadVideos.Checked = Settings.Instance.DownloadVideos;
             checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
-            checkBoxSerializeSubscriptions.Checked = Settings.Instance.CheckForMissedUploads;
-            numericUpDownIterationFrequency.Value = Settings.Instance.IterationFrequency;
+            checkBoxCheckForMissedUploads.Checked = Settings.Instance.CheckForMissedUploads;
+            checkBoxSyncSubscriptions.Checked = Settings.Instance.SyncSubscriptionsWithYouTube;
             checkBoxRunIterationsOnStartup.Checked = Settings.Instance.StartIterationsOnStartup;
+            numericUpDownIterationFrequency.Value = Settings.Instance.IterationFrequency;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
             checkBoxShowNotifications_CheckedChanged(null, null);
@@ -36,18 +37,19 @@ namespace YouTubeSubscriptionDownloader
             }
 
             //Save settings
+            Settings.Instance.DownloadVideos = checkBoxDownloadVideos.Checked;
             Settings.Instance.DownloadDirectory = textBoxDownloadDirectory.Text;
             Settings.Instance.PreferredQuality = comboBoxPreferredQuality.Text;
             Settings.Instance.ShowNotifications = checkBoxShowNotifications.Checked;
             Settings.Instance.NotificationClickOpensYouTubeVideo = comboBoxNotificationClick.SelectedIndex == 0;
             Settings.Instance.ShowThumbnailInNotification = checkBoxShowThumbnails.Checked;
-            Settings.Instance.DownloadVideos = checkBoxDownloadVideos.Checked;
             if (!checkBoxAddPocket.Checked)
                 Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)
 
-            Settings.Instance.CheckForMissedUploads = checkBoxSerializeSubscriptions.Checked;
-            Settings.Instance.IterationFrequency = Convert.ToInt32(numericUpDownIterationFrequency.Value);
+            Settings.Instance.CheckForMissedUploads = checkBoxCheckForMissedUploads.Checked;
+            Settings.Instance.SyncSubscriptionsWithYouTube = checkBoxSyncSubscriptions.Checked;
             Settings.Instance.StartIterationsOnStartup = checkBoxRunIterationsOnStartup.Checked;
+            Settings.Instance.IterationFrequency = Convert.ToInt32(numericUpDownIterationFrequency.Value);
 
             Settings.SaveSettings();
 

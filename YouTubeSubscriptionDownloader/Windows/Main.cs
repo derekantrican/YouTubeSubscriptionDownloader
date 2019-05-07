@@ -21,9 +21,6 @@ namespace YouTubeSubscriptionDownloader
 
         /*====================================================
          * TODO:
-         * 
-         * - add a setting for something like "Automatically get latest subscriptions from YouTube" that will automatically get latest subscriptions (if subscribed to a new channel on YouTube).
-         *      This would also control if a subscription gets removed from this program when unsubscribed on YouTube
          *  
          * - show Subscription Manager on first time run?
          * 
@@ -55,9 +52,10 @@ namespace YouTubeSubscriptionDownloader
             {
                 Log("Getting subscriptions...");
                 Common.DeserializeSubscriptions();
-            }
 
-            buttonStop.Enabled = false;
+                if (!Settings.Instance.CheckForMissedUploads)
+                    Common.TrackedSubscriptions.ForEach(p => p.LastVideoPublishDate = DateTime.Now);
+            }
 
             Log("Ready!");
 
@@ -158,25 +156,6 @@ namespace YouTubeSubscriptionDownloader
             if (token.IsCancellationRequested)
                 return;
 
-            //Log("Getting latest subscriptions from YouTube");
-            //foreach (Subscription missingSubscription in tempUserSubscriptions.Where(p => Common.TrackedSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null))
-            //{
-            //    Subscription sub = AssignUploadsPlaylist(missingSubscription);
-            //    sub.LastVideoPublishDate = GetMostRecentUploadDate(sub);
-            //    Common.TrackedSubscriptions.Add(sub);
-            //}
-
-            //Remove any extraneous (unsubscribed since last time the program was run) subscriptions
-            //List<Subscription> unsubscribedSubscriptions = Common.TrackedSubscriptions.Where(p => tempUserSubscriptions.Where(o => o.Title == p.Title).FirstOrDefault() == null && !p.IsPlaylist).ToList();
-            //foreach (Subscription unsubscribedSubscription in unsubscribedSubscriptions)
-            //    Common.TrackedSubscriptions.Remove(unsubscribedSubscription);
-
-            //if (token.IsCancellationRequested)
-            //    return;
-
-            //Remove any duplicates
-            //Common.TrackedSubscriptions = Common.TrackedSubscriptions.GroupBy(p => p.PlaylistIdToWatch).Select(p => p.First()).ToList();
-
             if (Settings.Instance.CheckForMissedUploads &&
                 (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
@@ -205,6 +184,9 @@ namespace YouTubeSubscriptionDownloader
                 Log("!!NO INTERNET CONNECTION!!");
                 return;
             }
+
+            if (Settings.Instance.SyncSubscriptionsWithYouTube)
+                YouTubeFunctions.UpdateYTSubscriptions().Wait();
 
             bool tempNotificationSetting = Settings.Instance.ShowNotifications;
             if (!showNotifications)

@@ -40,12 +40,12 @@ namespace YouTubeSubscriptionDownloader
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception)
-                Common.DumpException(e.ExceptionObject as Exception);
+                Common.HandleException(e.ExceptionObject as Exception);
         }
 
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            Common.DumpException(e.Exception);
+            Common.HandleException(e.Exception);
         }
     }
 }

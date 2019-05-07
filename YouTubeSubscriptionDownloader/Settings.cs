@@ -23,6 +23,7 @@ namespace YouTubeSubscriptionDownloader
         public int IterationFrequency { get; set; } //In minutes
         public bool StartIterationsOnStartup { get; set; }
         public bool NotificationClickOpensYouTubeVideo { get; set; }
+        public bool SyncSubscriptionsWithYouTube { get; set; }
 
         private static Settings GetDefaultValues()
         {
@@ -39,6 +40,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.IterationFrequency = 5;
             defaultSettings.StartIterationsOnStartup = false;
             defaultSettings.NotificationClickOpensYouTubeVideo = true;
+            defaultSettings.SyncSubscriptionsWithYouTube = false;
 
             return defaultSettings;
         }
@@ -74,7 +76,7 @@ namespace YouTubeSubscriptionDownloader
             catch (Exception ex)
             {
                 Instance = GetDefaultValues();
-                Common.DumpException(ex);
+                Common.HandleException(ex);
             }
         }
         #endregion Read Settings

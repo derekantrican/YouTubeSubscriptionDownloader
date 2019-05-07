@@ -1,4 +1,5 @@
-﻿using PocketSharp;
+﻿using Google;
+using PocketSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -68,6 +69,17 @@ namespace YouTubeSubscriptionDownloader
         {
             if (Settings.Instance.AddToPocket && Settings.Instance.PocketAuthCode != "")
                 Settings.PocketClient = new PocketClient(POCKETCONSUMERKEY, Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
+        }
+
+        public static void HandleException(Exception ex)
+        {
+            if (ex is WebException ||
+                ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.InternalServerError)
+            {
+                Console.WriteLine("There was a problem contacting YouTube");
+            }
+            else
+                DumpException(ex);
         }
 
         public static void DumpException(Exception ex)

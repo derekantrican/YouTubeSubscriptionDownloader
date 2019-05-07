@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -80,6 +81,25 @@ namespace YouTubeSubscriptionDownloader
             return result;
         }
 
+        public async static Task UpdateYTSubscriptions()
+        {
+            try
+            {
+                List<Subscription> currentSubs = await GetUserSubscriptionsAsync(CancellationToken.None);
+
+                List<Subscription> newSubs = currentSubs.Where(p => Common.TrackedSubscriptions.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null).ToList();
+                List<Subscription> deletedSubs = Common.TrackedSubscriptions.Where(p => currentSubs.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null && !p.IsPlaylist).ToList();
+
+                Common.TrackedSubscriptions.RemoveAll(p => deletedSubs.Contains(p)); //Remove unsubscribed subscriptions
+
+                Common.TrackedSubscriptions.AddRange(newSubs); //Add new subscriptions
+            }
+            catch (Exception ex)
+            {
+                Common.HandleException(ex);
+            }
+        }
+
         private static List<Subscription> ConvertSubscriptionItems(List<YTSubscription> itemList)
         {
             List<Subscription> subscriptions = new List<Subscription>();
@@ -89,7 +109,8 @@ namespace YouTubeSubscriptionDownloader
                 Subscription sub = new Subscription()
                 {
                     ChannelId = item.Snippet.ResourceId.ChannelId,
-                    Title = item.Snippet.Title
+                    Title = item.Snippet.Title,
+                    LastVideoPublishDate = DateTime.Now //Get all videos from this point onwards
                 };
 
                 subscriptions.Add(sub);
@@ -108,7 +129,7 @@ namespace YouTubeSubscriptionDownloader
             string playlistTitle = response.Items.FirstOrDefault().Snippet.Title;
 
             Subscription playlistSubscription = new Subscription();
-            playlistSubscription.LastVideoPublishDate = DateTime.Now;
+            playlistSubscription.LastVideoPublishDate = DateTime.Now; //Get all videos from this point onwards
             playlistSubscription.ChannelId = channelId;
             playlistSubscription.PlaylistIdToWatch = playlistId;
             playlistSubscription.Title = playlistTitle;
@@ -205,7 +226,7 @@ namespace YouTubeSubscriptionDownloader
                 }
                 catch (Exception ex)
                 {
-                    Common.DumpException(ex);
+                    Common.HandleException(ex);
                 }
             }
 
