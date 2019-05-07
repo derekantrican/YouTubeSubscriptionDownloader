@@ -55,7 +55,7 @@ namespace YouTubeSubscriptionDownloader
             });
         }
 
-        public static List<Subscription> GetUserSubscriptions(CancellationToken token)
+        public async static Task<List<Subscription>> GetUserSubscriptionsAsync(CancellationToken token)
         {
             List<Subscription> result = new List<Subscription>();
 
@@ -63,13 +63,13 @@ namespace YouTubeSubscriptionDownloader
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
             listSubscriptions.Mine = true;
             listSubscriptions.MaxResults = 50;
-            SubscriptionListResponse response = listSubscriptions.Execute();
+            SubscriptionListResponse response = await listSubscriptions.ExecuteAsync();
 
             while (response.NextPageToken != null && !token.IsCancellationRequested)
             {
                 result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
                 listSubscriptions.PageToken = response.NextPageToken;
-                response = listSubscriptions.Execute();
+                response = await listSubscriptions.ExecuteAsync();
             }
 
             result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
@@ -117,7 +117,7 @@ namespace YouTubeSubscriptionDownloader
             return playlistSubscription;
         }
 
-        public static List<PlaylistItem> GetMostRecentUploads(Subscription sub, DateTime? sinceDate = null)
+        public async static Task<List<PlaylistItem>> GetMostRecentUploadsAsync(Subscription sub, DateTime? sinceDate = null)
         {
             List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
             if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
@@ -137,13 +137,13 @@ namespace YouTubeSubscriptionDownloader
                         //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
 
                         listRequest.MaxResults = 50; //50 is the maximum
-                        response = listRequest.Execute();
+                        response = await listRequest.ExecuteAsync();
                         results.AddRange(response.Items);
 
                         while (response.NextPageToken != null)
                         {
                             listRequest.PageToken = response.NextPageToken;
-                            response = listRequest.Execute();
+                            response = await listRequest.ExecuteAsync();
                             results.AddRange(response.Items);
                         }
                     }
@@ -159,7 +159,7 @@ namespace YouTubeSubscriptionDownloader
                             while (!results.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
                             {
                                 listRequest.PageToken = response.NextPageToken;
-                                response = listRequest.Execute();
+                                response = await listRequest.ExecuteAsync();
                                 results.AddRange(response.Items);
                             }
                         }

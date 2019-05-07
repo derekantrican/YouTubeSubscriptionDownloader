@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace YouTubeSubscriptionDownloader
@@ -29,9 +30,6 @@ namespace YouTubeSubscriptionDownloader
             int newRowIndex = gridPlaylists.Rows.Add(playlist.Title, playlist.FilterRegex);
             gridPlaylists.Rows[newRowIndex].Tag = playlist;
         }
-
-        public delegate void SubscriptionsUpdatedDelegate(List<Subscription> updatedSubscriptions);
-        public event SubscriptionsUpdatedDelegate SubscriptionsUpdated;
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
@@ -66,7 +64,7 @@ namespace YouTubeSubscriptionDownloader
 
                 ContextMenu contexMenu = new ContextMenu();
                 MenuItem openItem = new MenuItem() { Text = "Open" };
-                openItem.Click += (s, args) => { Process.Start("https://www.youtube.com/playlist?list=" + (gridPlaylists.Rows[index].Tag as Subscription).PlaylistIdToWatch); };
+                openItem.Click += (s, args) => { Process.Start(Common.YOUTUBEPLAYLISTBASEURL + (gridPlaylists.Rows[index].Tag as Subscription).PlaylistIdToWatch); };
                 contexMenu.MenuItems.Add(openItem);
 
                 MenuItem removeItem = new MenuItem() { Text = "Remove" };
@@ -83,6 +81,27 @@ namespace YouTubeSubscriptionDownloader
         {
             if (e.KeyCode == Keys.Delete)
                 gridPlaylists.Rows.Remove(gridPlaylists.SelectedRows[0]);
+        }
+
+        private void ButtonGetYTSubscriptions_Click(object sender, EventArgs e)
+        {
+            //Todo: maybe add an alert (only for the first time) that there is a setting to do this automatically
+            Cursor.Current = Cursors.WaitCursor;
+
+            List<Subscription> existingSubs = new List<Subscription>();
+            foreach (DataGridViewRow item in gridPlaylists.Rows)
+                existingSubs.Add(item.Tag as Subscription);
+
+            List<Subscription> userSubs = YouTubeFunctions.GetUserSubscriptionsAsync(CancellationToken.None).Result;
+            foreach (Subscription sub in userSubs)
+            {
+                //Make sure it is not already in the list
+                if (existingSubs.FirstOrDefault(p => p.PlaylistIdToWatch == sub.PlaylistIdToWatch) == null)
+                    Add(sub);
+            }
+
+            gridPlaylists.FirstDisplayedScrollingRowIndex = gridPlaylists.RowCount - 1; //Scroll to bottom of list to show item was added
+            Cursor.Current = Cursors.Default;
         }
 
         private void pictureBoxAdd_Click(object sender, EventArgs e)
@@ -127,21 +146,19 @@ namespace YouTubeSubscriptionDownloader
         {
             //Do resizing/repositioning of all contents in the window
 
-            gridPlaylists.Height = this.Height - 189;
+            gridPlaylists.Height = this.Height - 227;
             gridPlaylists.Width = this.Width - 22;
             gridPlaylists.Columns[0].Width = (int)(gridPlaylists.Width * 0.75) - 5;
             gridPlaylists.Columns[1].Width = -2; //AutoSize
 
-            pictureBoxAdd.Left = this.Width - 48;
-            textBoxPlaylistURL.Width = this.Width - 135;
-            textBoxRegex.Width = this.Width - 175;
+            groupBoxManualSub.Width = this.Width - 25;
+            textBoxPlaylistURL.Width = this.Width - 139;
+            textBoxRegex.Width = this.Width - 179;
 
-            labelPlaylistURL.Top = this.Height - 180;
-            textBoxPlaylistURL.Top = this.Height - 183;
-            pictureBoxAdd.Top = this.Height - 183;
-
-            labelRegex.Top = this.Height - 157;
-            textBoxRegex.Top = this.Height - 160;
+            buttonGetYTSubscriptions.Top = this.Height - 221;
+            buttonGetYTSubscriptions.Left = this.Width - 206;
+            groupBoxManualSub.Top = this.Height - 180;
+            pictureBoxAdd.Left = groupBoxManualSub.Width - 26;
         }
     }
 }

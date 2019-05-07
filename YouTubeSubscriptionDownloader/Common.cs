@@ -16,7 +16,8 @@ namespace YouTubeSubscriptionDownloader
         public static string SubscriptionsPath = Path.Combine(UserSettings, "Subscriptions.xml");
         public static string SettingsPath = Path.Combine(UserSettings, "Settings.xml");
 
-        public const string YOUTUBEBASEURL = "https://www.youtube.com/watch?v=";
+        public const string YOUTUBEVIDEOBASEURL = "https://www.youtube.com/watch?v=";
+        public const string YOUTUBEPLAYLISTBASEURL = "https://www.youtube.com/playlist?list=";
         public const string POCKETCONSUMERKEY = "69847-fc525ffd3205de609a7429bf";
 
         public static List<Subscription> TrackedSubscriptions = new List<Subscription>();
@@ -31,7 +32,6 @@ namespace YouTubeSubscriptionDownloader
             }
             catch
             {
-                //Log("!!NO INTERNET CONNECTION!!");
                 return false;
             }
         }
