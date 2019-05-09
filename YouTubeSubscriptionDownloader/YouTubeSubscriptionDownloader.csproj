@@ -167,6 +167,8 @@
     <None Include="FodyWeavers.xml" />
     <None Include="Resources\playlist.png" />
     <None Include="Resources\plus-black-symbol.png" />
+    <None Include="Resources\GooglePayButton.png" />
+    <None Include="Resources\PayPalButton.png" />
     <Content Include="youtubedownload_wFk_icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
