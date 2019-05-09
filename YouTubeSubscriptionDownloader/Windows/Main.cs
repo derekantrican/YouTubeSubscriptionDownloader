@@ -129,26 +129,13 @@ namespace YouTubeSubscriptionDownloader
 
         private void Start(CancellationToken token)
         {
-            if (this.IsHandleCreated)
-            {
-                this.Invoke((MethodInvoker)delegate
-                {
-                    richTextBoxLog.Clear();
-                    buttonStart.Enabled = false;
-                    buttonStop.Enabled = true;
-                });
-            }
+                richTextBoxLog.Clear();
+                buttonStart.Enabled = false;
+                buttonStop.Enabled = true;
 
             if (!Common.HasInternetConnection())
             {
-                if (this.IsHandleCreated)
-                {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        buttonStop_Click(null, null);
-                    });
-                }
-
+                buttonStop_Click(null, null);
                 return;
             }
 
