@@ -38,7 +38,7 @@
             this.checkBoxShowNotifications = new System.Windows.Forms.CheckBox();
             this.checkBoxDownloadVideos = new System.Windows.Forms.CheckBox();
             this.checkBoxAddPocket = new System.Windows.Forms.CheckBox();
-            this.checkBoxSerializeSubscriptions = new System.Windows.Forms.CheckBox();
+            this.checkBoxCheckForMissedUploads = new System.Windows.Forms.CheckBox();
             this.labelIterationFrequency = new System.Windows.Forms.Label();
             this.numericUpDownIterationFrequency = new System.Windows.Forms.NumericUpDown();
             this.labelMinutes = new System.Windows.Forms.Label();
@@ -46,12 +46,13 @@
             this.checkBoxShowThumbnails = new System.Windows.Forms.CheckBox();
             this.comboBoxNotificationClick = new System.Windows.Forms.ComboBox();
             this.labelClickNotification = new System.Windows.Forms.Label();
+            this.checkBoxSyncSubscriptions = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(258, 267);
+            this.buttonCancel.Location = new System.Drawing.Point(256, 314);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 0;
@@ -61,7 +62,7 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(177, 267);
+            this.buttonSave.Location = new System.Drawing.Point(175, 314);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 1;
@@ -156,18 +157,18 @@
             // 
             // checkBoxSerializeSubscriptions
             // 
-            this.checkBoxSerializeSubscriptions.AutoSize = true;
-            this.checkBoxSerializeSubscriptions.Location = new System.Drawing.Point(12, 193);
-            this.checkBoxSerializeSubscriptions.Name = "checkBoxSerializeSubscriptions";
-            this.checkBoxSerializeSubscriptions.Size = new System.Drawing.Size(291, 17);
-            this.checkBoxSerializeSubscriptions.TabIndex = 10;
-            this.checkBoxSerializeSubscriptions.Text = "Download all uploads since last time program was used?";
-            this.checkBoxSerializeSubscriptions.UseVisualStyleBackColor = true;
+            this.checkBoxCheckForMissedUploads.AutoSize = true;
+            this.checkBoxCheckForMissedUploads.Location = new System.Drawing.Point(12, 193);
+            this.checkBoxCheckForMissedUploads.Name = "checkBoxSerializeSubscriptions";
+            this.checkBoxCheckForMissedUploads.Size = new System.Drawing.Size(291, 17);
+            this.checkBoxCheckForMissedUploads.TabIndex = 10;
+            this.checkBoxCheckForMissedUploads.Text = "Download all uploads since last time program was used?";
+            this.checkBoxCheckForMissedUploads.UseVisualStyleBackColor = true;
             // 
             // labelIterationFrequency
             // 
             this.labelIterationFrequency.AutoSize = true;
-            this.labelIterationFrequency.Location = new System.Drawing.Point(9, 237);
+            this.labelIterationFrequency.Location = new System.Drawing.Point(8, 288);
             this.labelIterationFrequency.Name = "labelIterationFrequency";
             this.labelIterationFrequency.Size = new System.Drawing.Size(91, 13);
             this.labelIterationFrequency.TabIndex = 11;
@@ -175,7 +176,7 @@
             // 
             // numericUpDownIterationFrequency
             // 
-            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(106, 235);
+            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(105, 286);
             this.numericUpDownIterationFrequency.Minimum = new decimal(new int[] {
             1,
             0,
@@ -193,7 +194,7 @@
             // labelMinutes
             // 
             this.labelMinutes.AutoSize = true;
-            this.labelMinutes.Location = new System.Drawing.Point(152, 237);
+            this.labelMinutes.Location = new System.Drawing.Point(151, 288);
             this.labelMinutes.Name = "labelMinutes";
             this.labelMinutes.Size = new System.Drawing.Size(43, 13);
             this.labelMinutes.TabIndex = 13;
@@ -202,7 +203,7 @@
             // checkBoxRunIterationsOnStartup
             // 
             this.checkBoxRunIterationsOnStartup.AutoSize = true;
-            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 217);
+            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(12, 259);
             this.checkBoxRunIterationsOnStartup.Name = "checkBoxRunIterationsOnStartup";
             this.checkBoxRunIterationsOnStartup.Size = new System.Drawing.Size(228, 17);
             this.checkBoxRunIterationsOnStartup.TabIndex = 14;
@@ -240,11 +241,21 @@
             this.labelClickNotification.TabIndex = 16;
             this.labelClickNotification.Text = "Notification click...";
             // 
+            // checkBoxSyncSubscriptions
+            // 
+            this.checkBoxSyncSubscriptions.Location = new System.Drawing.Point(12, 216);
+            this.checkBoxSyncSubscriptions.Name = "checkBoxSyncSubscriptions";
+            this.checkBoxSyncSubscriptions.Size = new System.Drawing.Size(319, 37);
+            this.checkBoxSyncSubscriptions.TabIndex = 18;
+            this.checkBoxSyncSubscriptions.Text = "Sync subscriptions with YouTube? (does not affect manual playlist subscriptions)";
+            this.checkBoxSyncSubscriptions.UseVisualStyleBackColor = true;
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 299);
+            this.ClientSize = new System.Drawing.Size(343, 349);
+            this.Controls.Add(this.checkBoxSyncSubscriptions);
             this.Controls.Add(this.comboBoxNotificationClick);
             this.Controls.Add(this.labelClickNotification);
             this.Controls.Add(this.checkBoxShowThumbnails);
@@ -252,7 +263,7 @@
             this.Controls.Add(this.labelMinutes);
             this.Controls.Add(this.numericUpDownIterationFrequency);
             this.Controls.Add(this.labelIterationFrequency);
-            this.Controls.Add(this.checkBoxSerializeSubscriptions);
+            this.Controls.Add(this.checkBoxCheckForMissedUploads);
             this.Controls.Add(this.checkBoxAddPocket);
             this.Controls.Add(this.checkBoxDownloadVideos);
             this.Controls.Add(this.checkBoxShowNotifications);
@@ -285,7 +296,7 @@
         private System.Windows.Forms.CheckBox checkBoxShowNotifications;
         private System.Windows.Forms.CheckBox checkBoxDownloadVideos;
         private System.Windows.Forms.CheckBox checkBoxAddPocket;
-        private System.Windows.Forms.CheckBox checkBoxSerializeSubscriptions;
+        private System.Windows.Forms.CheckBox checkBoxCheckForMissedUploads;
         private System.Windows.Forms.Label labelIterationFrequency;
         private System.Windows.Forms.NumericUpDown numericUpDownIterationFrequency;
         private System.Windows.Forms.Label labelMinutes;
@@ -293,5 +304,6 @@
         private System.Windows.Forms.CheckBox checkBoxShowThumbnails;
         private System.Windows.Forms.ComboBox comboBoxNotificationClick;
         private System.Windows.Forms.Label labelClickNotification;
+        private System.Windows.Forms.CheckBox checkBoxSyncSubscriptions;
     }
 }
