@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace YouTubeSubscriptionDownloader
 {
-    public partial class PlaylistManager : Form
+    public partial class SubscriptionManager : Form
     {
-        public PlaylistManager()
+        public SubscriptionManager()
         {
             InitializeComponent();
 
@@ -31,15 +31,22 @@ namespace YouTubeSubscriptionDownloader
             gridPlaylists.Rows[newRowIndex].Tag = playlist;
         }
 
+        private List<Subscription> GetGridSubs()
+        {
+            List<Subscription> subsInGrid = new List<Subscription>();
+            foreach (DataGridViewRow row in gridPlaylists.Rows)
+            {
+                Subscription sub = row.Tag as Subscription;
+                sub.FilterRegex = row.Cells[1].Value == null ? "" : row.Cells[1].Value.ToString();
+            }
+
+            return subsInGrid;
+        }
+
         private void buttonSave_Click(object sender, EventArgs e)
         {
             Common.TrackedSubscriptions.Clear();
-            foreach (DataGridViewRow item in gridPlaylists.Rows)
-            {
-                Subscription sub = item.Tag as Subscription;
-                Common.TrackedSubscriptions.Add(sub);
-            }
-
+            Common.TrackedSubscriptions.AddRange(GetGridSubs());
             Common.SerializeSubscriptions();
 
             this.Close();
@@ -85,14 +92,18 @@ namespace YouTubeSubscriptionDownloader
 
         private void ButtonGetYTSubscriptions_Click(object sender, EventArgs e)
         {
-            //Todo: maybe add an alert (only for the first time) that there is a setting to do this automatically
+            if (Settings.Instance.FirstTimeNotifySyncSetting)
+            {
+                MessageBox.Show("Tip: In the Settings, you can turn on \"Sync subscriptions with YouTube\" where the program will " +
+                                "automatically start tracking any new channels you subscribe to on YouTube (and stop tracking " +
+                                "unsubscribed ones)");
+                Settings.Instance.FirstTimeNotifySyncSetting = false;
+            }
+
             Cursor.Current = Cursors.WaitCursor;
 
-            List<Subscription> existingSubs = new List<Subscription>();
-            foreach (DataGridViewRow item in gridPlaylists.Rows)
-                existingSubs.Add(item.Tag as Subscription);
-
-            List<Subscription> userSubs = YouTubeFunctions.GetUserSubscriptionsAsync(CancellationToken.None).Result;
+            List<Subscription> existingSubs = GetGridSubs();
+            List<Subscription> userSubs = YouTubeFunctions.GetUserSubscriptions(CancellationToken.None);
             foreach (Subscription sub in userSubs)
             {
                 //Make sure it is not already in the list
@@ -108,10 +119,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (IsValidPlaylist(textBoxPlaylistURL.Text))
             {
-                List<Subscription> playlists = new List<Subscription>();
-                foreach (DataGridViewRow item in gridPlaylists.Rows)
-                    playlists.Add(item.Tag as Subscription);
-
+                List<Subscription> playlists = GetGridSubs();
                 if (playlists.FirstOrDefault(p => textBoxPlaylistURL.Text.Contains(p.PlaylistIdToWatch)) != null)
                     MessageBox.Show("That playlist already exists in the list");
                 else

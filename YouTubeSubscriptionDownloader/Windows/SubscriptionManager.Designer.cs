@@ -1,6 +1,6 @@
 ﻿namespace YouTubeSubscriptionDownloader
 {
-    partial class PlaylistManager
+    partial class SubscriptionManager
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlaylistManager));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SubscriptionManager));
             this.buttonSave = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.labelPlaylistOverview = new System.Windows.Forms.Label();
@@ -38,17 +38,17 @@
             this.labelRegex = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.groupBoxManualSub = new System.Windows.Forms.GroupBox();
+            this.pictureBoxAdd = new System.Windows.Forms.PictureBox();
+            this.buttonGetYTSubscriptions = new System.Windows.Forms.Button();
             this.gridPlaylists = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.buttonGetYTSubscriptions = new System.Windows.Forms.Button();
-            this.pictureBoxAdd = new System.Windows.Forms.PictureBox();
-            this.groupBoxManualSub = new System.Windows.Forms.GroupBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridPlaylists)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).BeginInit();
             this.groupBoxManualSub.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPlaylists)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonSave
@@ -136,6 +136,41 @@
             this.panel2.Size = new System.Drawing.Size(781, 513);
             this.panel2.TabIndex = 12;
             // 
+            // groupBoxManualSub
+            // 
+            this.groupBoxManualSub.Controls.Add(this.textBoxRegex);
+            this.groupBoxManualSub.Controls.Add(this.pictureBoxAdd);
+            this.groupBoxManualSub.Controls.Add(this.textBoxPlaylistURL);
+            this.groupBoxManualSub.Controls.Add(this.labelPlaylistURL);
+            this.groupBoxManualSub.Controls.Add(this.labelRegex);
+            this.groupBoxManualSub.Location = new System.Drawing.Point(6, 443);
+            this.groupBoxManualSub.Name = "groupBoxManualSub";
+            this.groupBoxManualSub.Size = new System.Drawing.Size(772, 68);
+            this.groupBoxManualSub.TabIndex = 13;
+            this.groupBoxManualSub.TabStop = false;
+            this.groupBoxManualSub.Text = "Manual Subscription";
+            // 
+            // pictureBoxAdd
+            // 
+            this.pictureBoxAdd.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.plus_black_symbol;
+            this.pictureBoxAdd.Location = new System.Drawing.Point(746, 19);
+            this.pictureBoxAdd.Name = "pictureBoxAdd";
+            this.pictureBoxAdd.Size = new System.Drawing.Size(20, 20);
+            this.pictureBoxAdd.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxAdd.TabIndex = 7;
+            this.pictureBoxAdd.TabStop = false;
+            this.pictureBoxAdd.Click += new System.EventHandler(this.pictureBoxAdd_Click);
+            // 
+            // buttonGetYTSubscriptions
+            // 
+            this.buttonGetYTSubscriptions.Location = new System.Drawing.Point(591, 402);
+            this.buttonGetYTSubscriptions.Name = "buttonGetYTSubscriptions";
+            this.buttonGetYTSubscriptions.Size = new System.Drawing.Size(178, 23);
+            this.buttonGetYTSubscriptions.TabIndex = 12;
+            this.buttonGetYTSubscriptions.Text = "Get Subscriptions From YouTube";
+            this.buttonGetYTSubscriptions.UseVisualStyleBackColor = true;
+            this.buttonGetYTSubscriptions.Click += new System.EventHandler(this.ButtonGetYTSubscriptions_Click);
+            // 
             // gridPlaylists
             // 
             this.gridPlaylists.AllowUserToAddRows = false;
@@ -161,47 +196,13 @@
             // 
             this.Column1.HeaderText = "Playlist";
             this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
             // 
             // Column2
             // 
             this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.Column2.HeaderText = "Search Regex";
             this.Column2.Name = "Column2";
-            // 
-            // buttonGetYTSubscriptions
-            // 
-            this.buttonGetYTSubscriptions.Location = new System.Drawing.Point(591, 402);
-            this.buttonGetYTSubscriptions.Name = "buttonGetYTSubscriptions";
-            this.buttonGetYTSubscriptions.Size = new System.Drawing.Size(178, 23);
-            this.buttonGetYTSubscriptions.TabIndex = 12;
-            this.buttonGetYTSubscriptions.Text = "Get Subscriptions From YouTube";
-            this.buttonGetYTSubscriptions.UseVisualStyleBackColor = true;
-            this.buttonGetYTSubscriptions.Click += new System.EventHandler(this.ButtonGetYTSubscriptions_Click);
-            // 
-            // pictureBoxAdd
-            // 
-            this.pictureBoxAdd.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.plus_black_symbol;
-            this.pictureBoxAdd.Location = new System.Drawing.Point(746, 19);
-            this.pictureBoxAdd.Name = "pictureBoxAdd";
-            this.pictureBoxAdd.Size = new System.Drawing.Size(20, 20);
-            this.pictureBoxAdd.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBoxAdd.TabIndex = 7;
-            this.pictureBoxAdd.TabStop = false;
-            this.pictureBoxAdd.Click += new System.EventHandler(this.pictureBoxAdd_Click);
-            // 
-            // groupBoxManualSub
-            // 
-            this.groupBoxManualSub.Controls.Add(this.textBoxRegex);
-            this.groupBoxManualSub.Controls.Add(this.pictureBoxAdd);
-            this.groupBoxManualSub.Controls.Add(this.textBoxPlaylistURL);
-            this.groupBoxManualSub.Controls.Add(this.labelPlaylistURL);
-            this.groupBoxManualSub.Controls.Add(this.labelRegex);
-            this.groupBoxManualSub.Location = new System.Drawing.Point(6, 443);
-            this.groupBoxManualSub.Name = "groupBoxManualSub";
-            this.groupBoxManualSub.Size = new System.Drawing.Size(772, 68);
-            this.groupBoxManualSub.TabIndex = 13;
-            this.groupBoxManualSub.TabStop = false;
-            this.groupBoxManualSub.Text = "Manual Subscription";
             // 
             // PlaylistManager
             // 
@@ -219,10 +220,10 @@
             this.Resize += new System.EventHandler(this.PlaylistManager_Resize);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridPlaylists)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).EndInit();
             this.groupBoxManualSub.ResumeLayout(false);
             this.groupBoxManualSub.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAdd)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPlaylists)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -238,10 +239,10 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.DataGridView gridPlaylists;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.GroupBox groupBoxManualSub;
         private System.Windows.Forms.PictureBox pictureBoxAdd;
         private System.Windows.Forms.Button buttonGetYTSubscriptions;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
     }
 }

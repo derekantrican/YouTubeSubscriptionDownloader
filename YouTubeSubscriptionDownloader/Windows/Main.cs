@@ -19,15 +19,6 @@ namespace YouTubeSubscriptionDownloader
 
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
-        /*====================================================
-         * TODO:
-         *  
-         * - show Subscription Manager on first time run?
-         * 
-         * - need to handle editing in Subscription Manager
-         * ====================================================
-         */
-
         public Main(bool start = false)
         {
             InitializeComponent();
@@ -48,6 +39,16 @@ namespace YouTubeSubscriptionDownloader
                 YouTubeFunctions.AuthService();
             }
 
+            if (Settings.Instance.FirstTimeShowSubscriptionManager)
+            {
+                MessageBox.Show("Welcome to YouTube Subscription Downloader!\n\nSince this is your first time running the program, " +
+                                "we'll show you the Subscription Manager where you can set up your tracked subscriptions");
+
+                SubscriptionManager manager = new SubscriptionManager();
+                manager.ShowDialog();
+
+                Settings.Instance.FirstTimeShowSubscriptionManager = false;
+            }
             if (File.Exists(Common.SubscriptionsPath)) //Don't show the message if there are no subscriptions saved (eg first time startup)
             {
                 Log("Getting subscriptions...");
@@ -172,7 +173,7 @@ namespace YouTubeSubscriptionDownloader
             }
 
             if (Settings.Instance.SyncSubscriptionsWithYouTube)
-                YouTubeFunctions.UpdateYTSubscriptions().Wait();
+                YouTubeFunctions.UpdateYTSubscriptions();
 
             bool tempNotificationSetting = Settings.Instance.ShowNotifications;
             if (!showNotifications)
@@ -260,7 +261,7 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
-            PlaylistManager manager = new PlaylistManager();
+            SubscriptionManager manager = new SubscriptionManager();
             manager.ShowDialog();
         }
 
@@ -301,6 +302,7 @@ namespace YouTubeSubscriptionDownloader
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Common.SerializeSubscriptions();
+            Settings.SaveSettings();
         }
     }
 }

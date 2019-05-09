@@ -24,6 +24,8 @@ namespace YouTubeSubscriptionDownloader
         public bool StartIterationsOnStartup { get; set; }
         public bool NotificationClickOpensYouTubeVideo { get; set; }
         public bool SyncSubscriptionsWithYouTube { get; set; }
+        public bool FirstTimeShowSubscriptionManager { get; set; }
+        public bool FirstTimeNotifySyncSetting { get; set; }
 
         private static Settings GetDefaultValues()
         {
@@ -41,6 +43,8 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.StartIterationsOnStartup = false;
             defaultSettings.NotificationClickOpensYouTubeVideo = true;
             defaultSettings.SyncSubscriptionsWithYouTube = false;
+            defaultSettings.FirstTimeShowSubscriptionManager = true;
+            defaultSettings.FirstTimeNotifySyncSetting = true;
 
             return defaultSettings;
         }
@@ -61,6 +65,9 @@ namespace YouTubeSubscriptionDownloader
         {
             try
             {
+                if (!File.Exists(Common.SettingsPath))
+                    Instance = GetDefaultValues();
+
                 using (FileStream fileStream = new FileStream(Common.SettingsPath, FileMode.Open))
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
