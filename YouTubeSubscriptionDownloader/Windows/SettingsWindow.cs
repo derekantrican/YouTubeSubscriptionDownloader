@@ -113,8 +113,8 @@ namespace YouTubeSubscriptionDownloader
 
         private void PictureBoxGoogleWallet_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Thank you for being kind enough to choose Google Pay! Please put \"derekantrican@gmail.com\" as the recipient"); //This is temporary - we should get a better URL like the PayPal one below (or a different method)
-            Process.Start("https://pay.google.com/send/send?authuser=0");
+            MessageBox.Show("Thank you for choosing Google Pay! Please put \"derekantrican@gmail.com\" as the recipient"); //This is temporary - we should get a better URL like the PayPal one below (or a different method)
+            Process.Start("https://pay.google.com/payments/u/0/home#sendRequestMoney");
         }
 
         private void PictureBoxPayPal_Click(object sender, EventArgs e)
