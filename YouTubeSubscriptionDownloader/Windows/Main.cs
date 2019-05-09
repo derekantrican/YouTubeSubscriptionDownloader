@@ -59,9 +59,8 @@ namespace YouTubeSubscriptionDownloader
 
             Log("Ready!");
 
-            //TEMP
-            //if (Settings.Instance.StartIterationsOnStartup || start)
-            //    Start(cancelTokenSource.Token);
+            if (Settings.Instance.StartIterationsOnStartup || start)
+                Start(cancelTokenSource.Token);
         }
 
         private void Form1_HandleCreated(object sender, EventArgs e)
