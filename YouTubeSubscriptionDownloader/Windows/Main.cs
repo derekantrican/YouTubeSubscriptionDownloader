@@ -234,8 +234,11 @@ namespace YouTubeSubscriptionDownloader
             if (!Settings.Instance.ShowThumbnailInNotification)
                 imageURL = null;
 
-            Notification notification = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
-            notification.Show();
+            this.Invoke((MethodInvoker)delegate
+            {
+                Notification notification = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
+                notification.Show();
+            });
         }
 
         private void DownloadYouTubeVideo(string youTubeVideoId, string destinationFolder, CancellationToken token)
