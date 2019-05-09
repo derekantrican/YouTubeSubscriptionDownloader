@@ -56,7 +56,7 @@ namespace YouTubeSubscriptionDownloader
             });
         }
 
-        public static List<Subscription> GetUserSubscriptions(CancellationToken token)
+        public async static Task<List<Subscription>> GetUserSubscriptionsAsync(CancellationToken token)
         {
             List<Subscription> result = new List<Subscription>();
 
@@ -64,13 +64,13 @@ namespace YouTubeSubscriptionDownloader
             listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
             listSubscriptions.Mine = true;
             listSubscriptions.MaxResults = 50;
-            SubscriptionListResponse response = listSubscriptions.Execute();
+            SubscriptionListResponse response = await listSubscriptions.ExecuteAsync();
 
             while (response.NextPageToken != null && !token.IsCancellationRequested)
             {
                 result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
                 listSubscriptions.PageToken = response.NextPageToken;
-                response = listSubscriptions.Execute();
+                response = await listSubscriptions.ExecuteAsync();
             }
 
             result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
@@ -81,11 +81,11 @@ namespace YouTubeSubscriptionDownloader
             return result;
         }
 
-        public static void UpdateYTSubscriptions()
+        public async static Task UpdateYTSubscriptions()
         {
             try
             {
-                List<Subscription> currentSubs = GetUserSubscriptions(CancellationToken.None);
+                List<Subscription> currentSubs = await GetUserSubscriptionsAsync(CancellationToken.None);
 
                 List<Subscription> newSubs = currentSubs.Where(p => Common.TrackedSubscriptions.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null).ToList();
                 List<Subscription> deletedSubs = Common.TrackedSubscriptions.Where(p => currentSubs.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null && !p.IsPlaylist).ToList();

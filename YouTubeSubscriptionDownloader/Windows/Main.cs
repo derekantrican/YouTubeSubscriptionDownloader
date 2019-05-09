@@ -173,7 +173,7 @@ namespace YouTubeSubscriptionDownloader
             }
 
             if (Settings.Instance.SyncSubscriptionsWithYouTube)
-                YouTubeFunctions.UpdateYTSubscriptions();
+                YouTubeFunctions.UpdateYTSubscriptions().Wait();
 
             bool tempNotificationSetting = Settings.Instance.ShowNotifications;
             if (!showNotifications)

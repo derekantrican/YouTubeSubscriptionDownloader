@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace YouTubeSubscriptionDownloader
@@ -38,6 +39,8 @@ namespace YouTubeSubscriptionDownloader
             {
                 Subscription sub = row.Tag as Subscription;
                 sub.FilterRegex = row.Cells[1].Value == null ? "" : row.Cells[1].Value.ToString();
+
+                subsInGrid.Add(sub);
             }
 
             return subsInGrid;
@@ -103,7 +106,11 @@ namespace YouTubeSubscriptionDownloader
             Cursor.Current = Cursors.WaitCursor;
 
             List<Subscription> existingSubs = GetGridSubs();
-            List<Subscription> userSubs = YouTubeFunctions.GetUserSubscriptions(CancellationToken.None);
+
+            Task<List<Subscription>> getUserSubs = Task.Run(() => YouTubeFunctions.GetUserSubscriptionsAsync(CancellationToken.None));
+            getUserSubs.Wait();
+            List<Subscription> userSubs = getUserSubs.Result;
+
             foreach (Subscription sub in userSubs)
             {
                 //Make sure it is not already in the list
