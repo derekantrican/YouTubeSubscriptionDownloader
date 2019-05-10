@@ -74,6 +74,7 @@ namespace YouTubeSubscriptionDownloader
         public static void HandleException(Exception ex)
         {
             if (ex is WebException ||
+                ex is GoogleApiException && (ex as GoogleApiException).InnerException is WebException ||
                 ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.InternalServerError)
             {
                 Console.WriteLine("There was a problem contacting YouTube");

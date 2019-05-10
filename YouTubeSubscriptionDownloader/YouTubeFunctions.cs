@@ -60,25 +60,32 @@ namespace YouTubeSubscriptionDownloader
         {
             List<Subscription> result = new List<Subscription>();
 
-            SubscriptionsResource.ListRequest listSubscriptions = Service.Subscriptions.List("snippet");
-            listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
-            listSubscriptions.Mine = true;
-            listSubscriptions.MaxResults = 50;
-            SubscriptionListResponse response = await listSubscriptions.ExecuteAsync();
-
-            while (response.NextPageToken != null && !token.IsCancellationRequested)
+            try
             {
+                SubscriptionsResource.ListRequest listSubscriptions = Service.Subscriptions.List("snippet");
+                listSubscriptions.Order = SubscriptionsResource.ListRequest.OrderEnum.Alphabetical;
+                listSubscriptions.Mine = true;
+                listSubscriptions.MaxResults = 50;
+                SubscriptionListResponse response = await listSubscriptions.ExecuteAsync();
+
+                while (response.NextPageToken != null && !token.IsCancellationRequested)
+                {
+                    result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
+                    listSubscriptions.PageToken = response.NextPageToken;
+                    response = await listSubscriptions.ExecuteAsync();
+                }
+
                 result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
-                listSubscriptions.PageToken = response.NextPageToken;
-                response = await listSubscriptions.ExecuteAsync();
+
+                //Populate uploads playlists for subscriptions
+                result.ForEach(p => p.PlaylistIdToWatch = GetChannelUploadsPlaylistId(p));
+                return result;
             }
-
-            result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
-
-            //Populate uploads playlists for subscriptions
-            result.ForEach(p => p.PlaylistIdToWatch = GetChannelUploadsPlaylistId(p));
-
-            return result;
+            catch (Exception ex)
+            {
+                Common.HandleException(ex);
+                return Common.TrackedSubscriptions.Where(p => !p.IsPlaylist).ToList(); //As a "default" return the current YouTube subscriptions
+            }
         }
 
         public async static Task UpdateYTSubscriptions()
