@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -74,7 +75,8 @@ namespace YouTubeSubscriptionDownloader
         public static void HandleException(Exception ex)
         {
             if (ex is WebException ||
-                ex is GoogleApiException && (ex as GoogleApiException).InnerException is WebException ||
+                ex.InnerException is WebException ||
+                (ex is TaskCanceledException && (ex as TaskCanceledException).CancellationToken.IsCancellationRequested == false) || //HttpClient timeout
                 ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.InternalServerError)
             {
                 Console.WriteLine("There was a problem contacting YouTube");
