@@ -47,6 +47,9 @@ namespace YouTubeSubscriptionDownloader
                 Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)
 
             Settings.Instance.CheckForMissedUploads = checkBoxCheckForMissedUploads.Checked;
+            if (!checkBoxCheckForMissedUploads.Checked)
+                Common.TrackedSubscriptions.ForEach(p => p.LastVideoPublishDate = DateTime.Now);
+
             Settings.Instance.SyncSubscriptionsWithYouTube = checkBoxSyncSubscriptions.Checked;
             Settings.Instance.StartIterationsOnStartup = checkBoxRunIterationsOnStartup.Checked;
             Settings.Instance.IterationFrequency = Convert.ToInt32(numericUpDownIterationFrequency.Value);
