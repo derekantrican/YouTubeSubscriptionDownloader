@@ -87,14 +87,14 @@ namespace YouTubeSubscriptionDownloader
 
         public static void DumpException(Exception ex)
         {
-            MessageBox.Show("There was an unhandled exception. Please contact the developer and relay this information: \n\nMessage: " + ex?.Message);
-
             string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
             string exceptionString = "";
             exceptionString = $"[{DateTime.Now}] EXCEPTION MESSAGE: {ex?.Message}\n\n";
             exceptionString += $"[{DateTime.Now}] INNER EXCEPTION: {ex?.InnerException}\n\n";
             exceptionString += $"[{DateTime.Now}] STACK TRACE: {ex?.StackTrace}\n\n";
             File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
+
+            MessageBox.Show("There was an unhandled exception. Please contact the developer and relay this information: \n\nMessage: " + ex?.Message);
         }
     }
 }
