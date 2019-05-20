@@ -77,7 +77,8 @@ namespace YouTubeSubscriptionDownloader
             if (ex is WebException ||
                 ex.InnerException is WebException ||
                 (ex is TaskCanceledException && (ex as TaskCanceledException).CancellationToken.IsCancellationRequested == false) || //HttpClient timeout
-                ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.InternalServerError)
+                ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.InternalServerError ||
+                ex.Message.Contains("That's an error")) //Handles the Google error pages like https://i.imgur.com/lFDKFro.png (Todo: in the future handle this with exponential backoff)
             {
                 Console.WriteLine("There was a problem contacting YouTube");
             }
@@ -89,6 +90,7 @@ namespace YouTubeSubscriptionDownloader
         {
             string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
             string exceptionString = "";
+            exceptionString = $"[{DateTime.Now}] EXCEPTION TYPE: {ex?.GetType()}\n\n";
             exceptionString = $"[{DateTime.Now}] EXCEPTION MESSAGE: {ex?.Message}\n\n";
             exceptionString += $"[{DateTime.Now}] INNER EXCEPTION: {ex?.InnerException}\n\n";
             exceptionString += $"[{DateTime.Now}] STACK TRACE: {ex?.StackTrace}\n\n";
