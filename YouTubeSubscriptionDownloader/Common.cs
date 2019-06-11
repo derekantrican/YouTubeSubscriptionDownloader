@@ -78,7 +78,7 @@ namespace YouTubeSubscriptionDownloader
                 ex.InnerException is WebException ||
                 (ex is TaskCanceledException && (ex as TaskCanceledException).CancellationToken.IsCancellationRequested == false) || //HttpClient timeout
                 ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.InternalServerError ||
-                ex.Message.Contains("That's an error")) //Handles the Google error pages like https://i.imgur.com/lFDKFro.png (Todo: in the future handle this with exponential backoff)
+                ex.Message.Contains("That’s an error")) //Handles the Google error pages like https://i.imgur.com/lFDKFro.png (Todo: in the future handle this with exponential backoff)
             {
                 Console.WriteLine("There was a problem contacting YouTube");
             }
@@ -88,13 +88,12 @@ namespace YouTubeSubscriptionDownloader
 
         public static void DumpException(Exception ex)
         {
-            string crashPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YouTube Subscription Downloader");
             string exceptionString = "";
-            exceptionString = $"[{DateTime.Now}] EXCEPTION TYPE: {ex?.GetType()}\n\n";
-            exceptionString = $"[{DateTime.Now}] EXCEPTION MESSAGE: {ex?.Message}\n\n";
+            exceptionString += $"[{DateTime.Now}] EXCEPTION TYPE: {ex?.GetType()}\n\n";
+            exceptionString += $"[{DateTime.Now}] EXCEPTION MESSAGE: {ex?.Message}\n\n";
             exceptionString += $"[{DateTime.Now}] INNER EXCEPTION: {ex?.InnerException}\n\n";
             exceptionString += $"[{DateTime.Now}] STACK TRACE: {ex?.StackTrace}\n\n";
-            File.AppendAllText(Path.Combine(crashPath, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
+            File.AppendAllText(Path.Combine(UserSettings, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
 
             MessageBox.Show("There was an unhandled exception. Please contact the developer and relay this information: \n\nMessage: " + ex?.Message);
         }
