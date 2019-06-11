@@ -77,5 +77,11 @@ namespace YouTubeSubscriptionDownloader
 
             this.Close();
         }
+
+        //Don't steal focus when showing
+        protected override bool ShowWithoutActivation
+        {
+            get { return true; }
+        }
     }
 }
