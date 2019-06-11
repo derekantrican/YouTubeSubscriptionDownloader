@@ -178,7 +178,7 @@ namespace YouTubeSubscriptionDownloader
                     else
                     {
                         listRequest.MaxResults = 50;
-                        response = listRequest.Execute();
+                        response = await listRequest.ExecuteAsync();
                         results.AddRange(response.Items);
 
                         //If we still haven't gotten any items older than the "sinceDate", get more
