@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using YoutubeExplode;
 using YoutubeExplode.Models.MediaStreams;
 using YTSubscription = Google.Apis.YouTube.v3.Data.Subscription;
@@ -154,7 +155,7 @@ namespace YouTubeSubscriptionDownloader
                 {
                     PlaylistItemsResource.ListRequest listRequest = Service.PlaylistItems.List("snippet,status");
                     listRequest.PlaylistId = sub.PlaylistIdToWatch;
-                    PlaylistItemListResponse response;
+                    PlaylistItemListResponse response = null;
 
                     List<PlaylistItem> results = new List<PlaylistItem>();
                     List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
@@ -165,7 +166,22 @@ namespace YouTubeSubscriptionDownloader
                         //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
 
                         listRequest.MaxResults = 50; //50 is the maximum
-                        response = await listRequest.ExecuteAsync();
+
+                        try
+                        {
+                            response = await listRequest.ExecuteAsync();
+                        }
+                        catch (Google.GoogleApiException e)
+                        {
+                            if (e.HttpStatusCode == HttpStatusCode.NotFound)
+                            {
+                                MessageBox.Show($"There was a problem accessing the playlist for {sub.Title}.\n\nPerhaps it has been deleted?");
+                                return resultsByDate;
+                            }
+                            else
+                                throw;
+                        }
+
                         results.AddRange(response.Items);
 
                         while (response.NextPageToken != null)
