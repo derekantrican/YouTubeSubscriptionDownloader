@@ -57,7 +57,7 @@ namespace YouTubeSubscriptionDownloader
             });
         }
 
-        public async static Task<List<Subscription>> GetUserSubscriptionsAsync(CancellationToken token)
+        public async static Task<List<Subscription>> GetUserSubscriptionsAsync(CancellationToken token, bool getUploadsPlaylist = false)
         {
             List<Subscription> result = new List<Subscription>();
 
@@ -78,8 +78,9 @@ namespace YouTubeSubscriptionDownloader
 
                 result.AddRange(ConvertSubscriptionItems(response.Items.ToList()));
 
-                //Populate uploads playlists for subscriptions
-                result.ForEach(p => p.PlaylistIdToWatch = GetChannelUploadsPlaylistId(p));
+                if (getUploadsPlaylist)
+                    result.ForEach(p => p.PlaylistIdToWatch = GetChannelUploadsPlaylistId(p));
+
                 return result;
             }
             catch (Exception ex)
@@ -94,6 +95,15 @@ namespace YouTubeSubscriptionDownloader
             try
             {
                 List<Subscription> currentSubs = await GetUserSubscriptionsAsync(CancellationToken.None);
+
+                foreach (Subscription sub in currentSubs)
+                {
+                    Subscription matchingSub = Common.TrackedSubscriptions.Find(s => s.ChannelId == sub.ChannelId);
+                    if (matchingSub != null)
+                        sub.PlaylistIdToWatch = matchingSub.PlaylistIdToWatch;
+                    else
+                        sub.PlaylistIdToWatch = GetChannelUploadsPlaylistId(sub);
+                }
 
                 List<Subscription> newSubs = currentSubs.Where(p => Common.TrackedSubscriptions.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null).ToList();
                 List<Subscription> deletedSubs = Common.TrackedSubscriptions.Where(p => currentSubs.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null && !p.IsPlaylist).ToList();
@@ -142,6 +152,7 @@ namespace YouTubeSubscriptionDownloader
             playlistSubscription.PlaylistIdToWatch = playlistId;
             playlistSubscription.Title = playlistTitle;
             playlistSubscription.IsPlaylist = true;
+            playlistSubscription.IsPlaylistUploadsPlaylist = playlistId == GetChannelUploadsPlaylistId(playlistSubscription);
 
             return playlistSubscription;
         }
@@ -159,8 +170,7 @@ namespace YouTubeSubscriptionDownloader
 
                     List<PlaylistItem> results = new List<PlaylistItem>();
                     List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
-                    if (sub.IsPlaylist &&
-                        GetChannelUploadsPlaylistId(sub) != sub.PlaylistIdToWatch) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
+                    if (sub.IsPlaylist && !sub.IsPlaylistUploadsPlaylist) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
                     {
                         //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
                         //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists

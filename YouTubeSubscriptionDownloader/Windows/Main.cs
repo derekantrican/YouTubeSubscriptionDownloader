@@ -130,9 +130,9 @@ namespace YouTubeSubscriptionDownloader
 
         private void Start(CancellationToken token)
         {
-                richTextBoxLog.Clear();
-                buttonStart.Enabled = false;
-                buttonStop.Enabled = true;
+            richTextBoxLog.Clear();
+            buttonStart.Enabled = false;
+            buttonStop.Enabled = true;
 
             if (!Common.HasInternetConnection())
             {
@@ -156,6 +156,7 @@ namespace YouTubeSubscriptionDownloader
             Log("Iterations started");
             InitializeTimer();
             timer.Start();
+            Timer_Tick(null, null); //Run first "tick" now rather than waiting for the timer interval to elapse before first "tick"
         }
 
         private void Timer_Tick(object sender, EventArgs e)

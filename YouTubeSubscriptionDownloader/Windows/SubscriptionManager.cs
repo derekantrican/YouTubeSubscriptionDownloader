@@ -107,7 +107,7 @@ namespace YouTubeSubscriptionDownloader
 
             List<Subscription> existingSubs = GetGridSubs();
 
-            Task<List<Subscription>> getUserSubs = Task.Run(() => YouTubeFunctions.GetUserSubscriptionsAsync(CancellationToken.None));
+            Task<List<Subscription>> getUserSubs = Task.Run(() => YouTubeFunctions.GetUserSubscriptionsAsync(CancellationToken.None, true));
             getUserSubs.Wait();
             List<Subscription> userSubs = getUserSubs.Result;
 
