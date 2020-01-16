@@ -239,7 +239,7 @@ namespace YouTubeSubscriptionDownloader
         {
             Log("Adding video to Pocket...");
             string youTubeURL = Common.YOUTUBEVIDEOBASEURL + youTubeVideoId;
-            Settings.PocketClient.Add(new Uri(youTubeURL)).Wait(500); //Async
+            Settings.PocketClient.Add(new Uri(youTubeURL)).Wait(1500); //Async
             Log("Video added to Pocket");
         }
 
