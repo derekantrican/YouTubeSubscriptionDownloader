@@ -235,11 +235,11 @@ namespace YouTubeSubscriptionDownloader
             _ = YouTubeFunctions.DownloadYouTubeVideoAsync(youTubeVideoId, destinationFolder, token);
         }
 
-        private void AddYouTubeVideoToPocket(string youTubeVideoId)
+        private async void AddYouTubeVideoToPocket(string youTubeVideoId)
         {
             Log("Adding video to Pocket...");
             string youTubeURL = Common.YOUTUBEVIDEOBASEURL + youTubeVideoId;
-            Settings.PocketClient.Add(new Uri(youTubeURL)).Wait(1500); //Async
+            await Settings.PocketClient.Add(new Uri(youTubeURL));
             Log("Video added to Pocket");
         }
 
