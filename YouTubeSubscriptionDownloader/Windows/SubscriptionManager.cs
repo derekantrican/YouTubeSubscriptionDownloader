@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -143,13 +144,34 @@ namespace YouTubeSubscriptionDownloader
 
         private bool IsValidPlaylist(string playlistURL)
         {
-            string playlistID = Regex.Match(playlistURL, @"(PL|UU)[\w-]*").ToString();
-            return !string.IsNullOrEmpty(playlistID);
+            return !string.IsNullOrEmpty(playlistURL) && Regex.IsMatch(playlistURL, @"(PL|UU|UC)[\w-]*|/user/");
+        }
+
+        private string GetChannelId(string channelUrl)
+        {
+            using (WebClient client = new WebClient())
+            {
+                string htmlCode = client.DownloadString(channelUrl);
+                return Regex.Match(htmlCode, "\"externalId\":\"(?<channelId>[^\"]*)\"|<meta itemprop=\"channelId\" content=\"(?<channelId>[^\"]*)\">").Groups["channelId"].Value;
+            }
         }
 
         private void AddPlaylistToList(string playlistURL)
         {
-            string playlistID = Regex.Match(playlistURL, @"(PL|UU)[\w-]*").ToString();
+            string playlistID = Regex.Match(playlistURL, @"(PL|UU|UC)[\w-]*").Value;
+
+            if (playlistID.StartsWith("UC"))
+                playlistID = playlistID.Replace("UC", "UU");
+            else if (playlistURL.Contains("/user/"))
+            {
+                playlistID = GetChannelId(playlistURL).Replace("UC", "UU");
+            }
+
+            if (string.IsNullOrEmpty(playlistID))
+            {
+                MessageBox.Show($"Could not find a playlist ID for {playlistURL}");
+                return;
+            }
 
             Subscription playlistSubscription = YouTubeFunctions.GetPlaylistAsSubscription(playlistID);
             playlistSubscription.FilterRegex = textBoxRegex.Text;

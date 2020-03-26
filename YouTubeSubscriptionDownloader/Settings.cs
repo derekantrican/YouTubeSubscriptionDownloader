@@ -66,7 +66,10 @@ namespace YouTubeSubscriptionDownloader
             try
             {
                 if (!File.Exists(Common.SettingsPath))
+                {
                     Instance = GetDefaultValues();
+                    return;
+                }
 
                 using (FileStream fileStream = new FileStream(Common.SettingsPath, FileMode.Open))
                 {
