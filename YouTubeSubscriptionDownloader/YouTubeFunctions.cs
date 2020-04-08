@@ -164,8 +164,7 @@ namespace YouTubeSubscriptionDownloader
             {
                 try
                 {
-                    PlaylistItemsResource.ListRequest listRequest = Service.PlaylistItems.List("snippet,status");
-                    listRequest.PlaylistId = sub.PlaylistIdToWatch;
+                    PlaylistItemsResource.ListRequest listRequest = null;
                     PlaylistItemListResponse response = null;
 
                     List<PlaylistItem> results = new List<PlaylistItem>();
@@ -175,6 +174,8 @@ namespace YouTubeSubscriptionDownloader
                         //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
                         //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
 
+                        listRequest = Service.PlaylistItems.List("snippet,contentDetails,status");
+                        listRequest.PlaylistId = sub.PlaylistIdToWatch;
                         listRequest.MaxResults = 50; //50 is the maximum
 
                         try
@@ -200,10 +201,18 @@ namespace YouTubeSubscriptionDownloader
                             response = await listRequest.ExecuteAsync();
                             results.AddRange(response.Items);
                         }
+
+                        //Snippet.PublishedAt for playlists actually indicates when the video was added to the playlist (not when it was published to YouTube).
+                        //So for non-uploads playlists, we will update the Snippet.PublishedAt with ContentDetails.VideoPublishedAt - which indicates when
+                        //the video was uploaded to YouTube.
+                        results.ForEach(p => p.Snippet.PublishedAt = p.ContentDetails.VideoPublishedAt);
                     }
                     else
                     {
+                        listRequest = Service.PlaylistItems.List("snippet,status");
+                        listRequest.PlaylistId = sub.PlaylistIdToWatch;
                         listRequest.MaxResults = 50;
+
                         response = await listRequest.ExecuteAsync();
                         results.AddRange(response.Items);
 
