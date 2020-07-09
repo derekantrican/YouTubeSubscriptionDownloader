@@ -173,6 +173,8 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
+            Common.DeserializeSubscriptions();
+
             if (Settings.Instance.SyncSubscriptionsWithYouTube)
                 YouTubeFunctions.UpdateYTSubscriptions().Wait();
 

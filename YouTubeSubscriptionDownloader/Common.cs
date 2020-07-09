@@ -61,7 +61,7 @@ namespace YouTubeSubscriptionDownloader
                 using (FileStream fileStream = new FileStream(SubscriptionsPath, FileMode.Open))
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
-                    TrackedSubscriptions.AddRange((List<Subscription>)xmlSerializer.Deserialize(fileStream));
+                    TrackedSubscriptions = (List<Subscription>)xmlSerializer.Deserialize(fileStream);
                 }
             }
         }
