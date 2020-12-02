@@ -259,6 +259,7 @@ namespace YouTubeSubscriptionDownloader
                 }
                 catch (Exception ex)
                 {
+                    ex.Data["sub"] = sub;
                     Common.HandleException(ex);
                 }
             }

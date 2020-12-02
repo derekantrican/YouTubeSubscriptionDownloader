@@ -1,4 +1,5 @@
 ﻿using Google;
+using Newtonsoft.Json;
 using PocketSharp;
 using System;
 using System.Collections.Generic;
@@ -95,7 +96,13 @@ namespace YouTubeSubscriptionDownloader
             exceptionString += $"[{DateTime.Now}] EXCEPTION MESSAGE: {ex?.Message}\n\n";
             exceptionString += $"[{DateTime.Now}] INNER EXCEPTION: {ex?.InnerException}\n\n";
             exceptionString += $"[{DateTime.Now}] STACK TRACE: {ex?.StackTrace}\n\n";
-            File.AppendAllText(Path.Combine(UserSettings, "CRASHREPORT (" + DateTime.Now.ToString("yyyy.MM.dd.HH.mm.ss") + ").log"), exceptionString);
+
+            if (ex.Data.Contains("sub"))
+            {
+                exceptionString += JsonConvert.SerializeObject(ex.Data["sub"], Formatting.Indented) + "\n\n";
+            }
+
+            File.AppendAllText(Path.Combine(UserSettings, $"CRASHREPORT ({DateTime.Now:yyyy.MM.dd.HH.mm.ss}).log"), exceptionString);
 
             MessageBox.Show("There was an unhandled exception. Please contact the developer and relay this information: \n\nMessage: " + ex?.Message);
         }
