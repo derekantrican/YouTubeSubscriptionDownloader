@@ -173,7 +173,13 @@ namespace YouTubeSubscriptionDownloader
                 return;
             }
 
-            Common.DeserializeSubscriptions();
+            //Check for a "Subscriptions-new.xml" to update the current one with
+            string newXml = Common.SubscriptionsPath.Replace(".xml", "-new.xml");
+            if (File.Exists(newXml))
+            {
+                Common.DeserializeSubscriptions(newXml);
+                File.Delete(newXml);
+            }
 
             if (Settings.Instance.SyncSubscriptionsWithYouTube)
                 YouTubeFunctions.UpdateYTSubscriptions().Wait();

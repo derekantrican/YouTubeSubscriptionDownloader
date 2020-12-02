@@ -54,11 +54,11 @@ namespace YouTubeSubscriptionDownloader
                 MessageBox.Show("Subscriptions serialized to " + serializationPath);
         }
 
-        public static void DeserializeSubscriptions()
+        public static void DeserializeSubscriptions(string subscriptionsPath = null)
         {
-            if (File.Exists(SubscriptionsPath))
+            if (File.Exists(subscriptionsPath ?? SubscriptionsPath))
             {
-                using (FileStream fileStream = new FileStream(SubscriptionsPath, FileMode.Open))
+                using (FileStream fileStream = new FileStream(subscriptionsPath ?? SubscriptionsPath, FileMode.Open))
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Subscription>));
                     TrackedSubscriptions = (List<Subscription>)xmlSerializer.Deserialize(fileStream);
