@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace YouTubeSubscriptionDownloader
 {
+    [Serializable]
     public class Subscription
     {
         public Subscription()
