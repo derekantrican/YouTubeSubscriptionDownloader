@@ -127,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Windows\Main.cs">
       <SubType>Form</SubType>
     </Compile>

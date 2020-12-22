@@ -214,7 +214,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (Settings.Instance.ShowNotifications)
             {
-                ShowNotification(newUpload.Title, "New video from " + sub.Title, newUpload.Thumbnails?.Standard?.Url,
+                ShowNotification(newUpload.Title, "New video from " + sub.Title, newUpload.Thumbnails.GetAvailableThumbnailUrl(),
                                  Common.YOUTUBEVIDEOBASEURL + newUpload.ResourceId.VideoId);
             }
 
