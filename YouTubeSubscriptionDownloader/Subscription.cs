@@ -24,5 +24,10 @@ namespace YouTubeSubscriptionDownloader
         {
             return Title;
         }
+
+        public string GetPlaylistUrl()
+        {
+            return $"{Common.YOUTUBEPLAYLISTBASEURL}{PlaylistIdToWatch}";
+        }
     }
 }

@@ -22,15 +22,16 @@ namespace YouTubeSubscriptionDownloader
             gridPlaylists.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(gridPlaylists, true, null);
 
             foreach (Subscription playlist in Common.TrackedSubscriptions)
-                Add(playlist);
+                AddGridRow(playlist);
 
             PlaylistManager_Resize(null, null);
         }
 
-        private void Add(Subscription playlist)
+        private void AddGridRow(Subscription playlist)
         {
             int newRowIndex = gridPlaylists.Rows.Add(playlist.Title, playlist.FilterRegex);
             gridPlaylists.Rows[newRowIndex].Tag = playlist;
+            gridPlaylists.Rows[newRowIndex].Cells[0].ToolTipText = playlist.GetPlaylistUrl();
         }
 
         private List<Subscription> GetGridSubs()
@@ -75,7 +76,7 @@ namespace YouTubeSubscriptionDownloader
 
                 ContextMenu contexMenu = new ContextMenu();
                 MenuItem openItem = new MenuItem() { Text = "Open" };
-                openItem.Click += (s, args) => { Process.Start(Common.YOUTUBEPLAYLISTBASEURL + (gridPlaylists.Rows[index].Tag as Subscription).PlaylistIdToWatch); };
+                openItem.Click += (s, args) => { Process.Start((gridPlaylists.Rows[index].Tag as Subscription).GetPlaylistUrl()); };
                 contexMenu.MenuItems.Add(openItem);
 
                 MenuItem removeItem = new MenuItem() { Text = "Remove" };
@@ -116,7 +117,7 @@ namespace YouTubeSubscriptionDownloader
             {
                 //Make sure it is not already in the list
                 if (existingSubs.FirstOrDefault(p => p.PlaylistIdToWatch == sub.PlaylistIdToWatch) == null)
-                    Add(sub);
+                    AddGridRow(sub);
             }
 
             gridPlaylists.FirstDisplayedScrollingRowIndex = gridPlaylists.RowCount - 1; //Scroll to bottom of list to show item was added
@@ -176,7 +177,7 @@ namespace YouTubeSubscriptionDownloader
             Subscription playlistSubscription = YouTubeFunctions.GetPlaylistAsSubscription(playlistID);
             playlistSubscription.FilterRegex = textBoxRegex.Text;
 
-            Add(playlistSubscription);
+            AddGridRow(playlistSubscription);
         }
 
         private void PlaylistManager_Resize(object sender, EventArgs e)
