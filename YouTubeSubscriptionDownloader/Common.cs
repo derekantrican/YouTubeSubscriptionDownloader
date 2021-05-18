@@ -83,7 +83,9 @@ namespace YouTubeSubscriptionDownloader
             {
                 Console.WriteLine("There was a problem contacting YouTube");
             }
-            else if (ex is GoogleApiException && (ex as GoogleApiException).HttpStatusCode == HttpStatusCode.Forbidden)
+            else if (ex is GoogleApiException && 
+                ((ex as GoogleApiException).HttpStatusCode == HttpStatusCode.Forbidden ||
+                (int)(ex as GoogleApiException).HttpStatusCode == 429))
                 Console.WriteLine("API quota exceeded. Will retry on next iteration.");
             else
                 DumpException(ex);
