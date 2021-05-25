@@ -111,6 +111,16 @@ namespace YouTubeSubscriptionDownloader
                 Common.TrackedSubscriptions.RemoveAll(p => deletedSubs.Contains(p)); //Remove unsubscribed subscriptions
 
                 Common.TrackedSubscriptions.AddRange(newSubs); //Add new subscriptions
+
+                //Fully populate subs that have some missing data (likely because they were added via Subscriptions-new.xml with only the playlistid)
+                for (int i = 0; i < Common.TrackedSubscriptions.Count; i++) //index-based list because we might modify the list
+                {
+                    Subscription sub = Common.TrackedSubscriptions[i];
+                    if (string.IsNullOrEmpty(sub.ChannelId) && !string.IsNullOrEmpty(sub.PlaylistIdToWatch))
+                    {
+                        Common.TrackedSubscriptions[i] = GetPlaylistAsSubscription(sub.PlaylistIdToWatch);
+                    }
+                }
             }
             catch (Exception ex)
             {
