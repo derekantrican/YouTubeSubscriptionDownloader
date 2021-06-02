@@ -119,6 +119,7 @@ namespace YouTubeSubscriptionDownloader
                     if (string.IsNullOrEmpty(sub.ChannelId) && !string.IsNullOrEmpty(sub.PlaylistIdToWatch))
                     {
                         Common.TrackedSubscriptions[i] = GetPlaylistAsSubscription(sub.PlaylistIdToWatch);
+                        Common.TrackedSubscriptions[i].FilterRegex = sub.FilterRegex; //Copy regex
                     }
                 }
             }
