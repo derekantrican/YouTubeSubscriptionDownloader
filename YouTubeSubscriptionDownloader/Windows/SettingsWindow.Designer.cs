@@ -36,7 +36,6 @@
             this.labelPreferredQuality = new System.Windows.Forms.Label();
             this.comboBoxPreferredQuality = new System.Windows.Forms.ComboBox();
             this.buttonFolderPicker = new System.Windows.Forms.Button();
-            this.checkBoxShowNotifications = new System.Windows.Forms.CheckBox();
             this.checkBoxDownloadVideos = new System.Windows.Forms.CheckBox();
             this.checkBoxAddPocket = new System.Windows.Forms.CheckBox();
             this.checkBoxCheckForMissedUploads = new System.Windows.Forms.CheckBox();
@@ -44,22 +43,27 @@
             this.numericUpDownIterationFrequency = new System.Windows.Forms.NumericUpDown();
             this.labelMinutes = new System.Windows.Forms.Label();
             this.checkBoxRunIterationsOnStartup = new System.Windows.Forms.CheckBox();
-            this.checkBoxShowThumbnails = new System.Windows.Forms.CheckBox();
-            this.comboBoxNotificationClick = new System.Windows.Forms.ComboBox();
-            this.labelClickNotification = new System.Windows.Forms.Label();
             this.checkBoxSyncSubscriptions = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPageSettings = new System.Windows.Forms.TabPage();
             this.tabPageAbout = new System.Windows.Forms.TabPage();
-            this.label1 = new System.Windows.Forms.Label();
             this.pictureBoxPayPal = new System.Windows.Forms.PictureBox();
             this.pictureBoxGoogleWallet = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tabPageNotifications = new System.Windows.Forms.TabPage();
+            this.comboBoxNotificationClick = new System.Windows.Forms.ComboBox();
+            this.labelClickNotification = new System.Windows.Forms.Label();
+            this.checkBoxShowNotifications = new System.Windows.Forms.CheckBox();
+            this.checkBoxShowThumbnails = new System.Windows.Forms.CheckBox();
+            this.comboBoxNotifyScreen = new System.Windows.Forms.ComboBox();
+            this.labelNotifyScreen = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownIterationFrequency)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPageSettings.SuspendLayout();
             this.tabPageAbout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxPayPal)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGoogleWallet)).BeginInit();
+            this.tabPageNotifications.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonCancel
@@ -134,17 +138,6 @@
             this.buttonFolderPicker.UseVisualStyleBackColor = true;
             this.buttonFolderPicker.Click += new System.EventHandler(this.buttonFolderPicker_Click);
             // 
-            // checkBoxShowNotifications
-            // 
-            this.checkBoxShowNotifications.AutoSize = true;
-            this.checkBoxShowNotifications.Location = new System.Drawing.Point(6, 93);
-            this.checkBoxShowNotifications.Name = "checkBoxShowNotifications";
-            this.checkBoxShowNotifications.Size = new System.Drawing.Size(120, 17);
-            this.checkBoxShowNotifications.TabIndex = 7;
-            this.checkBoxShowNotifications.Text = "Show Notifications?";
-            this.checkBoxShowNotifications.UseVisualStyleBackColor = true;
-            this.checkBoxShowNotifications.CheckedChanged += new System.EventHandler(this.checkBoxShowNotifications_CheckedChanged);
-            // 
             // checkBoxDownloadVideos
             // 
             this.checkBoxDownloadVideos.AutoSize = true;
@@ -159,7 +152,7 @@
             // checkBoxAddPocket
             // 
             this.checkBoxAddPocket.AutoSize = true;
-            this.checkBoxAddPocket.Location = new System.Drawing.Point(6, 162);
+            this.checkBoxAddPocket.Location = new System.Drawing.Point(6, 83);
             this.checkBoxAddPocket.Name = "checkBoxAddPocket";
             this.checkBoxAddPocket.Size = new System.Drawing.Size(134, 17);
             this.checkBoxAddPocket.TabIndex = 9;
@@ -170,7 +163,7 @@
             // checkBoxCheckForMissedUploads
             // 
             this.checkBoxCheckForMissedUploads.AutoSize = true;
-            this.checkBoxCheckForMissedUploads.Location = new System.Drawing.Point(6, 186);
+            this.checkBoxCheckForMissedUploads.Location = new System.Drawing.Point(6, 107);
             this.checkBoxCheckForMissedUploads.Name = "checkBoxCheckForMissedUploads";
             this.checkBoxCheckForMissedUploads.Size = new System.Drawing.Size(291, 17);
             this.checkBoxCheckForMissedUploads.TabIndex = 10;
@@ -180,7 +173,7 @@
             // labelIterationFrequency
             // 
             this.labelIterationFrequency.AutoSize = true;
-            this.labelIterationFrequency.Location = new System.Drawing.Point(2, 281);
+            this.labelIterationFrequency.Location = new System.Drawing.Point(2, 202);
             this.labelIterationFrequency.Name = "labelIterationFrequency";
             this.labelIterationFrequency.Size = new System.Drawing.Size(91, 13);
             this.labelIterationFrequency.TabIndex = 11;
@@ -188,7 +181,7 @@
             // 
             // numericUpDownIterationFrequency
             // 
-            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(99, 279);
+            this.numericUpDownIterationFrequency.Location = new System.Drawing.Point(99, 200);
             this.numericUpDownIterationFrequency.Minimum = new decimal(new int[] {
             1,
             0,
@@ -206,7 +199,7 @@
             // labelMinutes
             // 
             this.labelMinutes.AutoSize = true;
-            this.labelMinutes.Location = new System.Drawing.Point(145, 281);
+            this.labelMinutes.Location = new System.Drawing.Point(145, 202);
             this.labelMinutes.Name = "labelMinutes";
             this.labelMinutes.Size = new System.Drawing.Size(43, 13);
             this.labelMinutes.TabIndex = 13;
@@ -215,47 +208,16 @@
             // checkBoxRunIterationsOnStartup
             // 
             this.checkBoxRunIterationsOnStartup.AutoSize = true;
-            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(6, 252);
+            this.checkBoxRunIterationsOnStartup.Location = new System.Drawing.Point(6, 173);
             this.checkBoxRunIterationsOnStartup.Name = "checkBoxRunIterationsOnStartup";
             this.checkBoxRunIterationsOnStartup.Size = new System.Drawing.Size(228, 17);
             this.checkBoxRunIterationsOnStartup.TabIndex = 14;
             this.checkBoxRunIterationsOnStartup.Text = "Start running iterations on program startup?";
             this.checkBoxRunIterationsOnStartup.UseVisualStyleBackColor = true;
             // 
-            // checkBoxShowThumbnails
-            // 
-            this.checkBoxShowThumbnails.AutoSize = true;
-            this.checkBoxShowThumbnails.Location = new System.Drawing.Point(6, 139);
-            this.checkBoxShowThumbnails.Name = "checkBoxShowThumbnails";
-            this.checkBoxShowThumbnails.Size = new System.Drawing.Size(206, 17);
-            this.checkBoxShowThumbnails.TabIndex = 15;
-            this.checkBoxShowThumbnails.Text = "Show video thumbnail in notifications?";
-            this.checkBoxShowThumbnails.UseVisualStyleBackColor = true;
-            // 
-            // comboBoxNotificationClick
-            // 
-            this.comboBoxNotificationClick.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxNotificationClick.FormattingEnabled = true;
-            this.comboBoxNotificationClick.Items.AddRange(new object[] {
-            "Opens video",
-            "Dismisses notification"});
-            this.comboBoxNotificationClick.Location = new System.Drawing.Point(131, 112);
-            this.comboBoxNotificationClick.Name = "comboBoxNotificationClick";
-            this.comboBoxNotificationClick.Size = new System.Drawing.Size(137, 21);
-            this.comboBoxNotificationClick.TabIndex = 17;
-            // 
-            // labelClickNotification
-            // 
-            this.labelClickNotification.AutoSize = true;
-            this.labelClickNotification.Location = new System.Drawing.Point(24, 115);
-            this.labelClickNotification.Name = "labelClickNotification";
-            this.labelClickNotification.Size = new System.Drawing.Size(94, 13);
-            this.labelClickNotification.TabIndex = 16;
-            this.labelClickNotification.Text = "Notification click...";
-            // 
             // checkBoxSyncSubscriptions
             // 
-            this.checkBoxSyncSubscriptions.Location = new System.Drawing.Point(6, 209);
+            this.checkBoxSyncSubscriptions.Location = new System.Drawing.Point(6, 130);
             this.checkBoxSyncSubscriptions.Name = "checkBoxSyncSubscriptions";
             this.checkBoxSyncSubscriptions.Size = new System.Drawing.Size(319, 37);
             this.checkBoxSyncSubscriptions.TabIndex = 18;
@@ -265,6 +227,7 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPageSettings);
+            this.tabControl1.Controls.Add(this.tabPageNotifications);
             this.tabControl1.Controls.Add(this.tabPageAbout);
             this.tabControl1.Location = new System.Drawing.Point(1, 0);
             this.tabControl1.Name = "tabControl1";
@@ -277,16 +240,12 @@
             this.tabPageSettings.Controls.Add(this.checkBoxDownloadVideos);
             this.tabPageSettings.Controls.Add(this.checkBoxSyncSubscriptions);
             this.tabPageSettings.Controls.Add(this.labelDownloadDirectory);
-            this.tabPageSettings.Controls.Add(this.comboBoxNotificationClick);
             this.tabPageSettings.Controls.Add(this.textBoxDownloadDirectory);
-            this.tabPageSettings.Controls.Add(this.labelClickNotification);
             this.tabPageSettings.Controls.Add(this.labelPreferredQuality);
-            this.tabPageSettings.Controls.Add(this.checkBoxShowThumbnails);
             this.tabPageSettings.Controls.Add(this.comboBoxPreferredQuality);
             this.tabPageSettings.Controls.Add(this.checkBoxRunIterationsOnStartup);
             this.tabPageSettings.Controls.Add(this.buttonFolderPicker);
             this.tabPageSettings.Controls.Add(this.labelMinutes);
-            this.tabPageSettings.Controls.Add(this.checkBoxShowNotifications);
             this.tabPageSettings.Controls.Add(this.numericUpDownIterationFrequency);
             this.tabPageSettings.Controls.Add(this.checkBoxAddPocket);
             this.tabPageSettings.Controls.Add(this.labelIterationFrequency);
@@ -312,14 +271,6 @@
             this.tabPageAbout.Text = "About";
             this.tabPageAbout.UseVisualStyleBackColor = true;
             // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(7, 3);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(323, 70);
-            this.label1.TabIndex = 0;
-            this.label1.Text = resources.GetString("label1.Text");
-            // 
             // pictureBoxPayPal
             // 
             this.pictureBoxPayPal.Image = global::YouTubeSubscriptionDownloader.Properties.Resources.PayPalButton;
@@ -342,6 +293,88 @@
             this.pictureBoxGoogleWallet.TabStop = false;
             this.pictureBoxGoogleWallet.Click += new System.EventHandler(this.PictureBoxGoogleWallet_Click);
             // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(7, 3);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(323, 70);
+            this.label1.TabIndex = 0;
+            this.label1.Text = resources.GetString("label1.Text");
+            // 
+            // tabPageNotifications
+            // 
+            this.tabPageNotifications.Controls.Add(this.comboBoxNotifyScreen);
+            this.tabPageNotifications.Controls.Add(this.labelNotifyScreen);
+            this.tabPageNotifications.Controls.Add(this.checkBoxShowThumbnails);
+            this.tabPageNotifications.Controls.Add(this.comboBoxNotificationClick);
+            this.tabPageNotifications.Controls.Add(this.labelClickNotification);
+            this.tabPageNotifications.Controls.Add(this.checkBoxShowNotifications);
+            this.tabPageNotifications.Location = new System.Drawing.Point(4, 22);
+            this.tabPageNotifications.Name = "tabPageNotifications";
+            this.tabPageNotifications.Size = new System.Drawing.Size(336, 309);
+            this.tabPageNotifications.TabIndex = 2;
+            this.tabPageNotifications.Text = "Notifications";
+            this.tabPageNotifications.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxNotificationClick
+            // 
+            this.comboBoxNotificationClick.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxNotificationClick.FormattingEnabled = true;
+            this.comboBoxNotificationClick.Items.AddRange(new object[] {
+            "Opens video",
+            "Dismisses notification"});
+            this.comboBoxNotificationClick.Location = new System.Drawing.Point(132, 22);
+            this.comboBoxNotificationClick.Name = "comboBoxNotificationClick";
+            this.comboBoxNotificationClick.Size = new System.Drawing.Size(137, 21);
+            this.comboBoxNotificationClick.TabIndex = 20;
+            // 
+            // labelClickNotification
+            // 
+            this.labelClickNotification.AutoSize = true;
+            this.labelClickNotification.Location = new System.Drawing.Point(25, 25);
+            this.labelClickNotification.Name = "labelClickNotification";
+            this.labelClickNotification.Size = new System.Drawing.Size(94, 13);
+            this.labelClickNotification.TabIndex = 19;
+            this.labelClickNotification.Text = "Notification click...";
+            // 
+            // checkBoxShowNotifications
+            // 
+            this.checkBoxShowNotifications.AutoSize = true;
+            this.checkBoxShowNotifications.Location = new System.Drawing.Point(7, 3);
+            this.checkBoxShowNotifications.Name = "checkBoxShowNotifications";
+            this.checkBoxShowNotifications.Size = new System.Drawing.Size(120, 17);
+            this.checkBoxShowNotifications.TabIndex = 18;
+            this.checkBoxShowNotifications.Text = "Show Notifications?";
+            this.checkBoxShowNotifications.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxShowThumbnails
+            // 
+            this.checkBoxShowThumbnails.AutoSize = true;
+            this.checkBoxShowThumbnails.Location = new System.Drawing.Point(7, 85);
+            this.checkBoxShowThumbnails.Name = "checkBoxShowThumbnails";
+            this.checkBoxShowThumbnails.Size = new System.Drawing.Size(206, 17);
+            this.checkBoxShowThumbnails.TabIndex = 21;
+            this.checkBoxShowThumbnails.Text = "Show video thumbnail in notifications?";
+            this.checkBoxShowThumbnails.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxNotifyScreen
+            // 
+            this.comboBoxNotifyScreen.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxNotifyScreen.FormattingEnabled = true;
+            this.comboBoxNotifyScreen.Location = new System.Drawing.Point(148, 49);
+            this.comboBoxNotifyScreen.Name = "comboBoxNotifyScreen";
+            this.comboBoxNotifyScreen.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxNotifyScreen.TabIndex = 23;
+            // 
+            // labelNotifyScreen
+            // 
+            this.labelNotifyScreen.AutoSize = true;
+            this.labelNotifyScreen.Location = new System.Drawing.Point(25, 52);
+            this.labelNotifyScreen.Name = "labelNotifyScreen";
+            this.labelNotifyScreen.Size = new System.Drawing.Size(117, 13);
+            this.labelNotifyScreen.TabIndex = 22;
+            this.labelNotifyScreen.Text = "Show notifications on...";
+            // 
             // SettingsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -361,6 +394,8 @@
             this.tabPageAbout.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxPayPal)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGoogleWallet)).EndInit();
+            this.tabPageNotifications.ResumeLayout(false);
+            this.tabPageNotifications.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -374,7 +409,6 @@
         private System.Windows.Forms.Label labelPreferredQuality;
         private System.Windows.Forms.ComboBox comboBoxPreferredQuality;
         private System.Windows.Forms.Button buttonFolderPicker;
-        private System.Windows.Forms.CheckBox checkBoxShowNotifications;
         private System.Windows.Forms.CheckBox checkBoxDownloadVideos;
         private System.Windows.Forms.CheckBox checkBoxAddPocket;
         private System.Windows.Forms.CheckBox checkBoxCheckForMissedUploads;
@@ -382,9 +416,6 @@
         private System.Windows.Forms.NumericUpDown numericUpDownIterationFrequency;
         private System.Windows.Forms.Label labelMinutes;
         private System.Windows.Forms.CheckBox checkBoxRunIterationsOnStartup;
-        private System.Windows.Forms.CheckBox checkBoxShowThumbnails;
-        private System.Windows.Forms.ComboBox comboBoxNotificationClick;
-        private System.Windows.Forms.Label labelClickNotification;
         private System.Windows.Forms.CheckBox checkBoxSyncSubscriptions;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPageSettings;
@@ -392,5 +423,12 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.PictureBox pictureBoxPayPal;
         private System.Windows.Forms.PictureBox pictureBoxGoogleWallet;
+        private System.Windows.Forms.TabPage tabPageNotifications;
+        private System.Windows.Forms.CheckBox checkBoxShowThumbnails;
+        private System.Windows.Forms.ComboBox comboBoxNotificationClick;
+        private System.Windows.Forms.Label labelClickNotification;
+        private System.Windows.Forms.CheckBox checkBoxShowNotifications;
+        private System.Windows.Forms.ComboBox comboBoxNotifyScreen;
+        private System.Windows.Forms.Label labelNotifyScreen;
     }
 }

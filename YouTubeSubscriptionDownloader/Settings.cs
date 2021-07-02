@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace YouTubeSubscriptionDownloader
@@ -26,6 +27,7 @@ namespace YouTubeSubscriptionDownloader
         public bool SyncSubscriptionsWithYouTube { get; set; }
         public bool FirstTimeShowSubscriptionManager { get; set; }
         public bool FirstTimeNotifySyncSetting { get; set; }
+        public int NotifyScreen { get; set; }
 
         private static Settings GetDefaultValues()
         {
@@ -45,6 +47,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.SyncSubscriptionsWithYouTube = false;
             defaultSettings.FirstTimeShowSubscriptionManager = true;
             defaultSettings.FirstTimeNotifySyncSetting = true;
+            defaultSettings.NotifyScreen = 0; //0 is "auto"
 
             return defaultSettings;
         }
@@ -90,5 +93,34 @@ namespace YouTubeSubscriptionDownloader
             }
         }
         #endregion Read Settings
+
+        public static Screen ScreenFromSetting(int? overrideVal = null)
+        {
+            if (overrideVal.HasValue)
+            {
+                try
+                {
+                    return overrideVal.Value <= 1 ? Screen.PrimaryScreen : Screen.AllScreens[overrideVal.Value - 1];
+                }
+                catch
+                {
+                    return Screen.PrimaryScreen;
+                }
+            }
+            else
+            {
+                try
+                {
+                    return Instance.NotifyScreen <= 1 ? Screen.PrimaryScreen : Screen.AllScreens[Instance.NotifyScreen - 1];
+                }
+                catch
+                {
+                    Instance.NotifyScreen = 0; //If we have a problem getting the 3rd monitor (for instance) because it was unplugged, then default to the primary screen
+                    SaveSettings();
+
+                    return Screen.PrimaryScreen;
+                }
+            }
+        }
     }
 }

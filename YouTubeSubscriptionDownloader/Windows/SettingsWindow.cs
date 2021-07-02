@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace YouTubeSubscriptionDownloader
@@ -24,6 +25,11 @@ namespace YouTubeSubscriptionDownloader
             checkBoxRunIterationsOnStartup.Checked = Settings.Instance.StartIterationsOnStartup;
             numericUpDownIterationFrequency.Value = Settings.Instance.IterationFrequency;
 
+            comboBoxNotifyScreen.Items.Add("Primary Screen (auto)");
+            comboBoxNotifyScreen.Items.AddRange(Enumerable.Range(1, Screen.AllScreens.Length).Select(n => $"Screen {n}").ToArray());
+            comboBoxNotifyScreen.SelectedIndex = 0;
+            comboBoxNotifyScreen.SelectedIndexChanged += ComboBoxNotifyScreen_SelectedIndexChanged;
+
             checkBoxDownloadVideos_CheckedChanged(null, null);
             checkBoxShowNotifications_CheckedChanged(null, null);
         }
@@ -32,7 +38,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (checkBoxDownloadVideos.Checked && !Directory.Exists(textBoxDownloadDirectory.Text))
             {
-                MessageBox.Show("The directory \"" + textBoxDownloadDirectory.Text + "\" does not exist. Please either create it or choose a different one");
+                MessageBox.Show($"The directory \"{textBoxDownloadDirectory.Text}\" does not exist. Please either create it or choose a different one");
                 return;
             }
 
@@ -53,6 +59,7 @@ namespace YouTubeSubscriptionDownloader
             Settings.Instance.SyncSubscriptionsWithYouTube = checkBoxSyncSubscriptions.Checked;
             Settings.Instance.StartIterationsOnStartup = checkBoxRunIterationsOnStartup.Checked;
             Settings.Instance.IterationFrequency = Convert.ToInt32(numericUpDownIterationFrequency.Value);
+            Settings.Instance.NotifyScreen = comboBoxNotifyScreen.SelectedIndex;
 
             Settings.SaveSettings();
 
@@ -71,6 +78,16 @@ namespace YouTubeSubscriptionDownloader
 
             if (!string.IsNullOrWhiteSpace(folderBrowserDialog.SelectedPath))
                 textBoxDownloadDirectory.Text = folderBrowserDialog.SelectedPath;
+        }
+
+        private void ComboBoxNotifyScreen_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Notification notification = new Notification("Test notification", 
+                "This is a test notification", 
+                checkBoxShowThumbnails.Checked ? "https://i.imgur.com/vHO14Ck.png" : null, 
+                overrideScreen: Settings.ScreenFromSetting(comboBoxNotifyScreen.SelectedIndex));
+
+            notification.Show();
         }
 
         private void checkBoxDownloadVideos_CheckedChanged(object sender, EventArgs e)
