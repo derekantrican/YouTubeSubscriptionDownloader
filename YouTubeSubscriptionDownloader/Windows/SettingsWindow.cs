@@ -18,6 +18,7 @@ namespace YouTubeSubscriptionDownloader
             comboBoxPreferredQuality.SelectedIndex = comboBoxPreferredQuality.FindStringExact(Settings.Instance.PreferredQuality);
             checkBoxShowNotifications.Checked = Settings.Instance.ShowNotifications;
             comboBoxNotificationClick.SelectedIndex = Settings.Instance.NotificationClickOpensYouTubeVideo ? 0 : 1;
+            checkBoxAutoChangeNotificationScreen.Checked = Settings.Instance.AutoAdjustNotifyScreen;
             checkBoxShowThumbnails.Checked = Settings.Instance.ShowThumbnailInNotification;
             checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
             checkBoxCheckForMissedUploads.Checked = Settings.Instance.CheckForMissedUploads;
@@ -27,7 +28,7 @@ namespace YouTubeSubscriptionDownloader
 
             comboBoxNotifyScreen.Items.Add("Primary Screen (auto)");
             comboBoxNotifyScreen.Items.AddRange(Enumerable.Range(1, Screen.AllScreens.Length).Select(n => $"Screen {n}").ToArray());
-            comboBoxNotifyScreen.SelectedIndex = 0;
+            comboBoxNotifyScreen.SelectedIndex = Settings.Instance.NotifyScreen;
             comboBoxNotifyScreen.SelectedIndexChanged += ComboBoxNotifyScreen_SelectedIndexChanged;
 
             checkBoxDownloadVideos_CheckedChanged(null, null);
@@ -48,6 +49,7 @@ namespace YouTubeSubscriptionDownloader
             Settings.Instance.PreferredQuality = comboBoxPreferredQuality.Text;
             Settings.Instance.ShowNotifications = checkBoxShowNotifications.Checked;
             Settings.Instance.NotificationClickOpensYouTubeVideo = comboBoxNotificationClick.SelectedIndex == 0;
+            Settings.Instance.AutoAdjustNotifyScreen = checkBoxAutoChangeNotificationScreen.Checked;
             Settings.Instance.ShowThumbnailInNotification = checkBoxShowThumbnails.Checked;
             if (!checkBoxAddPocket.Checked)
                 Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)

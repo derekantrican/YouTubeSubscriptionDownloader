@@ -28,6 +28,7 @@ namespace YouTubeSubscriptionDownloader
         public bool FirstTimeShowSubscriptionManager { get; set; }
         public bool FirstTimeNotifySyncSetting { get; set; }
         public int NotifyScreen { get; set; }
+        public bool AutoAdjustNotifyScreen { get; set; }
 
         private static Settings GetDefaultValues()
         {
@@ -48,6 +49,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.FirstTimeShowSubscriptionManager = true;
             defaultSettings.FirstTimeNotifySyncSetting = true;
             defaultSettings.NotifyScreen = 0; //0 is "auto"
+            defaultSettings.AutoAdjustNotifyScreen = true;
 
             return defaultSettings;
         }
@@ -115,12 +117,17 @@ namespace YouTubeSubscriptionDownloader
                 }
                 catch
                 {
-                    Instance.NotifyScreen = 0; //If we have a problem getting the 3rd monitor (for instance) because it was unplugged, then default to the primary screen
-                    SaveSettings();
+                    if (Settings.Instance.AutoAdjustNotifyScreen)
+                    {
+                        Instance.NotifyScreen = 0; //If we have a problem getting the 3rd monitor (for instance) because it was unplugged, then default to the primary screen
+                        SaveSettings();
 
-                    return Screen.PrimaryScreen;
+                        return Screen.PrimaryScreen;
+                    }
                 }
             }
+
+            return null;
         }
     }
 }

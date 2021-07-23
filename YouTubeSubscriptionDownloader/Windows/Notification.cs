@@ -48,10 +48,6 @@ namespace YouTubeSubscriptionDownloader
 
             lifeTimer.Interval = 5000; //Show the notification for 5 seconds
             lifeTimer.Tick += LifeTimer_Tick;
-
-            string notificationSoundPath = @"C:\Windows\media\Windows Notify System Generic.wav";
-            using (var player = new System.Media.SoundPlayer(notificationSoundPath))
-                player.Play();
         }
 
         private void LifeTimer_Tick(object sender, EventArgs e)
@@ -61,7 +57,9 @@ namespace YouTubeSubscriptionDownloader
 
         private void Notification_Load(object sender, EventArgs e)
         {
-            Debug.WriteLine($"Showing notification on screen {Screen.DeviceName}");
+            string notificationSoundPath = @"C:\Windows\media\Windows Notify System Generic.wav";
+            using (var player = new System.Media.SoundPlayer(notificationSoundPath))
+                player.Play();
 
             // Display the form just above the system tray.
             this.Location = new Point(Screen.WorkingArea.X + Screen.WorkingArea.Width - this.Width, Screen.WorkingArea.Y + Screen.WorkingArea.Height - this.Height);

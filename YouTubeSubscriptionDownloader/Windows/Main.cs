@@ -233,7 +233,10 @@ namespace YouTubeSubscriptionDownloader
             this.Invoke((MethodInvoker)delegate
             {
                 Notification notification = new Notification(notificationTitle, notificationSubTitle, imageURL, videoURL);
-                notification.Show();
+                if (notification.Screen != null)
+                {
+                    notification.Show();
+                }
             });
         }
 
