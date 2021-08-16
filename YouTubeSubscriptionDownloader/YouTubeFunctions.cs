@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoutubeExplode;
-using YoutubeExplode.Models.MediaStreams;
+using YoutubeExplode.Videos.Streams;
 using YTSubscription = Google.Apis.YouTube.v3.Data.Subscription;
 
 namespace YouTubeSubscriptionDownloader
@@ -299,25 +299,25 @@ namespace YouTubeSubscriptionDownloader
         public static async Task DownloadYouTubeVideoAsync(string youTubeVideoId, string destinationFolder, CancellationToken token)
         {
             YoutubeClient client = new YoutubeClient();
-            var videoInfo = await client.GetVideoAsync(youTubeVideoId);
-            var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(youTubeVideoId);
+            YoutubeExplode.Videos.Video videoInfo = await client.Videos.GetAsync(youTubeVideoId);
+            StreamManifest streamInfoSet = await client.Videos.Streams.GetManifestAsync(youTubeVideoId);
 
             MuxedStreamInfo streamInfo = null;
             if (Settings.Instance.PreferredQuality != "Highest")
-                streamInfo = streamInfoSet.Muxed.Where(p => p.VideoQualityLabel == Settings.Instance.PreferredQuality).FirstOrDefault();
+                streamInfo = streamInfoSet.GetMuxedStreams().Where(p => p.VideoQuality.Label == Settings.Instance.PreferredQuality).FirstOrDefault();
 
             if (Settings.Instance.PreferredQuality == "Highest" || streamInfo == null)
-                streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
+                streamInfo = streamInfoSet.GetMuxedStreams().GetWithHighestVideoQuality() as MuxedStreamInfo;/*.OrderByDescending(s => s.VideoQuality).First();*/
 
-            string fileExtension = streamInfo.Container.GetFileExtension();
-            string fileName = "[" + videoInfo.Author + "] " + videoInfo.Title + "." + fileExtension;
+            string fileExtension = streamInfo.Container.Name;
+            string fileName = $"[{videoInfo.Author}] {videoInfo.Title}.{fileExtension}";
 
             //Remove invalid characters from filename
             string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
             Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
             fileName = r.Replace(fileName, "");
 
-            await client.DownloadMediaStreamAsync(streamInfo, Path.Combine(destinationFolder, fileName), cancellationToken: token);
+            await client.Videos.Streams.DownloadAsync(streamInfo, Path.Combine(destinationFolder, fileName), cancellationToken: token);
         }
     }
 }
