@@ -87,6 +87,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Notification";
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Notification";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.Notification_Load);
