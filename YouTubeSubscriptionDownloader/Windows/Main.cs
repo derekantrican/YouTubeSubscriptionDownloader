@@ -95,13 +95,13 @@ namespace YouTubeSubscriptionDownloader
             if (!this.IsHandleCreated ||
                 !this.richTextBoxLog.IsHandleCreated)
             {
-                missingLogLines.Add("[" + date + "] " + itemToLog + Environment.NewLine);
+                missingLogLines.Add($"[{date}] {itemToLog}{Environment.NewLine}");
                 return;
             }
 
             this.richTextBoxLog.Invoke((MethodInvoker)delegate
             {
-                richTextBoxLog.Text += "[" + date + "] " + itemToLog + Environment.NewLine;
+                richTextBoxLog.Text += $"[{date}] {itemToLog}{Environment.NewLine}";
 
                 richTextBoxLog.SelectionStart = richTextBoxLog.Text.Length;
                 richTextBoxLog.ScrollToCaret();
@@ -221,7 +221,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (Settings.Instance.ShowNotifications)
             {
-                ShowNotification(newUpload.Title, "New video from " + sub.Title, newUpload.Thumbnails.GetAvailableThumbnailUrl(),
+                ShowNotification(newUpload.Title, $"New video from {sub.Title}", newUpload.Thumbnails.GetAvailableThumbnailUrl(),
                                  Common.YOUTUBEVIDEOBASEURL + newUpload.ResourceId.VideoId);
             }
 
