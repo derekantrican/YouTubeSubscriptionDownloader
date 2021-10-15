@@ -147,7 +147,7 @@ namespace YouTubeSubscriptionDownloader
             if (Settings.Instance.CheckForMissedUploads && (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
                 Log("Looking for recent uploads");
-                Task.Run(() => CheckForNewVideoFromSubscriptionsAsync(token, false /*Turn off notifications temporarily because we don't want a bunch of notifications on startup*/)).ContinueWith(t => StartIterations(false));
+                Task.Run(() => CheckForNewVideoFromSubscriptionsAsync(token, false /*Turn off notifications temporarily because we don't want a bunch of notifications on startup*/)).ContinueWith(t => this.Invoke((MethodInvoker)delegate { StartIterations(false); }));
             }
             else
             {
