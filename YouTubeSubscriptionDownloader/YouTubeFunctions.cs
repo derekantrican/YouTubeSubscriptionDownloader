@@ -175,13 +175,13 @@ namespace YouTubeSubscriptionDownloader
             {
                 try
                 {
-                    PlaylistItemsResource.ListRequest listRequest = Service.PlaylistItems.List("snippet,status");
+                    PlaylistItemsResource.ListRequest listRequest = Service.PlaylistItems.List("snippet,contentDetails,status");
                     listRequest.PlaylistId = sub.PlaylistIdToWatch;
                     PlaylistItemListResponse response = null;
 
                     List<PlaylistItem> results = new List<PlaylistItem>();
                     List<PlaylistItem> privateToPublic = new List<PlaylistItem>();
-                    if (sub.IsPlaylist && !sub.IsPlaylistUploadsPlaylist) //If this is the uploads playlist for the channel, it WILL be at least somewhat ordered by most recent
+                    if (sub.IsPlaylist && !sub.IsPlaylistUploadsPlaylist) //If this is not the channel's uploads playlist, then we will have to get all the playlist items to get the most recent (not necessarily in order by upload date)
                     {
                         //A playlist isn't necessarily in date order (the owner of the playlist could put them in any order).
                         //Unfortunately, that means we have to get every video in the playlist and order them by date. This will be costly for large playlists
@@ -221,7 +221,7 @@ namespace YouTubeSubscriptionDownloader
                         //If we still haven't gotten any items older than the "sinceDate", get more
                         if (sinceDate != null)
                         {
-                            while (!results.Any(p => p.Snippet.PublishedAt < sinceDate) && response.NextPageToken != null)
+                            while (!results.Any(p => p.ContentDetails.VideoPublishedAt < sinceDate) && response.NextPageToken != null)
                             {
                                 listRequest.PageToken = response.NextPageToken;
                                 response = await listRequest.ExecuteAsync();
@@ -256,7 +256,7 @@ namespace YouTubeSubscriptionDownloader
                     }
 
                     if (sinceDate != null)
-                        results = results.Where(p => p.Snippet.PublishedAt > sinceDate).ToList();
+                        results = results.Where(p => p.ContentDetails.VideoPublishedAt > sinceDate).ToList();
 
                     results.AddRange(privateToPublic);
 
@@ -265,7 +265,7 @@ namespace YouTubeSubscriptionDownloader
                     ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
                     ////   will get the top 50 results and order them by upload date
 
-                    resultsByDate = results.OrderByDescending(p => p.Snippet.PublishedAt).ToList();
+                    resultsByDate = results.OrderByDescending(p => p.ContentDetails.VideoPublishedAt).ToList();
                     ////------------------------------------
                 }
                 catch (Exception ex)

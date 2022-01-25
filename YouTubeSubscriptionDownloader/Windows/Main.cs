@@ -197,12 +197,12 @@ namespace YouTubeSubscriptionDownloader
                 foreach (PlaylistItem item in newUploads)
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;
-                    Log("New uploaded detected: " + sub.Title + " (" + newUploadDetails.Title + ")");
+                    Log($"New uploaded detected: {sub.Title} ({newUploadDetails.Title})");
                     DoActionsForNewUpload(newUploadDetails, sub, token);
                 }
 
                 if (newUploads.Count > 0)
-                    sub.LastVideoPublishDate = (DateTime)newUploads.First().Snippet.PublishedAt;
+                    sub.LastVideoPublishDate = (DateTime)newUploads.First().ContentDetails.VideoPublishedAt;
             }
 
             Settings.Instance.ShowNotifications = tempNotificationSetting;
@@ -214,7 +214,7 @@ namespace YouTubeSubscriptionDownloader
         {
             if (Settings.Instance.ShowNotifications)
             {
-                ShowNotification(newUpload.Title, "New video from " + sub.Title, newUpload.Thumbnails.GetAvailableThumbnailUrl(),
+                ShowNotification(newUpload.Title, $"New video from {sub.Title}", newUpload.Thumbnails.GetAvailableThumbnailUrl(),
                                  Common.YOUTUBEVIDEOBASEURL + newUpload.ResourceId.VideoId);
             }
 
