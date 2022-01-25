@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.IO;
 using System.Threading;
 using Google.Apis.YouTube.v3.Data;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace YouTubeSubscriptionDownloader
@@ -49,6 +48,7 @@ namespace YouTubeSubscriptionDownloader
 
                 Settings.Instance.FirstTimeShowSubscriptionManager = false;
             }
+
             if (File.Exists(Common.SubscriptionsPath)) //Don't show the message if there are no subscriptions saved (eg first time startup)
             {
                 Log("Getting subscriptions...");
@@ -95,13 +95,13 @@ namespace YouTubeSubscriptionDownloader
             if (!this.IsHandleCreated ||
                 !this.richTextBoxLog.IsHandleCreated)
             {
-                missingLogLines.Add("[" + date + "] " + itemToLog + Environment.NewLine);
+                missingLogLines.Add($"[{date}] {itemToLog}{Environment.NewLine}");
                 return;
             }
 
             this.richTextBoxLog.Invoke((MethodInvoker)delegate
             {
-                richTextBoxLog.Text += "[" + date + "] " + itemToLog + Environment.NewLine;
+                richTextBoxLog.Text += $"[{date}] {itemToLog}{Environment.NewLine}";
 
                 richTextBoxLog.SelectionStart = richTextBoxLog.Text.Length;
                 richTextBoxLog.ScrollToCaret();
@@ -133,6 +133,7 @@ namespace YouTubeSubscriptionDownloader
             richTextBoxLog.Clear();
             buttonStart.Enabled = false;
             buttonStop.Enabled = true;
+            InitializeTimer();
 
             if (!Common.HasInternetConnection())
             {
@@ -143,20 +144,26 @@ namespace YouTubeSubscriptionDownloader
             if (token.IsCancellationRequested)
                 return;
 
-            if (Settings.Instance.CheckForMissedUploads &&
-                (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
+            if (Settings.Instance.CheckForMissedUploads && (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
             {
                 Log("Looking for recent uploads");
-                Task.Run(() => CheckForNewVideoFromSubscriptionsAsync(token, false /*Turn off notifications temporarily because we don't want a bunch of notifications on startup*/));
+                Task.Run(() => CheckForNewVideoFromSubscriptionsAsync(token, false /*Turn off notifications temporarily because we don't want a bunch of notifications on startup*/)).ContinueWith(t => this.Invoke((MethodInvoker)delegate { StartIterations(false); }));
             }
+            else
+            {
+                StartIterations();
+            }
+        }
 
-            if (token.IsCancellationRequested)
-                return;
-
+        private void StartIterations(bool runImmediateTick = true)
+        {
             Log("Iterations started");
-            InitializeTimer();
             timer.Start();
-            Timer_Tick(null, null); //Run first "tick" now rather than waiting for the timer interval to elapse before first "tick"
+
+            if (runImmediateTick)
+            {
+                Timer_Tick(null, null); //Run first "tick" now rather than waiting for the timer interval to elapse before first "tick"
+            }
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -193,7 +200,7 @@ namespace YouTubeSubscriptionDownloader
                 if (token.IsCancellationRequested)
                     return;
 
-                List<PlaylistItem> newUploads = YouTubeFunctions.GetMostRecentUploadsAsync(sub, sub.LastVideoPublishDate).Result;
+                List<PlaylistItem> newUploads = YouTubeFunctions.GetMostRecentUploadsAsync(sub).Result;
                 foreach (PlaylistItem item in newUploads)
                 {
                     PlaylistItemSnippet newUploadDetails = item.Snippet;

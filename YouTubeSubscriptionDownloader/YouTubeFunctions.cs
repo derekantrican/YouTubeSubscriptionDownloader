@@ -168,7 +168,7 @@ namespace YouTubeSubscriptionDownloader
             return playlistSubscription;
         }
 
-        public async static Task<List<PlaylistItem>> GetMostRecentUploadsAsync(Subscription sub, DateTime? sinceDate = null)
+        public async static Task<List<PlaylistItem>> GetMostRecentUploadsAsync(Subscription sub)
         {
             List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
             if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
@@ -219,14 +219,11 @@ namespace YouTubeSubscriptionDownloader
                         results.AddRange(response.Items);
 
                         //If we still haven't gotten any items older than the "sinceDate", get more
-                        if (sinceDate != null)
+                        while (!results.Any(p => p.ContentDetails.VideoPublishedAt < sub.LastVideoPublishDate) && response.NextPageToken != null)
                         {
-                            while (!results.Any(p => p.ContentDetails.VideoPublishedAt < sinceDate) && response.NextPageToken != null)
-                            {
-                                listRequest.PageToken = response.NextPageToken;
-                                response = await listRequest.ExecuteAsync();
-                                results.AddRange(response.Items);
-                            }
+                            listRequest.PageToken = response.NextPageToken;
+                            response = await listRequest.ExecuteAsync();
+                            results.AddRange(response.Items);
                         }
                     }
 
@@ -255,9 +252,7 @@ namespace YouTubeSubscriptionDownloader
                         results.Remove(video);
                     }
 
-                    if (sinceDate != null)
-                        results = results.Where(p => p.ContentDetails.VideoPublishedAt > sinceDate).ToList();
-
+                    results = results.Where(p => p.ContentDetails.VideoPublishedAt > sub.LastVideoPublishDate).ToList();
                     results.AddRange(privateToPublic);
 
                     ////------------------------------------
