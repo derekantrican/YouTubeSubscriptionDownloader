@@ -13,6 +13,7 @@ namespace YouTubeSubscriptionDownloader
 
         public string ChannelId { get; set; }
         public string Title { get; set; }
+        public string ThumbnailUrl { get; set; }
         public string PlaylistIdToWatch { get; set; }
         public DateTime LastVideoPublishDate { get; set; }
         public string FilterRegex { get; set; }

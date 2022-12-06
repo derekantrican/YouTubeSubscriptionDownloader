@@ -43,7 +43,7 @@ namespace YouTubeSubscriptionDownloader
             using (var stream = new MemoryStream(byteArray))
             {
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
+                    GoogleClientSecrets.FromStream(stream).Secrets,
                     Scopes,
                     Environment.UserName,
                     CancellationToken.None,
@@ -139,7 +139,8 @@ namespace YouTubeSubscriptionDownloader
                 {
                     ChannelId = item.Snippet.ResourceId.ChannelId,
                     Title = item.Snippet.Title,
-                    LastVideoPublishDate = DateTime.Now //Get all videos from this point onwards
+                    ThumbnailUrl = item.Snippet.Thumbnails.GetAvailableThumbnailUrl(),
+                    LastVideoPublishDate = DateTime.Now, //Get all videos from this point onwards
                 };
 
                 subscriptions.Add(sub);
@@ -154,15 +155,18 @@ namespace YouTubeSubscriptionDownloader
             listRequest.Id = playlistId;
             PlaylistListResponse response = listRequest.Execute();
 
-            string channelId = response.Items.FirstOrDefault().Snippet.ChannelId;
-            string playlistTitle = response.Items.FirstOrDefault().Snippet.Title;
+            PlaylistSnippet snippet = response.Items.FirstOrDefault().Snippet;
 
-            Subscription playlistSubscription = new Subscription();
-            playlistSubscription.LastVideoPublishDate = DateTime.Now; //Get all videos from this point onwards
-            playlistSubscription.ChannelId = channelId;
-            playlistSubscription.PlaylistIdToWatch = playlistId;
-            playlistSubscription.Title = playlistTitle;
-            playlistSubscription.IsPlaylist = true;
+            Subscription playlistSubscription = new Subscription
+            {
+                LastVideoPublishDate = DateTime.Now, //Get all videos from this point onwards
+                ChannelId = snippet.ChannelId,
+                PlaylistIdToWatch = playlistId,
+                Title = snippet.Title,
+                ThumbnailUrl = response.Items.FirstOrDefault().Snippet.Thumbnails.GetAvailableThumbnailUrl(),
+                IsPlaylist = true
+            };
+
             playlistSubscription.IsPlaylistUploadsPlaylist = playlistId == GetChannelUploadsPlaylistId(playlistSubscription);
 
             return playlistSubscription;
