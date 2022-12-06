@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoutubeExplode;
+using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos.Streams;
 using YTSubscription = Google.Apis.YouTube.v3.Data.Subscription;
 
@@ -172,7 +173,32 @@ namespace YouTubeSubscriptionDownloader
             return playlistSubscription;
         }
 
-        public async static Task<List<PlaylistItem>> GetMostRecentUploadsAsync(Subscription sub)
+        public static async Task<string> GetThubnailForSubscriptionAsync(Subscription sub)
+        {
+            if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))
+            {
+                if (sub.IsPlaylist && !sub.IsPlaylistUploadsPlaylist)
+                {
+                    PlaylistsResource.ListRequest playlistRequest = Service.Playlists.List("snippet");
+                    playlistRequest.Id = sub.PlaylistIdToWatch;
+                    PlaylistListResponse response = await playlistRequest.ExecuteAsync();
+
+                    return response.Items.FirstOrDefault().Snippet.Thumbnails.GetAvailableThumbnailUrl();
+                }
+                else
+                {
+                    ChannelsResource.ListRequest channelRequest = Service.Channels.List("snippet");
+                    channelRequest.Id = sub.ChannelId;
+                    ChannelListResponse response = await channelRequest.ExecuteAsync();
+
+                    return response.Items.FirstOrDefault().Snippet.Thumbnails.GetAvailableThumbnailUrl();
+                }
+            }
+
+            return null;
+        }
+
+        public static async Task<List<PlaylistItem>> GetMostRecentUploadsAsync(Subscription sub)
         {
             List<PlaylistItem> resultsByDate = new List<PlaylistItem>();
             if (!string.IsNullOrWhiteSpace(sub.PlaylistIdToWatch))

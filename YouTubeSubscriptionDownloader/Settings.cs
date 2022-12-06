@@ -29,6 +29,7 @@ namespace YouTubeSubscriptionDownloader
         public bool FirstTimeNotifySyncSetting { get; set; }
         public int NotifyScreen { get; set; }
         public bool AutoAdjustNotifyScreen { get; set; }
+        public bool KeepThubmnailsUpToDate { get; set; }
 
         private static Settings GetDefaultValues()
         {
@@ -50,6 +51,7 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.FirstTimeNotifySyncSetting = true;
             defaultSettings.NotifyScreen = 0; //0 is "auto"
             defaultSettings.AutoAdjustNotifyScreen = true;
+            defaultSettings.KeepThubmnailsUpToDate = false;
 
             return defaultSettings;
         }

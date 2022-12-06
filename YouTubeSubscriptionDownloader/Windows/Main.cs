@@ -172,6 +172,8 @@ namespace YouTubeSubscriptionDownloader
             Task.Run(() => CheckForNewVideoFromSubscriptionsAsync(cancelTokenSource.Token));
         }
 
+        private DateTime lastThumbnailUpdate = DateTime.Now;
+
         private void CheckForNewVideoFromSubscriptionsAsync(CancellationToken token, bool showNotifications = true)
         {
             if (!Common.HasInternetConnection())
@@ -195,10 +197,18 @@ namespace YouTubeSubscriptionDownloader
             if (!showNotifications)
                 Settings.Instance.ShowNotifications = false;
 
+            bool updateThumbnails = Settings.Instance.KeepThubmnailsUpToDate && (DateTime.Now - lastThumbnailUpdate).TotalDays > 1; //Optionally update thubnails every day
+
             foreach (Subscription sub in Common.TrackedSubscriptions)
             {
                 if (token.IsCancellationRequested)
                     return;
+
+                if (updateThumbnails)
+                {
+                    sub.ThumbnailUrl = YouTubeFunctions.GetThubnailForSubscriptionAsync(sub).Result;
+                    lastThumbnailUpdate = DateTime.Now;
+                }
 
                 List<PlaylistItem> newUploads = YouTubeFunctions.GetMostRecentUploadsAsync(sub).Result;
                 foreach (PlaylistItem item in newUploads)
