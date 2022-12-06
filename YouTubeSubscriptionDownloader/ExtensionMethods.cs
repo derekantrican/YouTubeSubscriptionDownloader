@@ -9,7 +9,7 @@ namespace YouTubeSubscriptionDownloader
 {
     public static class ExtensionMethods
     {
-        public static string GetAvailableThumbnailUrl(this ThumbnailDetails thumbnails)
+        public static string GetAvailableThumbnailUrl(this ThumbnailDetails thumbnails) //This returns Standard -> Medium -> High to try to minimize resolution when displaying
         {
             if (thumbnails != null)
             {
