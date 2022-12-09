@@ -1,5 +1,5 @@
 # YouTubeSubscriptionDownloader
-A simple program for alerting the user near-instantly of new uploads by their YouTube subscriptions (with the option of downloading the uploaded videos). When the downloading option is turned on, you can think if it almost like a "Sick Beard for YouTube".
+A simple program for alerting the user near-instantly of new uploads by their YouTube subscriptions (with the option of downloading the uploaded videos). When the downloading option is turned on, you can think if it almost like a "Sick Beard for YouTube" or "Sonarr for YouTube" (without the great UI of Sonarr).
 
 ![screenshot](https://i.imgur.com/kJeKjLY.png)
 
