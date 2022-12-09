@@ -267,7 +267,11 @@ namespace YouTubeSubscriptionDownloader
         {
             Log("Adding video to Pocket...");
             string youTubeURL = Common.YOUTUBEVIDEOBASEURL + youTubeVideoId;
-            await Settings.PocketClient.Add(new Uri(youTubeURL));
+            try //try-catch as temporary workaround for https://github.com/ceee/PocketSharp/issues/44 (not sure what's causing the real error, though)
+            {
+                await Settings.PocketClient.Add(new Uri(youTubeURL));
+            }
+            catch { }
             Log("Video added to Pocket");
         }
 
