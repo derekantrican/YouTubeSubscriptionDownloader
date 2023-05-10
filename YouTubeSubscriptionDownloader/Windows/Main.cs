@@ -334,8 +334,11 @@ namespace YouTubeSubscriptionDownloader
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Common.SerializeSubscriptions();
-            Settings.SaveSettings();
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                Common.SerializeSubscriptions();
+                Settings.SaveSettings();
+            }
         }
     }
 }
