@@ -103,7 +103,7 @@ namespace YouTubeSubscriptionDownloader
                     if (matchingSub != null)
                         sub.PlaylistIdToWatch = matchingSub.PlaylistIdToWatch;
                     else
-                        sub.PlaylistIdToWatch = GetChannelUploadsPlaylistId(sub);
+                        sub.PlaylistIdToWatch = Regex.Replace(GetChannelUploadsPlaylistId(sub), "^UU(?!LF)", "UULF"); //Only use the "UULF" playlist ("Long Form" content - exclude YouTube Shorts)
                 }
 
                 List<Subscription> newSubs = currentSubs.Where(p => Common.TrackedSubscriptions.Find(s => s.PlaylistIdToWatch == p.PlaylistIdToWatch) == null).ToList();
