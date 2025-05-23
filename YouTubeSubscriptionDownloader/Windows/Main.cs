@@ -219,8 +219,10 @@ namespace YouTubeSubscriptionDownloader
                 }
 
                 if (newUploads.Count > 0)
-                    sub.LastVideoPublishDate = (DateTime)newUploads.First().ContentDetails.VideoPublishedAt;
-            }
+                {
+                    sub.LastVideoPublishDate = newUploads.First().ContentDetails.VideoPublishedAtDateTimeOffset.Value.DateTime;
+                }
+			}
 
             Settings.Instance.ShowNotifications = tempNotificationSetting;
 

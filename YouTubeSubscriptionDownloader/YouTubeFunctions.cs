@@ -249,7 +249,7 @@ namespace YouTubeSubscriptionDownloader
                         results.AddRange(response.Items);
 
                         //If we still haven't gotten any items older than the "sinceDate", get more
-                        while (!results.Any(p => p.ContentDetails.VideoPublishedAt < sub.LastVideoPublishDate) && response.NextPageToken != null)
+                        while (!results.Any(p => p.ContentDetails.VideoPublishedAtDateTimeOffset.Value.DateTime < sub.LastVideoPublishDate) && response.NextPageToken != null)
                         {
                             listRequest.PageToken = response.NextPageToken;
                             response = await listRequest.ExecuteAsync();
@@ -282,7 +282,7 @@ namespace YouTubeSubscriptionDownloader
                         results.Remove(video);
                     }
 
-                    results = results.Where(p => p.ContentDetails.VideoPublishedAt > sub.LastVideoPublishDate).ToList();
+                    results = results.Where(p => p.ContentDetails.VideoPublishedAtDateTimeOffset.Value.DateTime > sub.LastVideoPublishDate).ToList();
                     results.AddRange(privateToPublic);
 
                     ////------------------------------------
@@ -290,7 +290,7 @@ namespace YouTubeSubscriptionDownloader
                     ////   the order shown on YouTube https://issuetracker.google.com/issues/65067744 . To combat this, we
                     ////   will get the top 50 results and order them by upload date
 
-                    resultsByDate = results.OrderByDescending(p => p.ContentDetails.VideoPublishedAt).ToList();
+                    resultsByDate = results.OrderByDescending(p => p.ContentDetails.VideoPublishedAtDateTimeOffset.Value.DateTime).ToList();
                     ////------------------------------------
                 }
                 catch (Exception ex)
