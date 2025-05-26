@@ -1,6 +1,5 @@
 ﻿using Google;
 using Newtonsoft.Json;
-using PocketSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +20,6 @@ namespace YouTubeSubscriptionDownloader
 
         public const string YOUTUBEVIDEOBASEURL = "https://www.youtube.com/watch?v=";
         public const string YOUTUBEPLAYLISTBASEURL = "https://www.youtube.com/playlist?list=";
-        public const string POCKETCONSUMERKEY = "69847-fc525ffd3205de609a7429bf";
 
         public static List<Subscription> TrackedSubscriptions = new List<Subscription>();
 
@@ -67,10 +65,13 @@ namespace YouTubeSubscriptionDownloader
             }
         }
 
-        public static void InitializePocket()
+        public static void InitializeRaindrop()
         {
-            if (Settings.Instance.AddToPocket && Settings.Instance.PocketAuthCode != "")
-                Settings.PocketClient = new PocketClient(POCKETCONSUMERKEY, Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
+            if (Settings.Instance.AddToRaindrop && Settings.Instance.RaindropAuthCode != "")
+            {
+                //Todo: RaindropClient?
+                //Settings.PocketClient = new PocketClient(POCKETCONSUMERKEY, Settings.Instance.PocketAuthCode, "https://getpocket.com/a/queue/");
+            }
         }
 
         public static void HandleException(Exception ex)

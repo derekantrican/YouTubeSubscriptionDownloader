@@ -1,5 +1,4 @@
-﻿using PocketSharp.Models;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace YouTubeSubscriptionDownloader
             comboBoxNotificationClick.SelectedIndex = Settings.Instance.NotificationClickOpensYouTubeVideo ? 0 : 1;
             checkBoxAutoChangeNotificationScreen.Checked = Settings.Instance.AutoAdjustNotifyScreen;
             checkBoxShowThumbnails.Checked = Settings.Instance.ShowThumbnailInNotification;
-            checkBoxAddPocket.Checked = Settings.Instance.AddToPocket;
+            checkBoxAddRaindrop.Checked = Settings.Instance.AddToRaindrop;
             checkBoxCheckForMissedUploads.Checked = Settings.Instance.CheckForMissedUploads;
             checkBoxSyncSubscriptions.Checked = Settings.Instance.SyncSubscriptionsWithYouTube;
             checkBoxRunIterationsOnStartup.Checked = Settings.Instance.StartIterationsOnStartup;
@@ -51,12 +50,16 @@ namespace YouTubeSubscriptionDownloader
             Settings.Instance.NotificationClickOpensYouTubeVideo = comboBoxNotificationClick.SelectedIndex == 0;
             Settings.Instance.AutoAdjustNotifyScreen = checkBoxAutoChangeNotificationScreen.Checked;
             Settings.Instance.ShowThumbnailInNotification = checkBoxShowThumbnails.Checked;
-            if (!checkBoxAddPocket.Checked)
-                Settings.Instance.AddToPocket = false; //Only set this to true if successfully Authed (down below)
+            if (!checkBoxAddRaindrop.Checked)
+            {
+                Settings.Instance.AddToRaindrop = false; //Only set this to true if successfully Authed (down below)
+            }
 
             Settings.Instance.CheckForMissedUploads = checkBoxCheckForMissedUploads.Checked;
             if (!checkBoxCheckForMissedUploads.Checked)
+            {
                 Common.TrackedSubscriptions.ForEach(p => p.LastVideoPublishDate = DateTime.Now);
+            }
 
             Settings.Instance.SyncSubscriptionsWithYouTube = checkBoxSyncSubscriptions.Checked;
             Settings.Instance.StartIterationsOnStartup = checkBoxRunIterationsOnStartup.Checked;
@@ -79,7 +82,9 @@ namespace YouTubeSubscriptionDownloader
             folderBrowserDialog.ShowDialog();
 
             if (!string.IsNullOrWhiteSpace(folderBrowserDialog.SelectedPath))
+            {
                 textBoxDownloadDirectory.Text = folderBrowserDialog.SelectedPath;
+            }
         }
 
         private void ComboBoxNotifyScreen_SelectedIndexChanged(object sender, EventArgs e)
@@ -104,33 +109,37 @@ namespace YouTubeSubscriptionDownloader
             checkBoxShowThumbnails.Enabled = checkBoxShowNotifications.Checked;
         }
 
-        private void checkBoxAddPocket_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxAddRaindrop_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxAddPocket.Checked && !Settings.Instance.AddToPocket) //Authorize Pocket only if this checkbox gets checked and it isn't already authorized
-                AuthorizePocket();
+            if (checkBoxAddRaindrop.Checked && !Settings.Instance.AddToRaindrop) //Authorize Raindrop.io only if this checkbox gets checked and it isn't already authorized
+            {
+                AuthorizeRaindrop();
+            }
         }
 
-        private async void AuthorizePocket()
+		private async void AuthorizeRaindrop()
         {
-            Settings.PocketClient.CallbackUri = "https://getpocket.com/a/queue/"; //Todo: Need to change this to an automatically closing page
-            string requestCode = await Settings.PocketClient.GetRequestCode();
-            Uri authenticationUri = Settings.PocketClient.GenerateAuthenticationUri();
-            Process.Start(authenticationUri.ToString());
+            //Todo: implement oauth flow
 
-            PocketUser user = null;
-            while (true)
-            {
-                try
-                {
-                    user = await Settings.PocketClient.GetUser(requestCode);
-                    break;
-                }
-                catch { }
-                System.Threading.Thread.Sleep(500);
-            }
+            //Settings.PocketClient.CallbackUri = "https://getpocket.com/a/queue/"; //Todo: Need to change this to an automatically closing page
+            //string requestCode = await Settings.PocketClient.GetRequestCode();
+            //Uri authenticationUri = Settings.PocketClient.GenerateAuthenticationUri();
+            //Process.Start(authenticationUri.ToString());
 
-            Settings.Instance.PocketAuthCode = user.Code;
-            Settings.Instance.AddToPocket = true;
+            //PocketUser user = null;
+            //while (true)
+            //{
+            //    try
+            //    {
+            //        user = await Settings.PocketClient.GetUser(requestCode);
+            //        break;
+            //    }
+            //    catch { }
+            //    System.Threading.Thread.Sleep(500);
+            //}
+
+            //Settings.Instance.PocketAuthCode = user.Code;
+            //Settings.Instance.AddToPocket = true;
         }
 
         private void PictureBoxGoogleWallet_Click(object sender, EventArgs e)
@@ -142,7 +151,6 @@ namespace YouTubeSubscriptionDownloader
         private void PictureBoxPayPal_Click(object sender, EventArgs e)
         {
             Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=derekantrican@gmail.com&lc=US&item_name=YouTubeSubscriptionDownloader&currency_code=USD&bn=PP%2dDonationsBF");
-
         }
     }
 }

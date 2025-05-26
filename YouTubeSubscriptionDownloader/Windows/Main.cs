@@ -7,6 +7,10 @@ using System.IO;
 using System.Threading;
 using Google.Apis.YouTube.v3.Data;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace YouTubeSubscriptionDownloader
 {
@@ -29,7 +33,7 @@ namespace YouTubeSubscriptionDownloader
             Log("Reading settings...");
             Settings.ReadSettings();
 
-            Common.InitializePocket();
+            Common.InitializeRaindrop();
             InitializeTimer();
 
             if (YouTubeFunctions.Service == null)
@@ -144,7 +148,7 @@ namespace YouTubeSubscriptionDownloader
             if (token.IsCancellationRequested)
                 return;
 
-            if (Settings.Instance.CheckForMissedUploads && (Settings.Instance.DownloadVideos || Settings.Instance.AddToPocket)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Pocket
+            if (Settings.Instance.CheckForMissedUploads && (Settings.Instance.DownloadVideos || Settings.Instance.AddToRaindrop)) //Don't run unnecessary iterations if the user doesn't want to download or add them to Raindrop.io
             {
                 Log("Looking for recent uploads");
                 Task.Run(() => CheckForNewVideoFromSubscriptionsAsync(token, false /*Turn off notifications temporarily because we don't want a bunch of notifications on startup*/)).ContinueWith(t => this.Invoke((MethodInvoker)delegate { StartIterations(false); }));
@@ -238,10 +242,14 @@ namespace YouTubeSubscriptionDownloader
             }
 
             if (Settings.Instance.DownloadVideos)
+            {
                 DownloadYouTubeVideo(newUpload.ResourceId.VideoId, Settings.Instance.DownloadDirectory, downloadCancellation);
+            }
 
-            if (Settings.Instance.AddToPocket)
-                AddYouTubeVideoToPocket(newUpload.ResourceId.VideoId);
+            if (Settings.Instance.AddToRaindrop)
+            {
+                AddYouTubeVideoToRaindrop(newUpload.Title, newUpload.Thumbnails.GetAvailableThumbnailUrl(), newUpload.ResourceId.VideoId);
+            }
         }
 
         private void ShowNotification(string notificationSubTitle, string notificationTitle = "", string imageURL = "", string videoURL = "")
@@ -265,13 +273,22 @@ namespace YouTubeSubscriptionDownloader
             _ = YouTubeFunctions.DownloadYouTubeVideoAsync(youTubeVideoId, destinationFolder, token);
         }
 
-        private async void AddYouTubeVideoToPocket(string youTubeVideoId)
+        HttpClient raindropClient = new HttpClient();
+        private async void AddYouTubeVideoToRaindrop(string title, string thumbnail, string youTubeVideoId)
         {
-            Log("Adding video to Pocket...");
+            Log("Adding video to Raindrop.io...");
             string youTubeURL = Common.YOUTUBEVIDEOBASEURL + youTubeVideoId;
             try //try-catch as temporary workaround for https://github.com/ceee/PocketSharp/issues/44 (not sure what's causing the real error, though)
             {
-                await Settings.PocketClient.Add(new Uri(youTubeURL));
+                raindropClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Settings.Instance.RaindropAuthCode);
+				var response = await raindropClient.PostAsync("https://api.raindrop.io/rest/v1/raindrop", new StringContent(JsonConvert.SerializeObject(new
+                {
+                    link = youTubeURL,
+                    // The below properties need to be specified because Raindrop won't "generate" them after the link is added (via the API, at least)
+                    title = title,
+                    cover = thumbnail, //
+                    type = "video", //This is needed otherwise Raindrop will add type of "link"
+                }), Encoding.UTF8, "application/json"));
             }
             catch { }
             Log("Video added to Pocket");

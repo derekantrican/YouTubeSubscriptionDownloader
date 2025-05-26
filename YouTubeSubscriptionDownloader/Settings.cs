@@ -1,5 +1,4 @@
-﻿using PocketSharp;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
@@ -9,7 +8,6 @@ namespace YouTubeSubscriptionDownloader
 {
     public class Settings
     {
-        public static PocketClient PocketClient = new PocketClient(Common.POCKETCONSUMERKEY);
         public static Settings Instance = GetDefaultValues();
 
         #region Settings
@@ -18,8 +16,8 @@ namespace YouTubeSubscriptionDownloader
         public bool ShowNotifications { get; set; }
         public bool ShowThumbnailInNotification { get; set; }
         public bool DownloadVideos { get; set; }
-        public bool AddToPocket { get; set; }
-        public string PocketAuthCode { get; set; }
+        public bool AddToRaindrop { get; set; }
+        public string RaindropAuthCode { get; set; }
         public bool CheckForMissedUploads { get; set; }
         public int IterationFrequency { get; set; } //In minutes
         public bool StartIterationsOnStartup { get; set; }
@@ -40,8 +38,8 @@ namespace YouTubeSubscriptionDownloader
             defaultSettings.ShowNotifications = true;
             defaultSettings.ShowThumbnailInNotification = true;
             defaultSettings.DownloadVideos = true;
-            defaultSettings.AddToPocket = false;
-            defaultSettings.PocketAuthCode = "";
+            defaultSettings.AddToRaindrop = false;
+            defaultSettings.RaindropAuthCode = "";
             defaultSettings.CheckForMissedUploads = false;
             defaultSettings.IterationFrequency = 5;
             defaultSettings.StartIterationsOnStartup = false;
