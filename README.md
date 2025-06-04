@@ -8,7 +8,7 @@ A simple program for alerting the user near-instantly of new uploads by their Yo
 - Able to sync YouTube subscriptions (automatically track any new channels subscribed to on YouTube or remove any unsubscribed ones)
 - Notifies of new videos
 - Able to download new videos automatically
-- Able to add videos to [Pocket](https://getpocket.com) automatically
+- Able to add videos to [Raindrop.io](https://raindrop.io) automatically
 - Able to subscribe to specific playlists
 - Able to filter subscription & playlists videos by regex (on a playlist-by-playlist basis)
 - If the program is closed and restarted later, it can look for any uploads it missed while it wasn't running
