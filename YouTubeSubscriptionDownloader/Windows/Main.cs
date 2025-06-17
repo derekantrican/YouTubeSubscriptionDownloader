@@ -277,21 +277,16 @@ namespace YouTubeSubscriptionDownloader
         private async void AddYouTubeVideoToRaindrop(string title, string thumbnail, string youTubeVideoId)
         {
             Log("Adding video to Raindrop.io...");
-            string youTubeURL = Common.YOUTUBEVIDEOBASEURL + youTubeVideoId;
-            try //try-catch as temporary workaround for https://github.com/ceee/PocketSharp/issues/44 (not sure what's causing the real error, though)
+            raindropClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Settings.Instance.RaindropAuthCode);
+            var response = await raindropClient.PostAsync("https://api.raindrop.io/rest/v1/raindrop", new StringContent(JsonConvert.SerializeObject(new
             {
-                raindropClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Settings.Instance.RaindropAuthCode);
-				var response = await raindropClient.PostAsync("https://api.raindrop.io/rest/v1/raindrop", new StringContent(JsonConvert.SerializeObject(new
-                {
-                    link = youTubeURL,
-                    // The below properties need to be specified because Raindrop won't "generate" them after the link is added (via the API, at least)
-                    title = title,
-                    cover = thumbnail, //
-                    type = "video", //This is needed otherwise Raindrop will add type of "link"
-                }), Encoding.UTF8, "application/json"));
-            }
-            catch { }
-            Log("Video added to Pocket");
+                link = youTubeURL,
+                // The below properties need to be specified because Raindrop won't "generate" them after the link is added (via the API, at least)
+                title = title,
+                cover = thumbnail, //
+                type = "video", //This is needed otherwise Raindrop will add type of "link"
+            }), Encoding.UTF8, "application/json"));
+            Log("Video added to Raindrop.io");
         }
 
         private void pictureBoxSettings_Click(object sender, EventArgs e)
